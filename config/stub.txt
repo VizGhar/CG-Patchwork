@@ -1,0 +1,14 @@
+read incomeEvents:int
+loop incomeEvents read incomeTime:int
+read patchEvents:int
+loop patchEvents read patchTime:int
+read tiles:int
+loop tiles read tileId:int tileEarning:int tileButtonPrice:int tileTimePrice:int tileShape:int
+gameloop
+read myButtons:int
+read myTime:int
+read opponentButtons:int
+read opponentTime:int
+read availableTiles:int
+loop availableTiles:int read tileId:int tileEarning:int tileButtonPrice:int tileTimePrice:int tileShape:int
+write SKIP
