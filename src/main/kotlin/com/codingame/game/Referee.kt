@@ -118,6 +118,9 @@ class Referee : AbstractReferee() {
     }
 
     override fun onEnd() {
+        boardManager.players.forEach {
+            System.err.println("finishes first? - ${it.finishedFirst}")
+        }
         endScreenModule.setScores(gameManager.players.map { it.score }.toIntArray())
     }
 }

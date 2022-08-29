@@ -29,6 +29,7 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
         var position: Int = 0,
         var availablePatches: Int = 0,
         var bonusAchieved: Boolean = false,
+        var finishedFirst: Boolean = false,
         val playedTiles: MutableList<PlayedTile> = mutableListOf(),
         val board: Array<Array<Boolean>> = Array(9) { Array(9) { false } }
     )
@@ -182,6 +183,10 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
         val patches = PATCH_TURNS.filter { it in (positionBefore + 1)..positionAfter && it !in takenPatches }
         takenPatches.addAll(patches)
         player.availablePatches += patches.size
+
+        if (positionAfter >= TOTAL_TURNS && players.none { it.finishedFirst }) {
+            player.finishedFirst = true
+        }
     }
 
     val remainingTurns get() = TOTAL_TURNS - actualPlayerPosition
@@ -192,9 +197,17 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
 
     fun score() =
         players.map { playerData ->
+            // standard scoring
             val minusPoints = playerData.board.sumOf { row -> row.count { taken -> !taken } } * MINUS_POINTS_MULTIPLIER
             val money = playerData.money
             val bonusPoints = if (playerData.bonusAchieved) BONUS_POINTS_MULTIPLIER else 0
             200 + bonusPoints + money - minusPoints
+        }.let {
+            // draw - player who finishes first win
+            when {
+                it[0] == it[1] && players[0].finishedFirst -> listOf(it[0] + 1, it[1])
+                it[0] == it[1] && players[1].finishedFirst -> listOf(it[0], it[1] + 1)
+                else -> it
+            }
         }
 }
