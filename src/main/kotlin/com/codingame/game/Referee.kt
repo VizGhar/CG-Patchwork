@@ -20,14 +20,13 @@ class Referee : AbstractReferee() {
     private val boardManager by lazy { BoardManager(gameTiles, gui) }
 
     override fun init() {
-        // Initialize your game here.
         gameManager.firstTurnMaxTime = 1000
 
         gui.hud(gameManager.players[0], gameManager.players[1])
         gui.showTilesBelt(boardManager.orderedGameTiles, boardManager.gameBonusTiles)
 
         gameManager.turnMaxTime = 50
-        gameManager.maxTurns = 200
+        gameManager.maxTurns = 80
         gameManager.frameDuration = 600
     }
 
@@ -106,6 +105,6 @@ class Referee : AbstractReferee() {
     }
 
     override fun onEnd() {
-        endScreenModule.setScores(gameManager.players.map { it.score }.toIntArray())
+        endScreenModule.setScores(gameManager.players.map { 200 + it.score }.toIntArray())
     }
 }

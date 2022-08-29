@@ -108,6 +108,7 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
             neutralTokenPosition = (neutralTokenPosition + availableTiles.indexOf(tile)) % (gameTiles.size - 1)
         }
 
+        // remove bonus tile if it was played now
         if (gameBonusTiles.isNotEmpty() && tile.id == gameBonusTiles[0].id) {
             gameBonusTiles.removeAt(0)
             player.availablePatches--
@@ -115,7 +116,25 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
 
         // remove tile from stack
         gameTiles.remove(tile)
+
+        // check bonus
+        if (players.none { it.bonusAchieved }) {
+            out@ for (startX in 0..2) {
+                u@ for (startY in 0..2) {
+                    for (windowX in startX..startX+6) {
+                        for (windowY in startY..startY+6) {
+                            if (!player.board[windowX][windowY]) continue@u
+                        }
+                    }
+                    player.bonusAchieved = true
+                    break@out
+                }
+            }
+        }
+
+        // UI operations
         gui.move(playerId, tileid, x, y, mirrored, orientation)
+
         return TurnResult.OK
     }
 
@@ -161,9 +180,9 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
 
     fun score() =
         players.map { playerData ->
-            val minusPoints = playerData.board.sumOf { row -> row.count { taken -> taken } } * MINUS_POINTS_MULTIPLIER
+            val minusPoints = playerData.board.sumOf { row -> row.count { taken -> !taken } } * MINUS_POINTS_MULTIPLIER
             val money = playerData.money
             val bonusPoints = if (playerData.bonusAchieved) BONUS_POINTS_MULTIPLIER else 0
-            bonusPoints + money + minusPoints
+            bonusPoints + money - minusPoints
         }
 }

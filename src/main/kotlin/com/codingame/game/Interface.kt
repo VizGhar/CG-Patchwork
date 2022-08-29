@@ -47,13 +47,20 @@ class Interface {
     }
 
     fun hud(player1: Player, player2: Player) {
+        g.createRectangle()
+            .setX(0)
+            .setY(0)
+            .setWidth(g.world.width)
+            .setHeight(g.world.height)
+            .setFillColor(0x000000)
+            .setZIndex(0)
+
         g.createTilingSprite()
             .setBaseWidth(g.world.width)
             .setBaseHeight(g.world.height)
             .setZIndex(0)
-            .setX(0)
-            .setY(0)
-            .setImage("background.jpg")
+            .setAlpha(0.3)
+            .setImage("background.jpeg")
 
         g.createRectangle()
             .setX(40)
@@ -161,7 +168,8 @@ class Interface {
                 .setWidth(9 * TILE_SIZE + 20)
                 .setHeight(9 * TILE_SIZE + 20)
                 .setLineWidth(20.0)
-                .setFillAlpha(0.0)
+                .setFillColor(if (board == 0) 0x91C7B1 else 0xE3D081)
+                .setFillAlpha(1.0)
                 .setLineColor(if (board == 0) player1.colorToken else player2.colorToken)
         }
     }
@@ -200,6 +208,7 @@ class Interface {
                 .setFillColor(0x000000)
         )
             .setRotation(Math.PI / (5.0 + Math.random() * 7.0))
+            .setZIndex(6)
             .also { t += it }
 
         interactive.addResize(atile, atile, 1.0, 1000, InteractiveDisplayModule.HOVER_ONLY)
@@ -262,7 +271,7 @@ class Interface {
             existing2.tile.setAnchor(0.5)
             existing2.tile.setScale(1.0)
         }
-        g.commitWorldState(0.1)
+        g.commitWorldState(0.5)
     }
 
     private val anchors = mapOf(
@@ -283,7 +292,6 @@ class Interface {
         visibleTiles.firstOrNull { it.tileId == tileid }?.let { tile ->
             val anchor = anchors[mirrored to orientation] ?: throw IllegalStateException("Ooops this shouldn't happen. Orientation should be in range of 0-3. Please provide author of this game with this error message and shared replay.")
             tile.priceTag.isVisible = false
-            g.commitWorldState(0.1)
             tile.tile
                 .setScaleX(if (mirrored) -1.0 else 1.0)
                 .setAnchorX(anchor.first)
@@ -294,7 +302,7 @@ class Interface {
                 .setZIndex(900)
             visibleTiles.remove(tile)
             interactive.untrack(tile.tile)
-            g.commitWorldState(0.98)
+            g.commitWorldState(1.0)
             tile.tile.setZIndex(10)
         } ?: throw IllegalStateException("No tile with tileid = $tileid found")
     }
