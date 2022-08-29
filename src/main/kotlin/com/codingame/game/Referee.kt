@@ -50,8 +50,13 @@ class Referee : AbstractReferee() {
         }
 
         // every turn (including first one)
-        activePlayer.sendInputLine("${boardManager.players[activePlayerId].money} ${boardManager.players[activePlayerId].position}")
-        activePlayer.sendInputLine("${boardOpponent.money} ${boardOpponent.position} ${boardOpponent.playedTiles.sumOf { it.tile.earn }}")
+        activePlayer.sendInputLine("${boardManager.players[activePlayerId].money}")
+        activePlayer.sendInputLine("${boardManager.players[activePlayerId].position}")
+
+        activePlayer.sendInputLine("${boardOpponent.money}")
+        activePlayer.sendInputLine("${boardOpponent.position}")
+        activePlayer.sendInputLine("${boardOpponent.playedTiles.sumOf { it.tile.earn }}")
+
         for (i in 0..8) {
             activePlayer.sendInputLine(boardOpponent.board[i].joinToString("") { if (it) "O" else "." })
         }
@@ -118,9 +123,6 @@ class Referee : AbstractReferee() {
     }
 
     override fun onEnd() {
-        boardManager.players.forEach {
-            System.err.println("finishes first? - ${it.finishedFirst}")
-        }
         endScreenModule.setScores(gameManager.players.map { it.score }.toIntArray())
     }
 }
