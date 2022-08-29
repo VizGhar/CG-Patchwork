@@ -3,7 +3,7 @@ loop incomeEvents read incomeTime:int
 read patchEvents:int
 loop patchEvents read patchTime:int
 read tiles:int
-loop tiles read tileId:int tileEarning:int tileButtonPrice:int tileTimePrice:int tileShape:int
+loop tiles read tileId:int tileEarning:int tileButtonPrice:int tileTimePrice:int tileShape:word(15)
 gameloop
 read myButtons:int
 read myTime:int
@@ -12,5 +12,5 @@ read opponentTime:int
 read opponentEarning:int
 loop 9 read line:string(9)
 read availableTiles:int
-loop availableTiles read tileId:int tileEarning:int tileButtonPrice:int tileTimePrice:int tileShape:int
+loop availableTiles read tileId:int tileEarning:int tileButtonPrice:int tileTimePrice:int tileShape:word(15)
 write SKIP
