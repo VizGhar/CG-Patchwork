@@ -35,6 +35,8 @@ class Referee : AbstractReferee() {
         val activePlayerId = boardManager.actualPlayerId
         val activePlayer = gameManager.players[activePlayerId]
 
+        val boardOpponent = boardManager.players[(activePlayerId + 1) % 2]
+
         // player's first turn
         if (turn <= gameManager.playerCount) {
             activePlayer.sendInputLine(EARNING_TURNS.size.toString())
@@ -49,7 +51,10 @@ class Referee : AbstractReferee() {
 
         // every turn (including first one)
         activePlayer.sendInputLine("${boardManager.players[activePlayerId].money} ${boardManager.players[activePlayerId].position}")
-        activePlayer.sendInputLine("${boardManager.players[(activePlayerId + 1) % 2].money} ${boardManager.players[(activePlayerId + 1) % 2].position}")
+        activePlayer.sendInputLine("${boardOpponent.money} ${boardOpponent.position} ${boardOpponent.playedTiles.sumOf { it.tile.earn }}")
+        for (i in 0..8) {
+            activePlayer.sendInputLine(boardOpponent.board[i].joinToString("") { if (it) "O" else "." })
+        }
 
         // available tiles specification
         if (boardManager.players[activePlayerId].availablePatches == 0) {
@@ -72,7 +77,7 @@ class Referee : AbstractReferee() {
             val output = outputs[0].split(" ")
             val result = when {
                 output[0] == "SKIP" -> boardManager.skip()
-                output[0] == "TAKE" && output.drop(1).take(5).none { it.toIntOrNull() == null } -> boardManager.move(
+                output[0] == "PLAY" && output.drop(1).take(5).none { it.toIntOrNull() == null } -> boardManager.move(
                     tileid = output[1].toInt(),
                     orientation = output[2].toInt(),
                     mirrored = output[3].toInt() == 1,
@@ -90,7 +95,13 @@ class Referee : AbstractReferee() {
                 TurnResult.OK -> {}
             }
 
+            if (result != TurnResult.OK) {
+                gameManager.endGame()
+                return
+            }
+
             gui.updateMoney(boardManager.players[0].money, boardManager.players[1].money)
+            gui.updateTime(boardManager.players[0].position, boardManager.players[1].position)
 
             if (boardManager.players.any { it.position < TOTAL_TURNS }) {
                 return
@@ -105,6 +116,6 @@ class Referee : AbstractReferee() {
     }
 
     override fun onEnd() {
-        endScreenModule.setScores(gameManager.players.map { 200 + it.score }.toIntArray())
+        endScreenModule.setScores(gameManager.players.map { it.score }.toIntArray())
     }
 }

@@ -7,9 +7,11 @@
             <span>The Goal</span>
         </h1>
         <div class="statement-goal-content">
-            Became the master of patchworking by filling your quilt canvas with patches. Be careful! Every patch costs
-            you a few buttons and it also takes some time to sew it on your canvas.<br><br>
-            This game is heavily inspired by 2 player board game Patchwork.
+            Become the master of patchworking by filling your quilt canvas with patches. Be careful! Every patch costs
+            you a few <strong>Buttons</strong> and it also takes some <strong>Time</strong> to sew it on your canvas.
+            Those are your most valuable resources<br><br>
+            This game is heavily inspired by 2 player board game <a
+                href="https://boardgamegeek.com/boardgame/163412/patchwork">Patchwork</a>.
         </div>
     </div>
     <!-- RULES -->
@@ -20,61 +22,165 @@
         </h1>
         <div>
             <div class="statement-rules-content">
-                This is turn based game but players do not necessarily alternate between turns. The player whose
-                time token is the furthest behind on the time board takes his turn. This may result in a player taking
-                multiple turns in a row before his opponent can take one. If there are both time tokens on same spot, player that played last move takes his turn.<br><br>
-                Your goal is to collect more Buttons than your opponent (Button is game currency) and to cover as much of your quilt board with patches as possible. Uncovered squares on quilt board will cost you 2 Buttons per piece at the end of game.<br><br>
+                This is turn based game but players do not necessarily alternate between turns. The player who is
+                furthest behind on the <strong>Timeline</strong> takes his turn. This may result in a player taking
+                multiple turns
+                in a row before his opponent can take one. If there are both time tokens on same spot, player that
+                played last move takes his turn.<br><br>
+                Your goal is to collect more <strong>Buttons</strong> than your opponent and to cover as much of your
+                quilt board with patches as possible. Uncovered squares on quilt board will cost you 2 Buttons per piece
+                at the end of game.<br><br>
                 On your turn, you carry out one of the following actions:
                 <ul>
-                    <li>Advance and Receive Buttons using <const>SKIP</const> command</li>
-                    <li>Take and Place a Patch using <const>TAKE</const> command</li>
+                    <li>Advance and Receive Buttons using
+                        <const>SKIP</const>
+                        command
+                    </li>
+                    <li>Take and Place a Patch using
+                        <const>PLAY</const>
+                        command
+                    </li>
                 </ul>
             </div>
         </div>
         <br>
         <h1>
-            <span>Advance and Receive Buttons</span>
+            <span>Advance and Receive Buttons - the <const>SKIP</const> command</span>
         </h1>
         <div class="statement-rules-content">
-            Your time token will move on the time board so that it occupies the space directly in front of your
-            opponent's time token. You receive 1 Button per space your time token moves. You can do so using
-            <const>SKIP</const> command.
+            Your <strong>Time</strong> token will move on the <strong>Timeline</strong> so that it occupies the space
+            directly in front of your
+            opponent's time token. You receive
+            <const>1</const>
+            <strong>Button</strong> per space your time token moves. You can do so using
+            <const>SKIP</const>
+            command.
         </div>
         <br>
         <h1>
-            <span>Take and Place a Patch</span>
+            <span>Take and Place a Patch - the <const>PLAY</const> command</span>
         </h1>
         <div class="statement-rules-content">
             This action consists of a few step:
             <ul>
-                <li>Choose from the three patches in front of the neutral token and place it on board</li>
-                <li>Pay the depicted number of buttons to the supply</li>
-                <li>Move your time token on the time board by a number of spaces as depicted on the label</li>
+                <li>Choose from the three available <strong>Patches</strong> and place it on board</li>
+                <li>Pay the depicted number of <strong>Buttons</strong> to the supply</li>
+                <li>Move your <strong>Time</strong> token on the time board by a number of spaces as depicted on the
+                    label
+                </li>
             </ul>
-            Patches can be rotated in any way - mirrored and/or rotated right (clockwise) 0, 1, 2 or 3 times. It can be placed anywhere on board as far as it won't cover already placed patches. First player to fully cover 7x7 square of quill board will receive Special Tile (see End of the game). You can do so using <const>TAKE</const> command.
+            <strong>Patches</strong> can be rotated in any way - flipped (horizontally) and/or rotated right (clockwise)
+            <const>0</const>
+            ,
+            <const>1</const>
+            ,
+            <const>2</const>
+            or
+            <const>3</const>
+            times. It can be placed anywhere on board as far as it won't cover already placed patches. First player to
+            fully cover 7x7 square of quill board will receive <strong>Special Patch</strong> for bonus points at the
+            End of the game.
         </div>
         <br>
         <h1>
-          <span>Time Board</span>
+            <span>Timeline</span>
         </h1>
         <div class="statement-rules-content">
-          Time Board consists of starting space and <const>53</const> game spaces. Regardless of the action you take, you always move your time token on the time board. Some spaces of the time board are marked. Whenever you move onto or past one of those spaces, resolve the corresponding event:
-          <ul>
-            <li><strong>Special Patch</strong>: Take the special patch and place it on your quilt board. The special patches are the only way to "patch" single spaces of your quilt board. If you receive the Special Patch, you will have to resolve it in next turn.</li>
-            <li><strong>Button Income</strong>: You receive a number of buttons according to the patches on your quilt board.</li>
-          </ul>
+            <strong>Timeline</strong> consists of starting point and
+            <const>53</const>
+            time points. Regardless of the action you take, you always move your time token on the time board. Some
+            spaces of the time board are marked (<var>WIP - visual not yet ready</var>). Whenever you move onto or past
+            one of those spaces, resolve the corresponding event:
+            <ul>
+                <li><strong>Special Patch</strong>:
+                    <const>PLAY</const>
+                    the special patch and place it on your quilt board. The special patches are the only way to "patch"
+                    single spaces of your quilt board. If you receive the <strong>Special Patch</strong>, you will have
+                    to resolve it in next turn. Playing special patch cannot be
+                    <const>SKIP</const>
+                    -ped
+                </li>
+                <li><strong>Button Income</strong>: You receive a number of buttons according to the patches on your
+                    quilt board.
+                </li>
+            </ul>
         </div>
 
         <h1>
-          <span class="icon icon-rules">&nbsp;</span>
-          <span>End of the game</span>
+            <span class="icon icon-rules">&nbsp;</span>
+            <span>End of the game and scoring</span>
         </h1>
         <div class="statement-rules-content">
-          The game ends after both time tokens reach the last space of the time board. If a time token were to move past the last space, it simply stops on the last space. In case of <const>SKIP</const> action, you only receive buttons for the actual number of spaces moved.<br><br>
-Determine the number of buttons you have left, adding <const>7</const> if you own Special Tile. From this score, subtract <const>2</const> points for each empty space of your quilt board.<br><br>
-The player with the highest score wins. In case of a tie, the player who got to the final space of the time board first wins.
+            The game ends after both time tokens reach the last point of the <strong>Timeline</strong>. If a time token
+            were to move past the last space, it simply stops on the last space. In case of
+            <const>SKIP</const>
+            action, you only receive buttons for the actual number of spaces moved.<br><br>
+            Starting with
+            <const>200</const>
+            points
+            <ul>
+                <li>Add
+                    <const>1</const>
+                    point for each <strong>Button</strong> you have left
+                </li>
+                <li>Add
+                    <const>7</const>
+                    if you own <strong>Special Tile</strong></li>
+                <li>Subtract
+                    <const>2</const>
+                    points for each empty space of your quilt board
+                </li>
+            </ul>
+            The player with the higher score wins. In case of a tie, the player who got to the final space of the time
+            board first wins. (<var>WIP - quite rare, not implemented yet</var>)
         </div>
-        
+
+        <!-- Victory conditions -->
+        <div class="statement-victory-conditions">
+            <div class="icon victory"></div>
+            <div class="blk">
+                <div class="title">Victory Conditions</div>
+                <div class="text">
+                    <ul style="padding-top:0; padding-bottom: 0;">
+                        <li>You have more points at the end of the game or</li>
+                        <li>You have same amount of points at the end of the game but you got to final space first</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Lose conditions -->
+        <div class="statement-lose-conditions">
+            <div class="icon lose"></div>
+            <div class="blk">
+                <div class="title">Defeat Conditions</div>
+                <div class="text">
+                    <ul>
+                        <li>Unknown command (only
+                            <const>SKIP</const>
+                            or
+                            <const>PLAY</const>
+                            are allowed)
+                        </li>
+                        <li>
+                            <const>SKIP</const>
+                            while holding <strong>Special Patch</strong></li>
+                        <li>
+                            <const>PLAY</const>
+                            unavailable or non-existent patch
+                        </li>
+                        <li>
+                            <const>PLAY</const>
+                            patch with invalid placement (outside quilt board/overlaping other patch)
+                        </li>
+                        <li>
+                            <const>PLAY</const>
+                            patch you have no money for
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
     </div>
     <!-- EXPERT RULES -->
     <div class="statement-section statement-expertrules">
@@ -83,7 +189,7 @@ The player with the highest score wins. In case of a tie, the player who got to 
             <span>Expert Rules</span>
         </h1>
         <div class="statement-expert-rules-content">
-            TODO
+            Source code on <a href="https://github.com/VizGhar/CG-Patchwork">GitHub</a>.
         </div>
     </div>
     <!-- PROTOCOL -->
@@ -96,29 +202,70 @@ The player with the highest score wins. In case of a tie, the player who got to 
         <div class="blk">
             <div class="title">Initialization Input</div>
             <div class="text">
-                <p><span class="statement-lineno">Line 1: </span> 1 integer <var>income_events</var>  how many "Button Income" events are there on Time Board</p>
-                <p><span class="statement-lineno">Line 2: </span> <var>income_events</var> integers of <var>income_time</var> when the "Button income" event will occur</p>
-                <p><span class="statement-lineno">Line 3: </span> 1 integer <var>patch_events</var> how many "Special Patch" events are there on Time Board</p>
-                <p><span class="statement-lineno">Line 4: </span> <var>patch_events</var> integers of <var>patch_time</var> when the "Special Patch" event will occur</p>
-                <p><span class="statement-lineno">Line 5: </span><var>tiles</var> - count of tiles - always <const>33</const></p>
-                <p><span class="statement-lineno">Next <var>tiles</var> lines:</span> 5 values: <var>tile_id</var> <var>tile_earning</var> <var>tile_button_price</var> <var>tile_time_price</var> <var>tile_shape</var></p>
+                <p><span class="statement-lineno">Line 1: </span> 1 integer <var>income_events</var> how many
+                    "Button Income" events are there on Time Board</p>
+                <p><span class="statement-lineno">Line 2: </span> <var>income_events</var> integers of
+                    <var>income_time</var>
+                    when the "Button income" event will occur</p>
+                <p><span class="statement-lineno">Line 3: </span> 1 integer <var>patch_events</var> how many
+                    "Special Patch" events are there on Time Board</p>
+                <p><span class="statement-lineno">Line 4: </span> <var>patch_events</var> integers of
+                    <var>patch_time</var>
+                    when the "Special Patch" event will occur</p>
+                <p><span class="statement-lineno">Line 5: </span><var>tiles</var> - count of tiles - always
+                    <const>33</const>
+                </p>
+                <p><span class="statement-lineno">Next <var>tiles</var> lines:</span> 5 values: <var>tile_id</var>
+                    <var>tile_earning</var> <var>tile_button_price</var> <var>tile_time_price</var>
+                    <var>tile_shape</var></p>
             </div>
         </div>
         <!-- Protocol block -->
         <div class="blk">
             <div class="title">Game turn Input</div>
             <div class="text">
-                <p><span class="statement-lineno">Line 1: </span> 2 integers <var>my_buttons</var> = amount of buttons you currently own; and <var>my_time_board_position</var> = how far is your token on Time Board</p>
-                <p><span class="statement-lineno">Line 2: </span> 2 integers <var>opponent_buttons</var> = amount of buttons your opponent currently owns; and <var>opponent_time_board_position</var> = how far is your opponent's token on Time Board</p>
-                <p><span class="statement-lineno">Line 3: </span> 1 integer <var>playable_tiles</var> = amount of tiles you can play (either <const>3</const> during normal turn or <const>1</const> while resolving "Special Patch" event)</p>
-                <p><span class="statement-lineno">Next <var>playable_tiles</var> lines:</span> 5 values: <var>tile_id</var> <var>tile_earning</var> <var>tile_button_price</var> <var>tile_time_price</var> <var>tile_shape</var></p>
+                <p><span class="statement-lineno">Line 1: </span> 2 integers <var>my_buttons</var> = amount of
+                    buttons you currently own; and <var>my_time</var> = how far is your token on Time Board</p>
+                <p><span class="statement-lineno">Line 2: </span> 3 integers <var>opponent_buttons</var> = amount of
+                    buttons your opponent currently owns; <var>opponent_time</var> = how far is your opponent's
+                    token on Time Board</p>
+                <p><span class="statement-lineno">Line 3-11: </span> 9 lines representing opponent board -
+                    <const>O</const>
+                    is taken field
+                    <const>.</const>
+                    is empty
+                </p>
+                <p><span class="statement-lineno">Line 12: </span> 1 integer <var>playable_tiles</var> = amount of
+                    tiles you can play (either
+                    <const>3</const>
+                    during normal turn or
+                    <const>1</const>
+                    while resolving "Special Patch" event)
+                </p>
+                <p><span class="statement-lineno">Next <var>playable_tiles</var> lines:</span> 5 values:
+                    <var>tile_id</var>
+                    <var>tile_earning</var> <var>tile_button_price</var> <var>tile_time_price</var>
+                    <var>tile_shape</var></p>
                 To describe all fields of tile:
                 <ul>
-                  <li><var>tile_id</var> - <const>0 - 32</const> for standard tiles or <const>-1</const> for Special Patch</li>
-                  <li><var>tile_earning</var> - how much will this patch earn during each "Button income" event</li>
-                  <li><var>tile_button_price</var> - how much buttons this patch costs</li>
-                  <li><var>tile_time_price</var> - how much time this patch costs</li>
-                  <li><var>tile_shape</var> - single string representing tile shape as follows: <const>|</const> separates rows of patch. Each rows consists of <const>.</const> and <const>O</const> characters. <const>O</const> means current square is taken by this patch</li>
+                    <li><var>tile_id</var> -
+                        <const>0 - 32</const>
+                        for standard tiles or negative for Special Patch
+                    </li>
+                    <li><var>tile_earning</var> - how much will this patch earn during each "Button income" event
+                    </li>
+                    <li><var>tile_button_price</var> - how much buttons this patch costs</li>
+                    <li><var>tile_time_price</var> - how much time this patch costs</li>
+                    <li><var>tile_shape</var> - single string representing tile shape as follows:
+                        <const>|</const>
+                        separates rows of patch. Each rows consists of
+                        <const>.</const>
+                        and
+                        <const>O</const>
+                        characters.
+                        <const>O</const>
+                        means current square is taken by this patch
+                    </li>
                 </ul>
             </div>
         </div>
@@ -129,26 +276,48 @@ The player with the highest score wins. In case of a tie, the player who got to 
             <div class="text">
                 <span class="statement-lineno">A single line</span> with either of 2 actions:
                 <ul>
-                  <li><const>SKIP</const></li>
-                  <li><const>TAKE</const> <var>tile_id</var> <var>rotations</var> <var>mirror</var> <var>x</var> <var>y</var></li>
+                    <li>
+                        <const>SKIP</const>
+                    </li>
+                    <li>
+                        <const>PLAY</const>
+                        <var>tile_id</var> <var>rotations</var> <var>horizontal_flip</var> <var>x</var> <var>y</var>
+                    </li>
                 </ul>
             </div>
 
             <div class="title">Output for one Game Turn</div>
             <div class="text">
 
-            Example of usage:<br>
-            <const>TAKE</const><br><var>tile_id</var> <br><var>rotate</var> - how many times to rotate tile clockwise<br><var>mirror</var> - <const>1</const> if tile should be mirrored<br><var>x</var> and <var>y</var> - coordinates of top/left corner after applying transformations<br><br>
-            <const>TAKE 3 1 1 6 5</const> - places tile with id <const>3</const> on position <const>6</const> <const>5</const> of you quilt board. The tile will be mirrored and rotated <const>1</const> time clockwise.
+                Example of usage:<br>
+                <const>PLAY</const>
+                <br><var>tile_id</var> <br><var>rotate</var> - how many times to rotate tile clockwise<br><var>horizontal_flip</var>
+                -
+                <const>1</const>
+                if tile should be flipped horizontally first<br><var>x</var> and <var>y</var> - coordinates of
+                top/left corner after applying transformations<br><br>
+                <const>PLAY 3 1 2 6 5</const>
+                - places tile with id
+                <const>3</const>
+                on position
+                <const>6</const>
+                <const>5</const>
+                of you quilt board. The tile will be mirrored and rotated
+                <const>2</const>
+                time clockwise.
                 <br>
-        </div>
+            </div>
         </div>
         <!-- Protocol block -->
         <div class="blk">
             <div class="title">Constraints</div>
             <div class="text">
-              Duration of first turn - <const>1000ms</const><br>
-              Duration of game turn - <const>50ms</const><br>
+                Duration of first turn -
+                <const>1000ms</const>
+                <br>
+                Duration of game turn -
+                <const>50ms</const>
+                <br>
             </div>
         </div>
     </div>

@@ -1,5 +1,3 @@
-import com.codingame.game.string
-import com.codingame.game.width
 import java.util.*
 
 typealias TileShape = List<List<Boolean>>
@@ -14,6 +12,8 @@ data class Tile(
     val price: Int,
     val time: Int
 )
+
+val TileShape.width: Int get() = get(0).size
 
 fun Scanner.nextTile() : Tile {
     val tileId = nextInt()
@@ -68,6 +68,9 @@ object Agent1 {
             val myTime = scanner.nextInt()
             val oppScore = scanner.nextInt()
             val oppTime = scanner.nextInt()
+            val oppEarning = scanner.nextInt()
+            scanner.nextLine()
+            val opponentBoard = (0 until 9).map { scanner.nextLine() }
             val availableTiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
 
             for (tile in availableTiles) {
@@ -99,7 +102,7 @@ object Agent1 {
                             }
                             val mirror = rotation.first >= 4
                             val rightRotations = rotation.first % 4
-                            println("TAKE ${tile.id} $rightRotations ${if (mirror) 1 else 0} $x $y")
+                            println("PLAY ${tile.id} $rightRotations ${if (mirror) 1 else 0} $x $y")
                             continue@gameLoop
                         }
                     }

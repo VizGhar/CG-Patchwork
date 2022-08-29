@@ -40,10 +40,17 @@ class Interface {
 
     private var player1MoneyText: Text? = null
     private var player2MoneyText: Text? = null
+    private var player1TimeText: Text? = null
+    private var player2TimeText: Text? = null
 
     fun updateMoney(player1Money: Int, player2Money: Int) {
         player1MoneyText?.text = "$player1Money"
         player2MoneyText?.text = "$player2Money"
+    }
+
+    fun updateTime(player1Time: Int, player2Time: Int) {
+        player1TimeText?.text = "Time passed: $player1Time"
+        player2TimeText?.text = "Time passed: $player2Time"
     }
 
     fun hud(player1: Player, player2: Player) {
@@ -136,6 +143,21 @@ class Interface {
         player2MoneyText = g.createText("5")
             .setX(g.world.width - 40 - AVATAR_SIZE - 40 - 40 - 10)
             .setY(100)
+            .setZIndex(3)
+            .setFontSize(40)
+            .setFillColor(0xFFFFFF)
+            .setAnchorX(1.0)
+
+        player1TimeText = g.createText("Time passed: 0")
+            .setX(40 + AVATAR_SIZE + 40)
+            .setY(150)
+            .setZIndex(3)
+            .setFontSize(40)
+            .setFillColor(0xFFFFFF)
+
+        player2TimeText = g.createText("Time passed: 0")
+            .setX(g.world.width - 40 - AVATAR_SIZE - 40)
+            .setY(150)
             .setZIndex(3)
             .setFontSize(40)
             .setFillColor(0xFFFFFF)

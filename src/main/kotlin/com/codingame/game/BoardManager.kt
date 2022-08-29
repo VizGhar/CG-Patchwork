@@ -29,9 +29,21 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
         var position: Int = 0,
         var availablePatches: Int = 0,
         var bonusAchieved: Boolean = false,
-        val playedTiles: MutableList<Tile> = mutableListOf(),
+        val playedTiles: MutableList<PlayedTile> = mutableListOf(),
         val board: Array<Array<Boolean>> = Array(9) { Array(9) { false } }
     )
+
+    class PlayedTile(
+        val tile: Tile,
+        val positionX: Int,
+        val positionY: Int,
+        val orientation: Int,
+        val mirrored: Boolean
+    ) {
+        override fun toString(): String {
+            return "$tile $orientation $mirrored $positionX $positionY"
+        }
+    }
 
     private fun tryApplyTileToBoard(board: Array<Array<Boolean>>, tileShape: TileShape, x: Int, y: Int) : Boolean {
         for (shapeY in tileShape.indices) {
@@ -96,7 +108,7 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
         // !! tile placed on board Successfully !!
 
         // store played tile
-        player.playedTiles.add(tile)
+        player.playedTiles.add(PlayedTile(tile, x, y, orientation, mirrored))
 
         // pay for tile and move player's token
         val timeDelta = minOf(tile.time, TOTAL_TURNS - player.position)
@@ -165,7 +177,7 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
         player.position += positionDelta
         val positionAfter = player.position
 
-        val earning = EARNING_TURNS.count { it in (positionBefore + 1)..positionAfter } * player.playedTiles.sumOf { it.earn }
+        val earning = EARNING_TURNS.count { it in (positionBefore + 1)..positionAfter } * player.playedTiles.sumOf { it.tile.earn }
         player.money += earning
         val patches = PATCH_TURNS.filter { it in (positionBefore + 1)..positionAfter && it !in takenPatches }
         takenPatches.addAll(patches)
@@ -183,6 +195,6 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
             val minusPoints = playerData.board.sumOf { row -> row.count { taken -> !taken } } * MINUS_POINTS_MULTIPLIER
             val money = playerData.money
             val bonusPoints = if (playerData.bonusAchieved) BONUS_POINTS_MULTIPLIER else 0
-            bonusPoints + money - minusPoints
+            200 + bonusPoints + money - minusPoints
         }
 }
