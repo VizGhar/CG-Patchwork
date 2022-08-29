@@ -96,6 +96,8 @@ class Referee : AbstractReferee() {
             }
 
             if (result != TurnResult.OK) {
+                boardManager.score().forEachIndexed { index, score -> gameManager.players[index].score = score }
+                activePlayer.score = 0
                 gameManager.endGame()
                 return
             }
