@@ -52,7 +52,7 @@ private fun tryApplyTileToBoard(board: Array<Array<Boolean>>, tileShape: TileSha
     return true
 }
 
-fun main() {
+fun main(args: Array<String>?) {
     val scanner = Scanner(System.`in`)
 
     val myBoard = Array(BOARD_HEIGHT) { Array(BOARD_WIDTH) { false } }
@@ -66,6 +66,9 @@ fun main() {
     gameLoop@ while (true) {
         val myScore = scanner.nextInt()
         val myTime = scanner.nextInt()
+        val myEarning = scanner.nextInt()
+        scanner.nextLine()
+        val board = (0 until 9).map { scanner.nextLine() }
         val oppScore = scanner.nextInt()
         val oppTime = scanner.nextInt()
         val oppEarning = scanner.nextInt()
@@ -74,9 +77,7 @@ fun main() {
         val availableTiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
 
         for (tile in availableTiles) {
-            if (tile.price > myScore) {
-                continue
-            }
+            if (tile.price > myScore) { continue }
             for (x in 0 until BOARD_WIDTH) {
                 for (y in 0 until BOARD_HEIGHT) {
 

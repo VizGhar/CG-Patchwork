@@ -77,19 +77,21 @@
             <const>2</const>
             or
             <const>3</const>
-            times. Patch can be placed anywhere on board as far as it won't cover already placed patches. First player
-            to
-            fully cover 7x7 square of quill board will receive <strong>Bonus Tile</strong> for
-            <const>7</const>
-            points counted towards final score.
+            times. Patch can be placed anywhere on board as far as it won't cover already placed patches.
 
+            <br/><br/>
+            Flipping Patch:
             <br/>
-            On following image you can see all possible configurations for one of the patches. First number is number of
-            rotations, second number represents whether patch should be flipped horizontally or not. Flipping has higher
-            priority than rotations.<br/>
+            <br/>
+            <img alt="Patch flip"
+                 src="https://cdn-games.codingame.com/community/3996809-1661712962734/e42b794a5de5ba64c069cc2937f66edfddcbc7770c39586ad408bbe7a5fe2a61.png">
 
-            <img alt="Patch rotations"
-                 src="https://cdn-games.codingame.com/community/3996809-1661712962734/c33827701085c73ca8f0da9723f61879555086f326a068e6736eb8cc886f3168.png">
+            <br/><br/>
+            Rotating Patch:
+            <br/>
+            <br/>
+            <img alt="Patch rotation"
+                 src="https://cdn-games.codingame.com/community/3996809-1661712962734/e80af6091ecc6d81b0c6ddc70ce73ffbbad5354fc87ea36ddc1405bd54ad0883.png">
         </div>
         <br>
         <h1>
@@ -98,8 +100,8 @@
         <div class="statement-rules-content">
             <strong>Timeline</strong> consists of starting point and
             <const>53</const>
-            time points. Regardless of the action you take, you always move your time token on the time board. Some
-            spaces of the time board are marked (<var>WIP - visual not yet ready</var>). Whenever you move onto or past
+            time points. Regardless of the action you take, you always move your time token on the Timeline. Some
+            time points of the Timeline are marked with button or Special Patch icon. Whenever you move onto or past
             one of those spaces, resolve the corresponding event:
             <ul>
                 <li><strong>Special Patch</strong>:
@@ -107,17 +109,35 @@
                     the special patch and place it on your quilt board. The special patches are the only way to "patch"
                     single spaces of your quilt board. If you receive the <strong>Special Patch</strong>, you will have
                     to resolve it in next turn. Playing special patch cannot be
-                    <const>SKIP</const>
-                    -ped
+                    <const>SKIP</const>-ped. If you call <const>SKIP</const> while holding special patch. Patch will be applied to first free space on your quilt board.
                 </li>
                 <li><strong>Button Income</strong>: You receive a number of buttons according to the patches on your
                     quilt board.
                 </li>
             </ul>
+
+            <img src="https://cdn-games.codingame.com/community/3996809-1661712962734/df7e5f304f2d9b065af745a1517a9d5bcd444c459d03a0c138ca94c996300ea5.png"/>
+        </div>
+
+<h1>
+            <br/>
+            <span>Bonus Button</span>
+        </h1>
+
+        <div class="statement-rules-content">
+             First player
+            to
+            fully cover 7x7 square of quilt board will receive <strong>Bonus Button</strong>. The <strong>Bonus Button</strong> can't be spent. It adds
+            <const>7</const>
+            points towards final score.<br/><br/>
+
+            <img src="https://cdn-games.codingame.com/community/3996809-1661712962734/c585bc886e1fc5b7a1d9a9a1d9f45f27335876b6b694124bc0ba8affcbe2ffd2.png"/>
+
         </div>
 
         <h1>
-            <span class="icon icon-rules">&nbsp;</span>
+                  <br/>
+      <span class="icon icon-rules">&nbsp;</span>
             <span>End of the game and scoring</span>
         </h1>
         <div class="statement-rules-content">
@@ -172,9 +192,6 @@
                             are allowed)
                         </li>
                         <li>
-                            <const>SKIP</const>
-                            while holding <strong>Special Patch</strong></li>
-                        <li>
                             <const>PLAY</const>
                             unavailable or non-existent patch
                         </li>
@@ -193,8 +210,8 @@
                 </div>
             </div>
         </div>
-
     </div>
+
     <!-- EXPERT RULES -->
     <div class="statement-section statement-expertrules">
         <h1>
@@ -202,7 +219,15 @@
             <span>Expert Rules</span>
         </h1>
         <div class="statement-expert-rules-content">
+
+        <ul>
+            <li>
             Source code on <a href="https://github.com/VizGhar/CG-Patchwork">GitHub</a>.
+            </li>
+            <li>
+            Design on <a href="https://www.figma.com/file/7diUIxEWdBphhC6MSSp48s/Patchwork---Codingame?node-id=0%3A1">Figma</a> (please don't judge)
+            </li>
+        </ul>
         </div>
     </div>
     <!-- PROTOCOL -->
@@ -237,18 +262,23 @@
         <div class="blk">
             <div class="title">Game turn Input</div>
             <div class="text">
-                <p><span class="statement-lineno">Line 1: </span> 2 integers <var>myButtons</var> = amount of
-                    buttons you currently own; and <var>myTime</var> = how far is your token on Time Board</p>
-                <p><span class="statement-lineno">Line 2: </span> 3 integers <var>opponentButtons</var> = amount of
+                <p><span class="statement-lineno">Line 1: </span> 3 integers <var>myButtons</var> = amount of
+                    buttons you currently own; <var>myTime</var> = how far is your token on Timeline; <var>myEarning</var> = how much you will earn during Button Income event</p>
+                    <p><span class="statement-lineno">Line 2-10: </span> 9 lines representing rows of your board -
+                    <const>O</const>
+                    is taken field
+                    <const>.</const>
+                    is empty</p>
+                <p><span class="statement-lineno">Line 11: </span> 3 integers <var>opponentButtons</var> = amount of
                     buttons your opponent currently owns; <var>opponentTime</var> = how far is your opponent's
-                    token on Timeline</p>
-                <p><span class="statement-lineno">Line 3-11: </span> 9 lines representing opponent board -
+                    token on Timeline; <var>opponentEarning</var> = how much you will earn during Button Income event</p>
+                <p><span class="statement-lineno">Line 12-20: </span> 9 lines representing rows of opponent board -
                     <const>O</const>
                     is taken field
                     <const>.</const>
                     is empty
                 </p>
-                <p><span class="statement-lineno">Line 12: </span> 1 integer <var>playablePatches</var> = amount of
+                <p><span class="statement-lineno">Line 21: </span> 1 integer <var>playablePatches</var> = amount of
                     patches you can play if you can afford it (most of the time
                     <const>3</const>
                     during normal turn or

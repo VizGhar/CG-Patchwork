@@ -15,7 +15,6 @@ enum class TurnResult {
     INVALID_TILE_ID,
     INVALID_TILE_PLACEMENT,
     NO_MONEY,
-    CANT_SKIP,
     OK
 }
 
@@ -141,7 +140,6 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
                     }
                     player.bonusAchieved = true
                     gui.acquireBonus(playerId)
-                    System.err.println("BONUSSSS")
                     break@out
                 }
             }
@@ -158,8 +156,16 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
         val player = players[playerId]
         val opponent = players[(playerId + 1) % 2]
 
-        // cannot skip if applying patch
-        if (player.availablePatches > 0) return TurnResult.CANT_SKIP
+        // If SKIP called - apply patch automatically to first free space
+        if (player.availablePatches > 0) {
+            for (y in 0 until 9) {
+                for (x in 0 until 9) {
+                    if (!player.board[y][x]) {
+                        return move(gameBonusTiles[0].id, 0, false, x, y)
+                    }
+                }
+            }
+        }
 
         val delta = minOf(
             // add 1 button and 1 time for each position from actual position to position in front of opponent

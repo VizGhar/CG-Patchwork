@@ -7,6 +7,8 @@ loop patches read patchId:int patchEarning:int patchButtonPrice:int patchTimePri
 gameloop
 read myButtons:int
 read myTime:int
+read myEarning:int
+loop 9 read line:word(9)
 read opponentButtons:int
 read opponentTime:int
 read opponentEarning:int
@@ -30,8 +32,9 @@ patchTimePrice: how much time does it take to sew this patch
 patchShape: representation of patch shape "O.O|OOO|O.O" represents H shaped tile
 myButtons: how many Buttons you hold right now
 myTime: where is my time token placed on timeline
+myEarning: how much will you earn during "Button income" phase with your current quilt board
 opponentButtons: how many Buttons your opponent holds right now
 opponentTime: where is opponent time token placed on timeline
-opponentEarning: how much will opponent earn during "Button income" phase with his current configuration
-line: represents opponent board "O....O.." means, 1st and 6th field is covered by patch on this row
+opponentEarning: how much will opponent earn during "Button income" phase with his current quilt board
+line: represents row of a board board "O....O.." means, 1st and 6th field is covered by patch on this row
 playablePatches: number of patches you can play (3 most of the time, 1 in case of "Special Patch" event)

@@ -35,6 +35,7 @@ class Referee : AbstractReferee() {
         val activePlayerId = boardManager.actualPlayerId
         val activePlayer = gameManager.players[activePlayerId]
 
+        val boardMe = boardManager.players[activePlayerId]
         val boardOpponent = boardManager.players[(activePlayerId + 1) % 2]
 
         // player's first turn
@@ -50,13 +51,16 @@ class Referee : AbstractReferee() {
         }
 
         // every turn (including first one)
-        activePlayer.sendInputLine("${boardManager.players[activePlayerId].money}")
-        activePlayer.sendInputLine("${boardManager.players[activePlayerId].position}")
+        activePlayer.sendInputLine("${boardMe.money}")
+        activePlayer.sendInputLine("${boardMe.position}")
+        activePlayer.sendInputLine("${boardMe.playedTiles.sumOf { it.tile.earn }}")
+        for (i in 0..8) {
+            activePlayer.sendInputLine(boardMe.board[i].joinToString("") { if (it) "O" else "." })
+        }
 
         activePlayer.sendInputLine("${boardOpponent.money}")
         activePlayer.sendInputLine("${boardOpponent.position}")
         activePlayer.sendInputLine("${boardOpponent.playedTiles.sumOf { it.tile.earn }}")
-
         for (i in 0..8) {
             activePlayer.sendInputLine(boardOpponent.board[i].joinToString("") { if (it) "O" else "." })
         }
@@ -96,7 +100,6 @@ class Referee : AbstractReferee() {
                 TurnResult.INVALID_TILE_ID -> activePlayer.deactivate(String.format("$%d cannot pick this tile", activePlayer.index))
                 TurnResult.INVALID_TILE_PLACEMENT -> activePlayer.deactivate(String.format("$%d cannot place tile on that position", activePlayer.index))
                 TurnResult.NO_MONEY -> activePlayer.deactivate(String.format("$%d cannot afford to buy required tile", activePlayer.index))
-                TurnResult.CANT_SKIP -> activePlayer.deactivate(String.format("$%d cannot SKIP placement of BONUS PATCH - see rules", activePlayer.index))
                 TurnResult.OK -> {}
             }
 

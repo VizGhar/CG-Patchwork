@@ -66,6 +66,9 @@ object Agent1 {
         gameLoop@ while (true) {
             val myScore = scanner.nextInt()
             val myTime = scanner.nextInt()
+            val myEarning = scanner.nextInt()
+            scanner.nextLine()
+            val board = (0 until 9).map { scanner.nextLine() }
             val oppScore = scanner.nextInt()
             val oppTime = scanner.nextInt()
             val oppEarning = scanner.nextInt()
