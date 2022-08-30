@@ -140,6 +140,8 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
                         }
                     }
                     player.bonusAchieved = true
+                    gui.acquireBonus(playerId)
+                    System.err.println("BONUSSSS")
                     break@out
                 }
             }

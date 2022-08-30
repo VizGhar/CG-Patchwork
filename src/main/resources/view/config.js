@@ -8,6 +8,6 @@ export const modules = [
 	InteractiveDisplayModule
 ];
 export const playerColors = [
-	'#66AE30',
-	'#D99616'
+	'#FF7878',
+	'#EEC373'
 ];

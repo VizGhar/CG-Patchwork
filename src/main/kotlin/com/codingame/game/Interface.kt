@@ -8,7 +8,6 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import view.modules.InteractiveDisplayModule
 
-private const val AVATAR_SIZE = 136
 private const val TILE_SIZE = 60
 
 private val greens = arrayOf(
@@ -42,6 +41,7 @@ class Interface {
     private var player2MoneyText: Text? = null
     private var player1TimeToken: Sprite? = null
     private var player2TimeToken: Sprite? = null
+    private var bonusButton: Sprite? = null
 
     fun updateMoney(player1Money: Int, player2Money: Int) {
         player1MoneyText?.text = "$player1Money"
@@ -53,6 +53,14 @@ class Interface {
         player2TimeToken?.x = 430 + 20 * player2Time
     }
 
+    fun acquireBonus(playerId: Int) {
+        when(playerId) {
+            0 -> bonusButton?.setX(325)?.setY(60)
+            1 -> bonusButton?.setX(1920-325)?.setY(60)
+            else -> {}
+        }
+    }
+
     fun hud(player1: Player, player2: Player) {
         g.createSprite()
             .setZIndex(0)
@@ -62,8 +70,8 @@ class Interface {
 
         g.createSprite()
             .setZIndex(100)
-            .setX(20)
-            .setY(15)
+            .setX(30)
+            .setY(0)
             .setImage("foreground.png")
 
         g.createRectangle()
@@ -157,32 +165,29 @@ class Interface {
             .setAnchorX(1.0)
             .setMaxWidth(280)
 
-        g.createSprite()
-            .setX(180)
-            .setY(40)
-            .setZIndex(1)
-            .setImage("green_button.png")
-
-        g.createSprite()
-            .setX(1700)
-            .setY(40)
-            .setZIndex(3)
-            .setImage("red_button.png")
-
         player1MoneyText = g.createText("5")
-            .setX(240)
-            .setY(39)
+            .setX(230)
+            .setY(80)
+            .setMaxWidth(100)
             .setZIndex(3)
             .setFontSize(32)
             .setFillColor(0xFFFFFF)
 
         player2MoneyText = g.createText("5")
-            .setX(1680)
-            .setY(39)
+            .setX(1690)
+            .setY(80)
+            .setMaxWidth(100)
             .setZIndex(3)
             .setFontSize(32)
             .setFillColor(0xFFFFFF)
             .setAnchorX(1.0)
+
+        bonusButton = g.createSprite()
+            .setAnchor(0.5)
+            .setX(960)
+            .setY(50)
+            .setZIndex(3)
+            .setImage("bonus.png")
     }
 
     private fun showTile(tile: Tile): TileEntity {
