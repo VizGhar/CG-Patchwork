@@ -40,8 +40,8 @@ class Interface {
 
     private var player1MoneyText: Text? = null
     private var player2MoneyText: Text? = null
-    private var player1TimeText: Text? = null
-    private var player2TimeText: Text? = null
+    private var player1TimeToken: Sprite? = null
+    private var player2TimeToken: Sprite? = null
 
     fun updateMoney(player1Money: Int, player2Money: Int) {
         player1MoneyText?.text = "$player1Money"
@@ -49,151 +49,140 @@ class Interface {
     }
 
     fun updateTime(player1Time: Int, player2Time: Int) {
-        player1TimeText?.text = "Time passed: $player1Time"
-        player2TimeText?.text = "Time passed: $player2Time"
+        player1TimeToken?.x = 430 + 20 * player1Time
+        player2TimeToken?.x = 430 + 20 * player2Time
     }
 
     fun hud(player1: Player, player2: Player) {
-        g.createRectangle()
+        g.createSprite()
+            .setZIndex(0)
             .setX(0)
             .setY(0)
-            .setWidth(g.world.width)
-            .setHeight(g.world.height)
-            .setFillColor(0x000000)
-            .setZIndex(0)
-
-        g.createTilingSprite()
-            .setBaseWidth(g.world.width)
-            .setBaseHeight(g.world.height)
-            .setZIndex(0)
-            .setAlpha(0.3)
             .setImage("background.jpeg")
 
+        g.createSprite()
+            .setZIndex(100)
+            .setX(20)
+            .setY(15)
+            .setImage("foreground.png")
+
         g.createRectangle()
             .setX(40)
             .setY(40)
-            .setWidth(AVATAR_SIZE)
-            .setHeight(AVATAR_SIZE)
-            .setLineWidth(5.0)
-            .setFillAlpha(0.0)
+            .setZIndex(0)
+            .setFillColor(player1.colorToken)
+            .setWidth(100)
+            .setHeight(100)
+
+        g.createRectangle()
+            .setX(1780)
+            .setY(40)
+            .setZIndex(0)
+            .setFillColor(player2.colorToken)
+            .setWidth(100)
+            .setHeight(100)
+
+        player1TimeToken = g.createSprite()
+            .setImage("TimeToken1.png")
+            .setAnchorX(0.5)
+            .setAnchorY(1.0)
+            .setX(430)
+            .setY(140)
             .setZIndex(2)
-            .setLineColor(player1.colorToken)
+
+        player2TimeToken = g.createSprite()
+            .setImage("TimeToken2.png")
+            .setAnchorX(0.5)
+            .setAnchorY(0.0)
+            .setX(430)
+            .setY(180)
+            .setZIndex(2)
+
+        (0..53).forEach {
+            if (it in EARNING_TURNS) {
+                g.createSprite()
+                    .setBaseWidth(20)
+                    .setBaseHeight(20)
+                    .setAnchor(0.5)
+                    .setX(430 + it * 20)
+                    .setY(160)
+                    .setImage("button.png")
+                    .setZIndex(3)
+            }
+
+            g.createCircle()
+                .setRadius(6)
+                .setX(430 + it * 20)
+                .setY(160)
+                .setZIndex(2)
+                .setFillColor(
+                    when {
+                        it in EARNING_TURNS -> 0xFB7575
+                        it in PATCH_TURNS -> 0x83DBD6
+                        else -> 0x728AB7
+                    }
+                )
+        }
 
         g.createSprite()
             .setX(40)
             .setY(40)
-            .setZIndex(0)
+            .setZIndex(1)
             .setImage(player1.avatarToken)
-            .setBaseHeight(AVATAR_SIZE)
-            .setBaseWidth(AVATAR_SIZE)
-
-        g.createRectangle()
-            .setX(g.world.width - 40 - AVATAR_SIZE)
-            .setY(40)
-            .setWidth(AVATAR_SIZE)
-            .setHeight(AVATAR_SIZE)
-            .setLineWidth(5.0)
-            .setFillAlpha(0.0)
-            .setZIndex(2)
-            .setLineColor(player2.colorToken)
+            .setBaseHeight(100)
+            .setBaseWidth(100)
 
         g.createSprite()
-            .setX(g.world.width - 40 - AVATAR_SIZE)
+            .setX(1780)
             .setY(40)
-            .setZIndex(0)
+            .setZIndex(1)
             .setImage(player2.avatarToken)
-            .setBaseHeight(AVATAR_SIZE)
-            .setBaseWidth(AVATAR_SIZE)
+            .setBaseHeight(100)
+            .setBaseWidth(100)
 
         g.createText(player1.nicknameToken)
-            .setX(40 + AVATAR_SIZE + 40)
-            .setY(40)
-            .setZIndex(3)
-            .setFontSize(40)
+            .setX(40)
+            .setY(160)
+            .setZIndex(1)
+            .setFontSize(32)
             .setFillColor(player1.colorToken)
+            .setMaxWidth(280)
 
         g.createText(player2.nicknameToken)
-            .setX(g.world.width - 40 - AVATAR_SIZE - 40)
-            .setY(40)
-            .setZIndex(3)
-            .setFontSize(40)
+            .setX(1880)
+            .setY(160)
+            .setZIndex(1)
+            .setFontSize(32)
             .setFillColor(player2.colorToken)
             .setAnchorX(1.0)
+            .setMaxWidth(280)
 
         g.createSprite()
-            .setX(40 + AVATAR_SIZE + 40)
-            .setY(103)
-            .setZIndex(3)
-            .setImage("button.png")
+            .setX(180)
+            .setY(40)
+            .setZIndex(1)
+            .setImage("green_button.png")
 
         g.createSprite()
-            .setX(g.world.width - 40 - AVATAR_SIZE - 40)
-            .setY(103)
+            .setX(1700)
+            .setY(40)
             .setZIndex(3)
-            .setImage("button.png")
-            .setAnchorX(1.0)
+            .setImage("red_button.png")
 
         player1MoneyText = g.createText("5")
-            .setX(40 + AVATAR_SIZE + 40 + 40 + 10)
-            .setY(100)
+            .setX(240)
+            .setY(39)
             .setZIndex(3)
-            .setFontSize(40)
+            .setFontSize(32)
             .setFillColor(0xFFFFFF)
 
         player2MoneyText = g.createText("5")
-            .setX(g.world.width - 40 - AVATAR_SIZE - 40 - 40 - 10)
-            .setY(100)
+            .setX(1680)
+            .setY(39)
             .setZIndex(3)
-            .setFontSize(40)
+            .setFontSize(32)
             .setFillColor(0xFFFFFF)
             .setAnchorX(1.0)
-
-        player1TimeText = g.createText("Time passed: 0")
-            .setX(40 + AVATAR_SIZE + 40)
-            .setY(150)
-            .setZIndex(3)
-            .setFontSize(40)
-            .setFillColor(0xFFFFFF)
-
-        player2TimeText = g.createText("Time passed: 0")
-            .setX(g.world.width - 40 - AVATAR_SIZE - 40)
-            .setY(150)
-            .setZIndex(3)
-            .setFontSize(40)
-            .setFillColor(0xFFFFFF)
-            .setAnchorX(1.0)
-
-        for (board in 0..1) {
-            val offsetX = if (board == 0) 40 else g.world.width - 40 - 9 * TILE_SIZE
-            val offsetY = 40 + AVATAR_SIZE + 40
-            for (row in 0..8) {
-                for (col in 0..8) {
-                    val player = if (board == 0) player1 else player2
-                    g.createRectangle()
-                        .setX(offsetX + col * TILE_SIZE)
-                        .setY(offsetY + row * TILE_SIZE)
-                        .setZIndex(4)
-                        .setWidth(TILE_SIZE)
-                        .setHeight(TILE_SIZE)
-                        .setFillColor(if (board == 0) greens.random() else oranges.random())
-                        .setLineColor(player.colorToken)
-                        .setLineWidth(1.0)
-                        .setLineAlpha(0.3)
-                        .setAlpha(0.2)
-                }
-            }
-
-            g.createRectangle()
-                .setX(offsetX - 10)
-                .setY(offsetY - 10)
-                .setZIndex(1)
-                .setWidth(9 * TILE_SIZE + 20)
-                .setHeight(9 * TILE_SIZE + 20)
-                .setLineWidth(20.0)
-                .setFillColor(if (board == 0) 0x91C7B1 else 0xE3D081)
-                .setFillAlpha(1.0)
-                .setLineColor(if (board == 0) player1.colorToken else player2.colorToken)
-        }
     }
 
     private fun showTile(tile: Tile): TileEntity {
@@ -216,7 +205,7 @@ class Interface {
                 .setImage("pricetag.png"),
             g.createText("${tile.price} ")
                 .setFontFamily("Brush Script MT")
-                .setX(60)
+                .setX(75)
                 .setY(7)
                 .setZIndex(3)
                 .setFontSize(40)
@@ -229,8 +218,6 @@ class Interface {
                 .setFontSize(40)
                 .setFillColor(0x000000)
         )
-            .setRotation(Math.PI / (5.0 + Math.random() * 7.0))
-            .setZIndex(6)
             .also { t += it }
 
         interactive.addResize(atile, atile, 1.0, 1000, InteractiveDisplayModule.HOVER_ONLY)
@@ -244,7 +231,7 @@ class Interface {
         if (tiles.isEmpty()) return
         val totalTilesCount = tiles.count()
 
-        val availableTileWidth = g.world.width / totalTilesCount
+        val availableTileWidth = (g.world.width - 80) / totalTilesCount
 
         tiles.forEachIndexed { index, tile ->
             var existing = visibleTiles.firstOrNull { it.tileId == tile.id }
@@ -252,10 +239,10 @@ class Interface {
 
             existing = visibleTiles.firstOrNull { it.tileId == tile.id }!!
 
-            val offsetY = 950
+            val offsetY = 979
             existing.tile.setAnchor(0.5)
             existing.tile.isVisible = true
-            existing.tile.x = index * availableTileWidth + availableTileWidth/2
+            existing.tile.x = 30 + index * availableTileWidth + availableTileWidth / 2
             existing.tile.y = offsetY
             existing.tile.setScale(0.2)
             existing.priceTag.isVisible = false
@@ -270,30 +257,42 @@ class Interface {
             existing = visibleTiles.firstOrNull { it.tileId == tile.id }!!
 
             val offsetX = (g.world.width - 180) / 2
-            val offsetY = 200 + i * 220 + (TILE_SIZE * (3 - tile.shape.height)) / 2 + TILE_SIZE*tile.shape.height / 2
-            existing.tile.isVisible = true
-            existing.priceTag.isVisible = true
-            existing.tile.y = offsetY
-            existing.tile.setScale(1.0)
-            existing.priceTag.y = offsetY + (tile.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE*tile.shape.height / 2
-            existing.tile.x = offsetX
-            existing.priceTag.x = offsetX + tile.shape.width * TILE_SIZE / 2 + 20
-            existing.tile.setAnchor(0.5)
+            val offsetY = 300 + i * 180 + (TILE_SIZE * (3 - tile.shape.height)) / 2 + TILE_SIZE*tile.shape.height / 2
+            existing.priceTag.setVisible(true)
+                .setY(offsetY + (tile.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE*tile.shape.height / 2)
+                .setX(offsetX + tile.shape.width * TILE_SIZE / 2 + 20)
+            existing.tile.setScale(0.8)
+                .setVisible(true)
+                .setY(offsetY)
+                .setScale(1.0)
+                .setX(offsetX)
+                .setAnchor(0.5)
         }
         showPatchBelt(tiles.drop(3))
 
-        bonusTiles.forEachIndexed { i, tile ->
-            val count = bonusTiles.count()
+        bonusTiles.reversed().forEachIndexed { i, tile ->
             var existing2 = visibleTiles.firstOrNull { it.tileId == tile.id }
-            if (existing2 == null) { visibleTiles.add(showTile(tile)) }
+            if (existing2 == null) { visibleTiles.add(showTile(tile)) } else { return@forEachIndexed }
             existing2 = visibleTiles.firstOrNull { it.tileId == tile.id }!!
-            existing2.priceTag.isVisible = false
-            existing2.tile.y = 100
-            existing2.tile.x = (g.world.width / 2 - 100 * (count-1).toDouble() / 2 + 100 * i).toInt()
-            existing2.tile.setAnchor(0.5)
-            existing2.tile.setScale(1.0)
+            existing2.priceTag.setVisible(false)
+            existing2.tile
+                .setAnchor(0.5)
+                .setY(159)
+                .setX(
+                    when(i) {
+                        0 -> 1431
+                        1 -> 1311
+                        2 -> 1071
+                        3 -> 951
+                        4 -> 831
+                        else -> throw IllegalStateException()
+                    }
+                )
+                .setScale(0.33)
+                .setRotation(Math.random())
+                .setZIndex(50 - i)
         }
-        g.commitWorldState(0.5)
+        g.commitWorldState(0.1)
     }
 
     private val anchors = mapOf(
@@ -308,14 +307,16 @@ class Interface {
     )
 
     fun move(playerId: Int, tileid: Int, x: Int, y: Int, mirrored: Boolean, orientation: Int) {
-        val offsetX = if (playerId == 0) 40 else g.world.width - 40 - 9 * TILE_SIZE
-        val offsetY = 40 + AVATAR_SIZE + 40
+        val offsetX = if (playerId == 0) 100 else g.world.width - 100 - 9 * TILE_SIZE
+        val offsetY = 320
         if (tileid == -1) return
         visibleTiles.firstOrNull { it.tileId == tileid }?.let { tile ->
             val anchor = anchors[mirrored to orientation] ?: throw IllegalStateException("Ooops this shouldn't happen. Orientation should be in range of 0-3. Please provide author of this game with this error message and shared replay.")
             tile.priceTag.isVisible = false
+            g.commitWorldState(0.1)
             tile.tile
                 .setScaleX(if (mirrored) -1.0 else 1.0)
+                .setScaleY(1.0)
                 .setAnchorX(anchor.first)
                 .setAnchorY(anchor.second)
                 .setRotation(Math.PI / 4 * orientation.toDouble() * 90)
@@ -324,7 +325,7 @@ class Interface {
                 .setZIndex(900)
             visibleTiles.remove(tile)
             interactive.untrack(tile.tile)
-            g.commitWorldState(1.0)
+            g.commitWorldState(0.98)
             tile.tile.setZIndex(10)
         } ?: throw IllegalStateException("No tile with tileid = $tileid found")
     }
