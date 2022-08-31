@@ -43,7 +43,9 @@ val TileShape.all : List<TileShape> get() {
         )
 }
 
-val tiles: Array<Tile> = arrayOf(
+val finalTile = Tile(32, parseShape("OO"), 0, 2, 1, "tile32.png")
+
+val tiles = listOf(
         Tile(0, parseShape("OO.|.OO"), 3, 7, 6, "tile0.png"),
         Tile(1, parseShape("OO.|.OO|OO."), 2, 3, 6, "tile1.png"),
         Tile(2, parseShape("OO.|.OO|..O"), 3, 10, 4, "tile2.png"),
@@ -75,14 +77,11 @@ val tiles: Array<Tile> = arrayOf(
         Tile(28, parseShape(".OO.|OOOO"), 2, 7, 4, "tile28.png"),
         Tile(29, parseShape("..O|OOO"), 2, 4, 6, "tile29.png"),
         Tile(30, parseShape("OO|.O"), 0, 1, 3, "tile30.png"),
-        Tile(31, parseShape("O.|OO"), 0, 3, 1, "tile31.png"),
-        Tile(32, parseShape("OO"), 0, 2, 1, "tile32.png")
+        Tile(31, parseShape("O.|OO"), 0, 3, 1, "tile31.png")
 )
 
-val bonusTiles = arrayOf(
-        Tile(-2, parseShape("O"), 0, 0, 0, "tile-1.png"),
-        Tile(-3, parseShape("O"), 0, 0, 0, "tile-2.png"),
-        Tile(-4, parseShape("O"), 0, 0, 0, "tile-3.png"),
-        Tile(-5, parseShape("O"), 0, 0, 0, "tile-4.png"),
-        Tile(-6, parseShape("O"), 0, 0, 0, "tile-5.png")
-)
+val bonusTiles by lazy {
+        league.patchTurns.mapIndexed { index, i ->
+                Tile(-i, parseShape("O"), 0, 0, 0, "tile-${index + 1}.png")
+        }
+}

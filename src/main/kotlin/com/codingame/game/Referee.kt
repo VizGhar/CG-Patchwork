@@ -8,6 +8,11 @@ import com.google.inject.Inject
 import java.security.SecureRandom
 import kotlin.random.asKotlinRandom
 
+sealed class Move {
+    object Skip : Move()
+    data class Play(val patchId: Int, val x: Int, val y: Int, val flip: Boolean, val rightRotations: Int): Move()
+    object Unknown: Move()
+}
 @Suppress("unused")
 class Referee : AbstractReferee() {
 
@@ -16,16 +21,20 @@ class Referee : AbstractReferee() {
     @Inject private lateinit var gui: Interface
 
     private val random by lazy { SecureRandom(gameManager.seed.toString().toByteArray()).asKotlinRandom() }
-    private val gameTiles by lazy { (tiles.dropLast(1).shuffled(random) + tiles.last()).map{if (league.earnTurns.isEmpty()) it.copy(earn = 0) else it} }
-    private val boardManager by lazy { BoardManager(gameTiles, gui) }
+    private val boardManager by lazy { BoardManager(random) }
 
     override fun init() {
         leagueInit(gameManager.leagueLevel)
         gameManager.firstTurnMaxTime = 1000
 
-        gui.hud(gameManager.players[0], gameManager.players[1])
-        gui.updateMoney(boardManager.players[0].money, boardManager.players[1].money)
-        gui.showTilesBelt(boardManager.orderedGameTiles, boardManager.gameBonusTiles)
+        gui.initialize(
+            gameManager.players[0],
+            gameManager.players[1],
+            boardManager.players[0],
+            boardManager.players[1],
+            boardManager.remainingPatches,
+            boardManager.gameBonusPatches
+        )
 
         gameManager.turnMaxTime = 100
         gameManager.maxTurns = 80
@@ -33,7 +42,7 @@ class Referee : AbstractReferee() {
     }
 
     override fun gameTurn(turn: Int) {
-        gui.showTilesBelt(boardManager.orderedGameTiles, boardManager.gameBonusTiles)
+        gui.showTilesBelt(boardManager.remainingPatches)
         val activePlayerId = boardManager.actualPlayerId
         val activePlayer = gameManager.players[activePlayerId]
 
@@ -46,8 +55,8 @@ class Referee : AbstractReferee() {
             activePlayer.sendInputLine(league.earnTurns.joinToString(" "))
             activePlayer.sendInputLine(league.patchTurns.size.toString())
             activePlayer.sendInputLine(league.patchTurns.joinToString(" "))
-            activePlayer.sendInputLine(gameTiles.size.toString())
-            for (tile in gameTiles) {
+            activePlayer.sendInputLine(boardManager.remainingPatches.size.toString())
+            for (tile in boardManager.remainingPatches) {
                 activePlayer.sendInputLine(tile.toString())
             }
         }
@@ -55,28 +64,28 @@ class Referee : AbstractReferee() {
         // every turn (including first one)
         activePlayer.sendInputLine("${boardMe.money}")
         activePlayer.sendInputLine("${boardMe.position}")
-        activePlayer.sendInputLine("${boardMe.playedTiles.sumOf { it.tile.earn }}")
+        activePlayer.sendInputLine("${boardMe.playedTiles.sumOf { it.earn }}")
         for (i in 0..8) {
             activePlayer.sendInputLine(boardMe.board[i].joinToString("") { if (it) "O" else "." })
         }
 
         activePlayer.sendInputLine("${boardOpponent.money}")
         activePlayer.sendInputLine("${boardOpponent.position}")
-        activePlayer.sendInputLine("${boardOpponent.playedTiles.sumOf { it.tile.earn }}")
+        activePlayer.sendInputLine("${boardOpponent.playedTiles.sumOf { it.earn }}")
         for (i in 0..8) {
             activePlayer.sendInputLine(boardOpponent.board[i].joinToString("") { if (it) "O" else "." })
         }
 
         // available tiles specification
         if (boardManager.players[activePlayerId].availablePatches == 0) {
-            val playerTiles = boardManager.availableTiles
+            val playerTiles = boardManager.availablePatches
             activePlayer.sendInputLine(playerTiles.size.toString())
             for (tile in playerTiles) {
                 activePlayer.sendInputLine(tile.toString())
             }
         } else {
             activePlayer.sendInputLine("1")
-            activePlayer.sendInputLine(boardManager.gameBonusTiles[0].toString())
+            activePlayer.sendInputLine(boardManager.gameBonusPatches[0].toString())
         }
 
         activePlayer.execute()
@@ -86,41 +95,49 @@ class Referee : AbstractReferee() {
             if (outputs.size != 1) { activePlayer.deactivate(String.format("%d Single line of input expected", activePlayer.index)); return }
 
             val output = outputs[0].split(" ")
-            val result = when {
-                output[0] == "SKIP" -> boardManager.skip()
-                output[0] == "PLAY" && output.drop(1).take(5).none { it.toIntOrNull() == null } -> boardManager.move(
-                    tileId = output[1].toInt(),
-                    requiredOrientation = output[2].toInt(),
-                    isFlipRequired = output[3].toInt() == 1,
+
+            val move = when {
+                output[0] == "SKIP" -> Move.Skip
+                output[0] == "PLAY" && output.drop(1).take(5).none { it.toIntOrNull() == null } -> Move.Play(
+                    patchId = output[1].toInt(),
                     x = output[4].toInt(),
-                    y = output[5].toInt())
-                else -> TurnResult.UNKNOWN_COMMAND
+                    y = output[5].toInt(),
+                    flip = output[3].toInt() == 1,
+                    rightRotations = output[2].toInt()
+                )
+                else -> Move.Unknown
             }
 
-            when(result){
-                TurnResult.UNKNOWN_COMMAND -> activePlayer.deactivate(String.format("$%d unknown command", activePlayer.index))
-                TurnResult.INVALID_TILE_ID -> activePlayer.deactivate(String.format("$%d cannot pick this tile", activePlayer.index))
-                TurnResult.INVALID_TILE_PLACEMENT -> activePlayer.deactivate(String.format("$%d cannot place tile on that position${if (!league.rotationsAllowed) ". Be aware, you cannot do rotations/flips in this league." else ""}", activePlayer.index))
-                TurnResult.NO_MONEY -> activePlayer.deactivate(String.format("$%d cannot afford to buy required tile", activePlayer.index))
-                TurnResult.OK -> {}
+            val moveResult = when(move) {
+                is Move.Play -> boardManager.playTile(move.patchId, move.rightRotations, move.flip, move.x, move.y)
+                Move.Skip -> boardManager.playSkip()
+                Move.Unknown -> TurnResult.UnknownCommand
             }
 
-            if (result != TurnResult.OK) {
-                boardManager.score().forEachIndexed { index, score -> gameManager.players[index].score = score }
+            when(moveResult){
+                TurnResult.UnknownCommand -> activePlayer.deactivate(String.format("$%d unknown command", activePlayer.index))
+                TurnResult.InvalidTileId -> activePlayer.deactivate(String.format("$%d cannot pick this tile", activePlayer.index))
+                TurnResult.InvalidTilePlacement -> activePlayer.deactivate(String.format("$%d cannot place tile on that position${if (!league.rotationsAllowed) ". Be aware, you cannot do rotations/flips in this league." else ""}", activePlayer.index))
+                TurnResult.NoMoney -> activePlayer.deactivate(String.format("$%d cannot afford to buy required tile", activePlayer.index))
+                is TurnResult.OK -> {}
+            }
+
+            if (moveResult !is TurnResult.OK) {
+                boardManager.computeScore().forEachIndexed { index, score -> gameManager.players[index].score = score }
                 activePlayer.score = 0
                 gameManager.endGame()
                 return
             }
 
+            // UI operations
+            if (moveResult.bonusAchieved) { gui.acquireBonus(activePlayerId) }
+            if (move is Move.Play) { gui.move(activePlayerId, move.patchId, move.x, move.y, move.flip, move.rightRotations) }
             gui.updateMoney(boardManager.players[0].money, boardManager.players[1].money)
             gui.updateTime(boardManager.players[0].position, boardManager.players[1].position)
 
-            if (boardManager.players.any { it.position < TOTAL_TURNS }) {
-                return
-            }
-
-            boardManager.score().forEachIndexed { index, score -> gameManager.players[index].score = score }
-
+            // End game
+            if (boardManager.players.any { it.position < TOTAL_TURNS }) { return }
+            boardManager.computeScore().forEachIndexed { index, score -> gameManager.players[index].score = score }
         } catch (e: AbstractPlayer.TimeoutException) {
             activePlayer.deactivate(String.format("$%d timeout!", activePlayer.index))
         }

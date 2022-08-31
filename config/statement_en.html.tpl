@@ -496,7 +496,7 @@ text-align: center;">
                     </li>
                     <li><var>patchEarning</var> - how much will this patch earn during each "Button income" event
                     <!-- BEGIN level1 -->
-                    <i>(always 0 for this league)</i>
+                    <i>(ignore for this league)</i>
                     <!-- END -->
                     </li>
                     <li><var>patchButtonPrice</var> - how much buttons this patch costs</li>

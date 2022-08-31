@@ -68,7 +68,10 @@ enum class League(
         scoreMoneyMultiplier = 1,
         rotationsAllowed = true,
         initialButtons = 5,
-    ),
+    );
+
+    val tileEarning get() = earnTurns.isNotEmpty()
+    val specialPatchesEnabled get() = patchTurns.isNotEmpty()
 }
 
 fun leagueInit(level: Int) {
