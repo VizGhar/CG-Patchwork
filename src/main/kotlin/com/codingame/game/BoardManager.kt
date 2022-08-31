@@ -2,13 +2,8 @@ package com.codingame.game
 
 import com.google.common.annotations.VisibleForTesting
 
-const val TOTAL_TURNS = 53 // starting position + 53 squares
-val EARNING_TURNS = listOf(5, 11, 17, 23, 29, 35, 41, 47, 53)
-val PATCH_TURNS = listOf(20, 26, 32, 44, 50)
 private const val BOARD_WIDTH = 9
 private const val BOARD_HEIGHT = 9
-private const val MINUS_POINTS_MULTIPLIER = 2
-private const val BONUS_POINTS_MULTIPLIER = 7
 
 enum class TurnResult {
     UNKNOWN_COMMAND,
@@ -24,7 +19,7 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
 
     @VisibleForTesting
     class PlayerData(
-        var money: Int = 5,
+        var money: Int = league.initialButtons,
         var position: Int = 0,
         var availablePatches: Int = 0,
         var bonusAchieved: Boolean = false,
@@ -71,7 +66,7 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
 
     val orderedGameTiles get() = gameTiles.subList(neutralTokenPosition, gameTiles.size) + gameTiles.subList(0, neutralTokenPosition)
 
-    val gameBonusTiles = bonusTiles.toMutableList()
+    val gameBonusTiles = if (league.scoreBonusMultiplier > 0) bonusTiles.toMutableList() else mutableListOf()
 
     val actualPlayerId get() = when {
         players[0].availablePatches > 0 -> 0                    // apply patch 0
@@ -84,16 +79,18 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
     val actualPlayerPosition get() = players[actualPlayerId].position
     val actualPlayerMoney get() = players[actualPlayerId].money
 
-    fun move(tileid: Int, orientation: Int, mirrored: Boolean, x: Int, y: Int) : TurnResult {
+    fun move(tileId: Int, requiredOrientation: Int, isFlipRequired: Boolean, x: Int, y: Int) : TurnResult {
+        val orientation = if (league.rotationsAllowed) requiredOrientation else 0
+        val flip = if (league.rotationsAllowed) isFlipRequired else false
         val playerId = actualPlayerId
         val player = players[playerId]
 
         // pick tile
         val tile = when {
-            player.availablePatches > 0 && tileid != gameBonusTiles[0].id -> return TurnResult.INVALID_TILE_ID
+            player.availablePatches > 0 && tileId != gameBonusTiles[0].id -> return TurnResult.INVALID_TILE_ID
             player.availablePatches > 0 -> gameBonusTiles[0]
-            player.availablePatches == 0 && tileid !in availableTiles.map { it.id } -> return TurnResult.INVALID_TILE_ID
-            player.availablePatches == 0 -> tiles[tileid]
+            player.availablePatches == 0 && tileId !in availableTiles.map { it.id } -> return TurnResult.INVALID_TILE_ID
+            player.availablePatches == 0 -> tiles[tileId].let { if(league.earnTurns.isEmpty()) it.copy(earn = 0) else it }
             else -> throw IllegalStateException("Ooops this shouldn't happen. Available patches should be non negative integer. Please provide author of this game with this error message and shared replay.")
         }
 
@@ -101,14 +98,14 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
         if (tile.price > player.money) return TurnResult.NO_MONEY
 
         // place tile on player's board
-        val shape = tile.shape.all[(if (mirrored) 4 else 0) + orientation]
+        val shape = tile.shape.all[(if (flip) 4 else 0) + orientation]
         val tilePlaced = tryApplyTileToBoard(player.board, shape, x, y)
         if (!tilePlaced) return TurnResult.INVALID_TILE_PLACEMENT
 
         // !! tile placed on board Successfully !!
 
         // store played tile
-        player.playedTiles.add(PlayedTile(tile, x, y, orientation, mirrored))
+        player.playedTiles.add(PlayedTile(tile, x, y, orientation, flip))
 
         // pay for tile and move player's token
         val timeDelta = minOf(tile.time, TOTAL_TURNS - player.position)
@@ -146,7 +143,7 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
         }
 
         // UI operations
-        gui.move(playerId, tileid, x, y, mirrored, orientation)
+        gui.move(playerId, tileId, x, y, flip, orientation)
 
         return TurnResult.OK
     }
@@ -174,7 +171,7 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
             TOTAL_TURNS - player.position
         )
 
-        move(player, delta, delta)
+        move(player, delta * league.skipMultiplier, delta)
         lastPlay = playerId
 
         return TurnResult.OK
@@ -186,9 +183,9 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
         player.position += positionDelta
         val positionAfter = player.position
 
-        val earning = EARNING_TURNS.count { it in (positionBefore + 1)..positionAfter } * player.playedTiles.sumOf { it.tile.earn }
+        val earning = league.earnTurns.count { it in (positionBefore + 1)..positionAfter } * player.playedTiles.sumOf { it.tile.earn }
         player.money += earning
-        val patches = PATCH_TURNS.filter { it in (positionBefore + 1)..positionAfter && it !in takenPatches }
+        val patches = league.patchTurns.filter { it in (positionBefore + 1)..positionAfter && it !in takenPatches }
         takenPatches.addAll(patches)
         player.availablePatches += patches.size
 
@@ -199,17 +196,18 @@ class BoardManager(preparedTiles: List<Tile>, private val gui: Interface) {
 
     val remainingTurns get() = TOTAL_TURNS - actualPlayerPosition
 
-    val earningPhases get() = EARNING_TURNS.map { TOTAL_TURNS - actualPlayerPosition }
+    val earningPhases get() = league.earnTurns.map { TOTAL_TURNS - actualPlayerPosition }
 
-    val patchEarnings get() = PATCH_TURNS.map { TOTAL_TURNS - actualPlayerPosition }
+    val patchEarnings get() = league.patchTurns.map { TOTAL_TURNS - actualPlayerPosition }
 
     fun score() =
         players.map { playerData ->
             // standard scoring
-            val minusPoints = playerData.board.sumOf { row -> row.count { taken -> !taken } } * MINUS_POINTS_MULTIPLIER
-            val money = playerData.money
-            val bonusPoints = if (playerData.bonusAchieved) BONUS_POINTS_MULTIPLIER else 0
-            200 + bonusPoints + money - minusPoints
+            val minusPoints = playerData.board.sumOf { row -> row.count { taken -> !taken } }   * league.scoreMinusPointsMultiplier      // 0 for league 0. -2 otherwise
+            val plusPoints = playerData.board.sumOf { row -> row.count { taken -> taken } }     * league.scoreFilledMultiplier           // 1 for league 1. 0 otherwise
+            val money = playerData.money                                                        * league.scoreMoneyMultiplier            // 0 for league 1. 1 otherwise
+            val bonusPoints = (if (playerData.bonusAchieved) 1 else 0)                          * league.scoreBonusMultiplier            // 7 for league 3. 0 otherwise
+            200 + plusPoints + bonusPoints + money + minusPoints
         }.let {
             // draw - player who finishes first win
             when {

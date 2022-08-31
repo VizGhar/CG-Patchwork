@@ -16,16 +16,18 @@ class Referee : AbstractReferee() {
     @Inject private lateinit var gui: Interface
 
     private val random by lazy { SecureRandom(gameManager.seed.toString().toByteArray()).asKotlinRandom() }
-    private val gameTiles by lazy { tiles.dropLast(1).shuffled(random) + tiles.last() }
+    private val gameTiles by lazy { (tiles.dropLast(1).shuffled(random) + tiles.last()).map{if (league.earnTurns.isEmpty()) it.copy(earn = 0) else it} }
     private val boardManager by lazy { BoardManager(gameTiles, gui) }
 
     override fun init() {
+        leagueInit(gameManager.leagueLevel)
         gameManager.firstTurnMaxTime = 1000
 
         gui.hud(gameManager.players[0], gameManager.players[1])
+        gui.updateMoney(boardManager.players[0].money, boardManager.players[1].money)
         gui.showTilesBelt(boardManager.orderedGameTiles, boardManager.gameBonusTiles)
 
-        gameManager.turnMaxTime = 50
+        gameManager.turnMaxTime = 100
         gameManager.maxTurns = 80
         gameManager.frameDuration = 600
     }
@@ -40,10 +42,10 @@ class Referee : AbstractReferee() {
 
         // player's first turn
         if (turn <= gameManager.playerCount) {
-            activePlayer.sendInputLine(EARNING_TURNS.size.toString())
-            activePlayer.sendInputLine(EARNING_TURNS.joinToString(" "))
-            activePlayer.sendInputLine(PATCH_TURNS.size.toString())
-            activePlayer.sendInputLine(PATCH_TURNS.joinToString(" "))
+            activePlayer.sendInputLine(league.earnTurns.size.toString())
+            activePlayer.sendInputLine(league.earnTurns.joinToString(" "))
+            activePlayer.sendInputLine(league.patchTurns.size.toString())
+            activePlayer.sendInputLine(league.patchTurns.joinToString(" "))
             activePlayer.sendInputLine(gameTiles.size.toString())
             for (tile in gameTiles) {
                 activePlayer.sendInputLine(tile.toString())
@@ -87,9 +89,9 @@ class Referee : AbstractReferee() {
             val result = when {
                 output[0] == "SKIP" -> boardManager.skip()
                 output[0] == "PLAY" && output.drop(1).take(5).none { it.toIntOrNull() == null } -> boardManager.move(
-                    tileid = output[1].toInt(),
-                    orientation = output[2].toInt(),
-                    mirrored = output[3].toInt() == 1,
+                    tileId = output[1].toInt(),
+                    requiredOrientation = output[2].toInt(),
+                    isFlipRequired = output[3].toInt() == 1,
                     x = output[4].toInt(),
                     y = output[5].toInt())
                 else -> TurnResult.UNKNOWN_COMMAND
@@ -98,7 +100,7 @@ class Referee : AbstractReferee() {
             when(result){
                 TurnResult.UNKNOWN_COMMAND -> activePlayer.deactivate(String.format("$%d unknown command", activePlayer.index))
                 TurnResult.INVALID_TILE_ID -> activePlayer.deactivate(String.format("$%d cannot pick this tile", activePlayer.index))
-                TurnResult.INVALID_TILE_PLACEMENT -> activePlayer.deactivate(String.format("$%d cannot place tile on that position", activePlayer.index))
+                TurnResult.INVALID_TILE_PLACEMENT -> activePlayer.deactivate(String.format("$%d cannot place tile on that position${if (!league.rotationsAllowed) ". Be aware, you cannot do rotations/flips in this league." else ""}", activePlayer.index))
                 TurnResult.NO_MONEY -> activePlayer.deactivate(String.format("$%d cannot afford to buy required tile", activePlayer.index))
                 TurnResult.OK -> {}
             }

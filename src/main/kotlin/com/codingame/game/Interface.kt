@@ -10,22 +10,6 @@ import view.modules.InteractiveDisplayModule
 
 private const val TILE_SIZE = 60
 
-private val greens = arrayOf(
-    0xbebaa4,
-    0xbab6a0,
-    0xb6b296,
-    0xb2ad92,
-    0xa8a98d,
-)
-
-private val oranges = arrayOf(
-    0xc5b485,
-    0xc9b889,
-    0xcdbc8d,
-    0xd1c091,
-    0xd5c495,
-)
-
 data class TileEntity(val tileId: Int, val tile: Sprite, val priceTag: Entity<*>)
 
 @Singleton
@@ -107,7 +91,7 @@ class Interface {
             .setZIndex(2)
 
         (0..53).forEach {
-            if (it in EARNING_TURNS) {
+            if (it in league.earnTurns) {
                 g.createSprite()
                     .setBaseWidth(20)
                     .setBaseHeight(20)
@@ -125,8 +109,8 @@ class Interface {
                 .setZIndex(2)
                 .setFillColor(
                     when {
-                        it in EARNING_TURNS -> 0xFB7575
-                        it in PATCH_TURNS -> 0x83DBD6
+                        it in league.earnTurns -> 0xFB7575
+                        it in league.patchTurns -> 0x83DBD6
                         else -> 0x728AB7
                     }
                 )
@@ -182,12 +166,14 @@ class Interface {
             .setFillColor(0xFFFFFF)
             .setAnchorX(1.0)
 
-        bonusButton = g.createSprite()
-            .setAnchor(0.5)
-            .setX(960)
-            .setY(50)
-            .setZIndex(3)
-            .setImage("bonus.png")
+        if (league.scoreBonusMultiplier > 0) {
+            bonusButton = g.createSprite()
+                .setAnchor(0.5)
+                .setX(960)
+                .setY(50)
+                .setZIndex(3)
+                .setImage("bonus.png")
+        }
     }
 
     private fun showTile(tile: Tile): TileEntity {

@@ -77,6 +77,56 @@ object Agent1 {
             val availableTiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
 
             for (tile in availableTiles) {
+                if (tile.price > myScore) {
+                    continue
+                }
+                for (x in 0 until BOARD_WIDTH) {
+                    for (y in 0 until BOARD_HEIGHT) {
+                        if (tryApplyTileToBoard(myBoard, tile.shape, x, y)) {
+                            for (y1 in 0 until BOARD_HEIGHT) {
+                                for (x1 in 0 until BOARD_WIDTH) {
+                                    System.err.print(if (myBoard[y1][x1]) 'O' else '.')
+                                }
+                                System.err.println()
+                            }
+                            println("PLAY ${tile.id} 0 0 $x $y")
+                            continue@gameLoop
+                        }
+                    }
+                }
+            }
+            println("SKIP")
+        }
+    }
+}
+
+object Agent2 {
+    @JvmStatic
+    fun main(args: Array<String>?) {
+        val scanner = Scanner(System.`in`)
+
+        val myBoard = Array(BOARD_HEIGHT) { Array(BOARD_WIDTH) { false } }
+
+        val incomeEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
+        val patchEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
+        val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+
+        var specialsPlaced = 0
+
+        gameLoop@ while (true) {
+            val myScore = scanner.nextInt()
+            val myTime = scanner.nextInt()
+            val myEarning = scanner.nextInt()
+            scanner.nextLine()
+            val board = (0 until 9).map { scanner.nextLine() }
+            val oppScore = scanner.nextInt()
+            val oppTime = scanner.nextInt()
+            val oppEarning = scanner.nextInt()
+            scanner.nextLine()
+            val opponentBoard = (0 until 9).map { scanner.nextLine() }
+            val availableTiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+
+            for (tile in availableTiles) {
                 if (tile.price > myScore) { continue }
                 for (x in 0 until BOARD_WIDTH) {
                     for (y in 0 until BOARD_HEIGHT) {
