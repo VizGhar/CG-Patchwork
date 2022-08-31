@@ -229,7 +229,9 @@ class Interface {
         return TileEntity(tile.id, atile, priceTag)
     }
 
-
+    /**
+     * Show remaining >= 30 patches on bottom of the screen
+     */
     private fun showPatchBelt(tiles: List<Tile>) {
         if (tiles.isEmpty()) return
         val totalTilesCount = tiles.count()
@@ -244,15 +246,18 @@ class Interface {
 
             val offsetY = 979
             existing.tile.setAnchor(0.5)
-            existing.tile.isVisible = true
+            existing.tile.alpha = 1.0
             existing.tile.x = 30 + index * availableTileWidth + availableTileWidth / 2
             existing.tile.y = offsetY
             existing.tile.setScale(0.2)
-            existing.priceTag?.isVisible = false
+            existing.priceTag?.alpha = 0.0
         }
     }
 
-    fun showAvailablePatches(tiles: List<Tile>) {
+    /**
+     * Show top 3 patches that can be purchased
+     */
+    private fun showAvailablePatches(tiles: List<Tile>) {
         tiles.forEachIndexed { i, tile ->
             var existing = visibleTiles.firstOrNull { it.tileId == tile.id }
             if (existing == null) { visibleTiles.add(showTile(tile)) }
@@ -261,11 +266,11 @@ class Interface {
 
             val offsetX = (g.world.width - 180) / 2
             val offsetY = 300 + i * 180 + (TILE_SIZE * (3 - tile.shape.height)) / 2 + TILE_SIZE*tile.shape.height / 2
-            existing.priceTag?.setVisible(true)
+            existing.priceTag?.setAlpha(1.0)
                 ?.setY(offsetY + (tile.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE*tile.shape.height / 2)
                 ?.setX(offsetX + tile.shape.width * TILE_SIZE / 2 + 20)
             existing.tile.setScale(0.8)
-                .setVisible(true)
+                .setAlpha(1.0)
                 .setY(offsetY)
                 .setScale(1.0)
                 .setX(offsetX)
@@ -273,7 +278,10 @@ class Interface {
         }
     }
 
-    fun showBonusPatches(bonusTiles: List<Tile>) {
+    /**
+     * Init - show bonus tiles on timeline
+     */
+    private fun showBonusPatches(bonusTiles: List<Tile>) {
         bonusTiles.forEach { tile ->
             val atile = g.createSprite()
                 .setAnchor(0.5)
@@ -295,7 +303,6 @@ class Interface {
     fun showTilesBelt(tiles: List<Tile>) {
         showAvailablePatches(tiles.take(3))
         showPatchBelt(tiles.drop(3))
-        g.commitWorldState(0.1)
     }
 
     private val anchors = mapOf(
@@ -315,8 +322,7 @@ class Interface {
         if (tileid == -1) return
         visibleTiles.firstOrNull { it.tileId == tileid }?.let { tile ->
             val anchor = anchors[mirrored to orientation] ?: throw IllegalStateException("Ooops this shouldn't happen. Orientation should be in range of 0-3. Please provide author of this game with this error message and shared replay.")
-            tile.priceTag?.isVisible = false
-            g.commitWorldState(0.1)
+            tile.priceTag?.setAlpha(0.0)
             tile.tile
                 .setScaleX(if (mirrored) -1.0 else 1.0)
                 .setScaleY(1.0)
@@ -328,7 +334,6 @@ class Interface {
                 .setZIndex(900)
             visibleTiles.remove(tile)
             interactive.untrack(tile.tile)
-            g.commitWorldState(0.98)
             tile.tile.setZIndex(10)
         } ?: throw IllegalStateException("No tile with tileid = $tileid found")
     }

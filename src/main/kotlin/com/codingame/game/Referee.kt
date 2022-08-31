@@ -4,6 +4,7 @@ import com.codingame.gameengine.core.AbstractPlayer
 import com.codingame.gameengine.core.AbstractReferee
 import com.codingame.gameengine.core.MultiplayerGameManager
 import com.codingame.gameengine.module.endscreen.EndScreenModule
+import com.codingame.gameengine.module.entities.GraphicEntityModule
 import com.google.inject.Inject
 import java.security.SecureRandom
 import kotlin.random.asKotlinRandom
@@ -16,6 +17,7 @@ sealed class Move {
 @Suppress("unused")
 class Referee : AbstractReferee() {
 
+    @Inject private lateinit var g: GraphicEntityModule
     @Inject private lateinit var gameManager: MultiplayerGameManager<Player>
     @Inject private lateinit var endScreenModule: EndScreenModule
     @Inject private lateinit var gui: Interface
@@ -42,7 +44,6 @@ class Referee : AbstractReferee() {
     }
 
     override fun gameTurn(turn: Int) {
-        gui.showTilesBelt(boardManager.remainingPatches)
         val activePlayerId = boardManager.actualPlayerId
         val activePlayer = gameManager.players[activePlayerId]
 
@@ -130,10 +131,13 @@ class Referee : AbstractReferee() {
             }
 
             // UI operations
-            if (moveResult.bonusAchieved) { gui.acquireBonus(activePlayerId) }
-            if (move is Move.Play) { gui.move(activePlayerId, move.patchId, move.x, move.y, move.flip, move.rightRotations) }
-            gui.updateMoney(boardManager.players[0].money, boardManager.players[1].money)
-            gui.updateTime(boardManager.players[0].position, boardManager.players[1].position)
+            val animations = mutableListOf<Animation>()
+            if (move is Move.Play) { animations += Animation(500) { gui.move(activePlayerId, move.patchId, move.x, move.y, move.flip, move.rightRotations) } }
+            if (moveResult.bonusAchieved) { animations += Animation(500) { gui.acquireBonus(activePlayerId) } }
+            animations += Animation(300) { gui.updateMoney(boardManager.players[0].money, boardManager.players[1].money) }
+            animations += Animation(300) { gui.updateTime(boardManager.players[0].position, boardManager.players[1].position) }
+            animations += Animation(500) { gui.showTilesBelt(boardManager.remainingPatches) }
+            animations.run(g, gameManager)
 
             // End game
             if (boardManager.players.any { it.position < TOTAL_TURNS }) { return }
