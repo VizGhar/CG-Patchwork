@@ -58,7 +58,7 @@ enum class League(
      *
      * + bonuses
      */
-    L3(
+    FULL(
         patchTurns = listOf(20, 26, 32, 44, 50),
         earnTurns = listOf(5, 11, 17, 23, 29, 35, 41, 47, 53),
         scoreBonusMultiplier = 7,
@@ -68,14 +68,14 @@ enum class League(
         scoreMoneyMultiplier = 1,
         rotationsAllowed = true,
         initialButtons = 5,
-    ),
+    )
 }
 
 fun leagueInit(level: Int) {
     league = when(level) {
         1 -> League.L1
         2 -> League.L2
-        3 -> League.L3
-        else -> throw IllegalStateException("Only leagues 1-3 supported")
+        3, 4 -> League.FULL
+        else -> throw IllegalStateException("Only leagues 1-4 supported")
     }
 }

@@ -7,7 +7,7 @@ object PatchWorkMain {
         gameRunner.addAgent(Agent2::class.java)
         gameRunner.addAgent(Agent2::class.java)
 //        gameRunner.addAgent("python3 src/test/kotlin/agent.py");
-        gameRunner.setLeagueLevel(3)
+        gameRunner.setLeagueLevel(4)
         gameRunner.start()
     }
 }
