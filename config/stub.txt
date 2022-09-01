@@ -5,13 +5,9 @@ loopline patchEvents patchTime:int
 read patches:int
 loop patches read patchId:int patchEarning:int patchButtonPrice:int patchTimePrice:int patchShape:word(15)
 gameloop
-read myButtons:int
-read myTime:int
-read myEarning:int
+read myButtons:int myTime:int myEarning:int
 loop 9 read line:word(9)
-read opponentButtons:int
-read opponentTime:int
-read opponentEarning:int
+read opponentButtons:int opponentTime:int opponentEarning:int
 loop 9 read line:word(9)
 read playablePatches:int
 loop playablePatches read patchId:int patchEarning:int patchButtonPrice:int patchTimePrice:int patchShape:word(15)
