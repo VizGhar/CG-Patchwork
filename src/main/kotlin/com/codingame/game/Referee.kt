@@ -159,11 +159,26 @@ class Referee : AbstractReferee() {
                 gui.showMessage(activePlayerId, message)
                 gui.showMessage((activePlayerId + 1) % 2, "")
             }
-            if (move is Move.Play) { animations += Animation(500) { gui.move(activePlayerId, move.patchId, move.x, move.y, move.flip, move.rightRotations) } }
-            if (moveResult.bonusAchieved) { animations += Animation(500) { gui.acquireBonus(activePlayerId) } }
-            animations += Animation(300) { gui.updateMoney(boardManager.players[0].money, boardManager.players[1].money) }
-            animations += Animation(300) { gui.updateTime(boardManager.players[0].position, boardManager.players[1].position) }
-            animations += Animation(500) { gui.showTilesBelt(boardManager.remainingPatches) }
+            if (move is Move.Play) {
+                // enlarge selected label
+                animations += Animation(300) { gui.enlarge(move.patchId) }
+                // pulse players button icon for each button spent
+                animations += (1..(tiles.firstOrNull { it.id == move.patchId }?.price ?: 0)).map {
+                    listOf(
+                        Animation(200) { from -> gui.pulseIn(from, activePlayerId) },
+                        Animation(200) { from -> gui.pulseOut(from, activePlayerId) })
+                }.flatten()
+
+                // move patch to proper position
+                animations += Animation(500) { from -> gui.move(from, activePlayerId, move.patchId, move.x, move.y, move.flip, move.rightRotations) }
+            }
+
+            // move time token
+            animations += Animation(300) { from -> gui.updateTime(from, boardManager.players[0].position, boardManager.players[1].position) }
+
+            if (moveResult.bonusAchieved) { animations += Animation(500) { from -> gui.acquireBonus(from, activePlayerId) } }
+            animations += Animation(300) { from -> gui.updateMoney(from, boardManager.players[0].money, boardManager.players[1].money) }
+            animations += Animation(1000) { from -> gui.showTilesBelt(from, boardManager.remainingPatches) }
             animations.run(g, gameManager)
 
             // End game

@@ -30,17 +30,20 @@ class Interface {
 
     private val visibleTiles = mutableListOf<TileEntity>()
 
-    fun updateMoney(player1Money: Int, player2Money: Int) {
+    fun updateMoney(from: Double, player1Money: Int, player2Money: Int) {
+        g.commitEntityState(from, player1MoneyText, player2MoneyText)
         player1MoneyText?.text = "$player1Money"
         player2MoneyText?.text = "$player2Money"
     }
 
-    fun updateTime(player1Time: Int, player2Time: Int) {
+    fun updateTime(from: Double, player1Time: Int, player2Time: Int) {
+        g.commitEntityState(from, player1TimeToken, player2TimeToken)
         player1TimeToken?.x = 430 + 20 * player1Time
         player2TimeToken?.x = 430 + 20 * player2Time
     }
 
-    fun acquireBonus(playerId: Int) {
+    fun acquireBonus(from: Double, playerId: Int) {
+        g.commitEntityState(from, bonusButton)
         when(playerId) {
             0 -> bonusButton?.setX(325)?.setY(60)
             1 -> bonusButton?.setX(1920-325)?.setY(60)
@@ -160,21 +163,22 @@ class Interface {
             .setMaxWidth(280)
 
         player1MoneyText = g.createText(player1Data.money.toString())
-            .setX(230)
-            .setY(80)
+            .setAnchor(0.5)
+            .setX(250)
+            .setY(100)
             .setMaxWidth(100)
             .setZIndex(3)
             .setFontSize(32)
             .setFillColor(0xFFFFFF)
 
         player2MoneyText = g.createText(player2Data.money.toString())
-            .setX(1690)
-            .setY(80)
+            .setAnchor(0.5)
+            .setX(1670)
+            .setY(100)
             .setMaxWidth(100)
             .setZIndex(3)
             .setFontSize(32)
             .setFillColor(0xFFFFFF)
-            .setAnchorX(1.0)
 
         if (league.scoreBonusMultiplier > 0) {
             bonusButton = g.createSprite()
@@ -363,7 +367,11 @@ class Interface {
         }
     }
 
-    fun showTilesBelt(tiles: List<Tile>) {
+    fun showTilesBelt(from: Double, tiles: List<Tile>) {
+        g.commitEntityState(
+            from,
+            *(visibleTiles.map { it.tile } + visibleTiles.map { it.priceTag } + visibleTiles.map { it.trace }).filterNotNull().toTypedArray()
+        )
         showAvailablePatches(tiles.take(3))
         showPatchBelt(tiles.drop(3))
     }
@@ -379,12 +387,13 @@ class Interface {
         (true to 3) to (0.0 to 0.0)
     )
 
-    fun move(playerId: Int, tileid: Int, x: Int, y: Int, mirrored: Boolean, orientation: Int) {
+    fun move(from: Double, playerId: Int, tileid: Int, x: Int, y: Int, mirrored: Boolean, orientation: Int) {
         val offsetX = if (playerId == 0) 100 else g.world.width - 100 - 9 * TILE_SIZE
         val offsetY = 320
         if (tileid == -1) return
         visibleTiles.firstOrNull { it.tileId == tileid }?.let { tile ->
             val anchor = anchors[mirrored to orientation] ?: throw IllegalStateException("Ooops this shouldn't happen. Orientation should be in range of 0-3. Please provide author of this game with this error message and shared replay.")
+            g.commitEntityState(from, *listOfNotNull(tile.priceTag, tile.tile).toTypedArray())
             tile.priceTag?.setAlpha(0.0)
             tile.tile
                 .setScaleX(if (mirrored) -1.0 else 1.0)
@@ -395,7 +404,6 @@ class Interface {
                 .setX(offsetX + x * TILE_SIZE)
                 .setY(offsetY + y * TILE_SIZE)
                 .setZIndex(900)
-            visibleTiles.remove(tile)
             interactive.untrack(tile.trace)
             tile.tile.setZIndex(10)
         } ?: throw IllegalStateException("No tile with tileid = $tileid found")
@@ -413,4 +421,31 @@ class Interface {
             }
         }
     }
+
+    fun enlarge(patchId: Int) {
+        visibleTiles.firstOrNull { it.tileId == patchId }?.let { tile ->
+            tile.priceTag
+                ?.setZIndex(5000)
+                ?.setAlpha(1.0)
+                ?.setScale(3.0, Curve.EASE_IN_AND_OUT)
+        }
+    }
+
+    fun pulseIn(from: Double, playerId: Int) {
+        val moneyText = when(playerId) {
+            0 -> player1MoneyText
+            else -> player2MoneyText
+        }
+        moneyText
+            ?.setScale(5.0, Curve.LINEAR)
+            ?.setText((moneyText.text.toInt() - 1).toString())
+    }
+    fun pulseOut(from: Double, playerId: Int) {
+        when(playerId) {
+            0 -> player1MoneyText
+            else -> player2MoneyText
+        }?.also { g.commitEntityState(from, it) }
+            ?.setScale(1.0, Curve.LINEAR)
+    }
+
 }
