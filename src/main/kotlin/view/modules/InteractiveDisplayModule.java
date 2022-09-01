@@ -116,9 +116,9 @@ public class InteractiveDisplayModule implements Module {
      * @param mode             when the associatedEntity has to be resized (HOVER_ONLY, CLICK_ONLY or BOTH)
      * @param zIndex           z index of entity during and after resizing
      */
-    public void addResize(Entity<?> entity, Entity<?> associatedEntity, double factor, int zIndex, String mode) {
+    public void addResize(Entity<?> entity, Entity<?> associatedEntity, double factor, int zIndex, int offsetX, String mode) {
         Map<Integer, String> resizes = registration.getOrDefault(entity.getId(), new HashMap<>());
-        resizes.put(associatedEntity.getId(), RESIZE + "," + mode + "," + factor + "," + zIndex);
+        resizes.put(associatedEntity.getId(), RESIZE + "," + mode + "," + factor + "," + zIndex + "," + offsetX);
         registration.put(entity.getId(), resizes);
         newRegistration.put(entity.getId(), resizes);
     }
@@ -132,7 +132,7 @@ public class InteractiveDisplayModule implements Module {
      * @param mode             when the associatedEntity has to be resized (HOVER_ONLY, CLICK_ONLY or BOTH)
      */
     public void addResize(Entity<?> entity, Entity<?> associatedEntity, double factor, String mode) {
-        addResize(entity, associatedEntity, factor, -1, mode);
+        addResize(entity, associatedEntity, factor, -1, 0, mode);
     }
 
     /**

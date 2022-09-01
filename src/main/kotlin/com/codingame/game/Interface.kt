@@ -7,7 +7,7 @@ import view.modules.InteractiveDisplayModule
 
 private const val TILE_SIZE = 60
 
-data class TileEntity(val tileId: Int, val tile: Sprite, val priceTag: Entity<*>?)
+data class TileEntity(val tileId: Int, val tile: Sprite, val priceTag: Entity<*>?, val trace: Rectangle?)
 
 @Singleton
 class Interface {
@@ -199,6 +199,8 @@ class Interface {
             .setFillColor(0XFFFFFF)
             .setTextAlign(TextBasedEntity.TextAlign.CENTER)
             .setZIndex(4)
+            .setFontWeight(Text.FontWeight.BOLDER)
+            .setFontSize(35)
             .setAnchor(0.5)
         player1MessageGroup = g.createGroup(box1, player1Message)
             .setVisible(false)
@@ -217,6 +219,8 @@ class Interface {
             .setFillColor(0XFFFFFF)
             .setTextAlign(TextBasedEntity.TextAlign.CENTER)
             .setZIndex(4)
+            .setFontWeight(Text.FontWeight.BOLDER)
+            .setFontSize(30)
             .setAnchor(0.5)
         player2MessageGroup = g.createGroup(box2, player2Message)
             .setVisible(false)
@@ -227,15 +231,12 @@ class Interface {
     }
 
     private fun showTile(tile: Tile): TileEntity {
-        val t = mutableListOf<Entity<*>>()
-
         val atile = g.createSprite()
             .setImage(tile.image)
             .setZIndex(100)
             .setScale(1.0)
             .setBaseWidth(TILE_SIZE * tile.shape.width)
             .setBaseHeight(TILE_SIZE * tile.shape.height)
-            .also { t += it }
 
         val priceTag = g.createGroup(
             g.createSprite()
@@ -259,11 +260,17 @@ class Interface {
                 .setFontSize(40)
                 .setFillColor(0x000000)
         )
-            .also { t += it }
 
-        interactive.addResize(atile, atile, 1.0, 1000, InteractiveDisplayModule.HOVER_ONLY)
+        val trace = g.createRectangle()
+            .setAlpha(0.0)
+            .setWidth(TILE_SIZE * tile.shape.width)
+            .setHeight(TILE_SIZE * tile.shape.height)
+            .setZIndex(10000)
 
-        return TileEntity(tile.id, atile, priceTag)
+        interactive.addResize(trace, atile, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
+        interactive.addResize(trace, priceTag, 1.0, 1000, 100, InteractiveDisplayModule.HOVER_ONLY)
+
+        return TileEntity(tile.id, atile, priceTag, trace)
     }
 
     /**
@@ -283,11 +290,21 @@ class Interface {
 
             val offsetY = 979
             existing.tile.setAnchor(0.5)
-            existing.tile.alpha = 1.0
-            existing.tile.x = 30 + index * availableTileWidth + availableTileWidth / 2
-            existing.tile.y = offsetY
-            existing.tile.setScale(0.2)
-            existing.priceTag?.alpha = 0.0
+                .setAlpha(1.0)
+                .setX(30 + index * availableTileWidth + availableTileWidth / 2)
+                .setY(offsetY)
+                .setScale(0.2)
+
+            existing.trace
+                ?.setX(30 + index * availableTileWidth)
+                ?.setY(910)
+                ?.setWidth(availableTileWidth)
+                ?.setHeight(150)
+
+            existing.priceTag
+                ?.setX(30 + (index + 1) * availableTileWidth)
+                ?.setY(offsetY)
+                ?.setScale(0.0)
         }
     }
 
@@ -303,9 +320,10 @@ class Interface {
 
             val offsetX = (g.world.width - 180) / 2
             val offsetY = 300 + i * 180 + (TILE_SIZE * (3 - tile.shape.height)) / 2 + TILE_SIZE*tile.shape.height / 2
-            existing.priceTag?.setAlpha(1.0)
+            existing.priceTag
                 ?.setY(offsetY + (tile.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE*tile.shape.height / 2)
                 ?.setX(offsetX + tile.shape.width * TILE_SIZE / 2 + 20)
+                ?.setScale(1.0)
             existing.tile.setScale(0.8)
                 .setAlpha(1.0)
                 .setY(offsetY)
@@ -331,9 +349,17 @@ class Interface {
                 .setX(429 - tile.id * 20)
                 .setRotation(Math.random())
 
-            interactive.addResize(atile, atile, 1.0, 1000, InteractiveDisplayModule.HOVER_ONLY)
+            val trace = g.createRectangle()
+                .setAlpha(0.0)
+                .setWidth(TILE_SIZE)
+                .setHeight(TILE_SIZE)
+                .setY(159 - TILE_SIZE / 2)
+                .setX(429 - tile.id * 20 - TILE_SIZE / 2)
+                .setZIndex(10000)
 
-            visibleTiles.add(TileEntity(tile.id, atile, null))
+            interactive.addResize(trace, atile, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
+
+            visibleTiles.add(TileEntity(tile.id, atile, null, trace))
         }
     }
 
@@ -370,7 +396,7 @@ class Interface {
                 .setY(offsetY + y * TILE_SIZE)
                 .setZIndex(900)
             visibleTiles.remove(tile)
-            interactive.untrack(tile.tile)
+            interactive.untrack(tile.trace)
             tile.tile.setZIndex(10)
         } ?: throw IllegalStateException("No tile with tileid = $tileid found")
     }

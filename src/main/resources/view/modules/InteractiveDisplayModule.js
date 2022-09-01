@@ -65,6 +65,15 @@ function setZindex(entity, zIndex) {
 }
 
 /**
+ * Set x to entity
+ * @param entity the entity to change offset of
+ * @param x to set to entity
+ */
+function setX(entity, x) {
+    entity.container.x = x
+}
+
+/**
  * Reset the scale of an entity
  * @param entity the entity to reset
  */
@@ -82,6 +91,14 @@ function resetZIndex(entity) {
 }
 
 /**
+ * Reset x offset of entity
+ * @param entity the entity to reset
+ */
+function resetXOffset(entity) {
+    entity.container.x = entity.currentState.x
+}
+
+/**
  * Perform the transformation for an entity
  * @param entity the entity to transform
  * @param parameters the parameters of the transformation
@@ -92,13 +109,17 @@ function performTransformation(entity, parameters, fraction) {
     const interaction = infos[0]
     const scale = parseFloat(infos[2])
     const zIndex = parseInt(infos[3])
+    const offsetX = parseInt(infos[4])
 
     const originalScaleX = entity.currentState.scaleX
     const originalScaleY = entity.currentState.scaleY
     const targetScaleX = scale
     const targetScaleY = scale
+    const originalX = entity.currentState.x
+    const targetX = entity.currentState.x + offsetX
     const actualScaleX = originalScaleX + (targetScaleX - originalScaleX) * fraction
     const actualScaleY = originalScaleY + (targetScaleY - originalScaleY) * fraction
+    const actualX = originalX + (targetX - originalX) * fraction
 
     switch (interaction) {
         case DISPLAY:
@@ -109,6 +130,7 @@ function performTransformation(entity, parameters, fraction) {
             if (zIndex !== -1) {
                 setZindex(entity, zIndex)
             }
+            setX(entity, actualX)
             return
         default:
             console.warn('[WARNING InteractiveDisplayModule] Unknown interaction: ' + interaction)
@@ -130,6 +152,7 @@ function revertTransformation(entity, parameters) {
         case RESIZE:
             resetScale(entity)
             resetZIndex(entity)
+            resetXOffset(entity)
             return
         default:
             console.warn('[WARNING InteractiveDisplayModule] Unknown interaction: ' + interaction)
@@ -155,7 +178,7 @@ function transformAssociated(id, module, unless = -1) {
     const to_display = module.currentFrame.registered[id]
     Object.keys(to_display).map(id2 => +id2).forEach(display_id => {
         if (getInteractionMode(to_display[display_id]) !== unless) {
-            performTransformation(entityModule.entities.get(display_id), to_display[display_id], module.running_animations.get(display_id))
+            performTransformation(entityModule.entities.get(display_id), to_display[display_id], module.running_animations.get(id))
         }
     })
 }
