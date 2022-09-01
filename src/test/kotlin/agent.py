@@ -22,13 +22,18 @@ for i in range(patches):
 
 # game loop
 while True:
-    my_buttons = int(input())  # how many Buttons you hold right now
-    my_time = int(input())  # where is my time token placed on timeline
-    opponent_buttons = int(input())  # how many Buttons your opponent holds right now
-    opponent_time = int(input())  # where is opponent time token placed on timeline
-    opponent_earning = int(input())  # how much will opponent earn during "Button income" phase with his current configuration
+    # my_buttons: how many Buttons you hold right now
+    # my_time: where is my time token placed on timeline
+    # my_earning: how much will you earn during "Button income" phase with your current quilt board
+    my_buttons, my_time, my_earning = [int(i) for i in input().split()]
     for i in range(9):
-        line = input()  # represents opponent board "O....O.." means, 1st and 6th field is covered by patch on this row
+        line = input()  # represents row of a board board "O....O.." means, 1st and 6th field is covered by patch on this row
+    # opponent_buttons: how many Buttons your opponent holds right now
+    # opponent_time: where is opponent time token placed on timeline
+    # opponent_earning: how much will opponent earn during "Button income" phase with his current quilt board
+    opponent_buttons, opponent_time, opponent_earning = [int(i) for i in input().split()]
+    for i in range(9):
+        line = input()
     playable_patches = int(input())  # number of patches you can play (3 most of the time, 1 in case of "Special Patch" event)
     for i in range(playable_patches):
         inputs = input().split()

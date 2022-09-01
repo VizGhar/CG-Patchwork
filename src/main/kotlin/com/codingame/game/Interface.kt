@@ -10,7 +10,7 @@ import view.modules.InteractiveDisplayModule
 
 private const val TILE_SIZE = 60
 
-data class TileEntity(val tileId: Int, val tile: Sprite, val priceTag: Entity<*>)
+data class TileEntity(val tileId: Int, val tile: Sprite, val priceTag: Entity<*>?)
 
 @Singleton
 class Interface {
@@ -26,6 +26,8 @@ class Interface {
     private var player1TimeToken: Sprite? = null
     private var player2TimeToken: Sprite? = null
     private var bonusButton: Sprite? = null
+
+    private val visibleTiles = mutableListOf<TileEntity>()
 
     fun updateMoney(player1Money: Int, player2Money: Int) {
         player1MoneyText?.text = "$player1Money"
@@ -45,7 +47,14 @@ class Interface {
         }
     }
 
-    fun hud(player1: Player, player2: Player) {
+    fun initialize(
+        player1: Player,
+        player2: Player,
+        player1Data: BoardManager.PlayerData,
+        player2Data: BoardManager.PlayerData,
+        patches: MutableList<Tile>,
+        bonusPatches: MutableList<Tile>
+    ) {
         g.createSprite()
             .setZIndex(0)
             .setX(0)
@@ -149,7 +158,7 @@ class Interface {
             .setAnchorX(1.0)
             .setMaxWidth(280)
 
-        player1MoneyText = g.createText("5")
+        player1MoneyText = g.createText(player1Data.money.toString())
             .setX(230)
             .setY(80)
             .setMaxWidth(100)
@@ -157,7 +166,7 @@ class Interface {
             .setFontSize(32)
             .setFillColor(0xFFFFFF)
 
-        player2MoneyText = g.createText("5")
+        player2MoneyText = g.createText(player2Data.money.toString())
             .setX(1690)
             .setY(80)
             .setMaxWidth(100)
@@ -174,6 +183,10 @@ class Interface {
                 .setZIndex(3)
                 .setImage("bonus.png")
         }
+
+        showAvailablePatches(patches.take(3))
+        showPatchBelt(patches.drop(3))
+        showBonusPatches(bonusPatches)
     }
 
     private fun showTile(tile: Tile): TileEntity {
@@ -216,8 +229,9 @@ class Interface {
         return TileEntity(tile.id, atile, priceTag)
     }
 
-    private val visibleTiles = mutableListOf<TileEntity>()
-
+    /**
+     * Show remaining >= 30 patches on bottom of the screen
+     */
     private fun showPatchBelt(tiles: List<Tile>) {
         if (tiles.isEmpty()) return
         val totalTilesCount = tiles.count()
@@ -232,16 +246,19 @@ class Interface {
 
             val offsetY = 979
             existing.tile.setAnchor(0.5)
-            existing.tile.isVisible = true
+            existing.tile.alpha = 1.0
             existing.tile.x = 30 + index * availableTileWidth + availableTileWidth / 2
             existing.tile.y = offsetY
             existing.tile.setScale(0.2)
-            existing.priceTag.isVisible = false
+            existing.priceTag?.alpha = 0.0
         }
     }
 
-    fun showTilesBelt(tiles: List<Tile>, bonusTiles: List<Tile>) {
-        tiles.take(3).forEachIndexed { i, tile ->
+    /**
+     * Show top 3 patches that can be purchased
+     */
+    private fun showAvailablePatches(tiles: List<Tile>) {
+        tiles.forEachIndexed { i, tile ->
             var existing = visibleTiles.firstOrNull { it.tileId == tile.id }
             if (existing == null) { visibleTiles.add(showTile(tile)) }
 
@@ -249,41 +266,43 @@ class Interface {
 
             val offsetX = (g.world.width - 180) / 2
             val offsetY = 300 + i * 180 + (TILE_SIZE * (3 - tile.shape.height)) / 2 + TILE_SIZE*tile.shape.height / 2
-            existing.priceTag.setVisible(true)
-                .setY(offsetY + (tile.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE*tile.shape.height / 2)
-                .setX(offsetX + tile.shape.width * TILE_SIZE / 2 + 20)
+            existing.priceTag?.setAlpha(1.0)
+                ?.setY(offsetY + (tile.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE*tile.shape.height / 2)
+                ?.setX(offsetX + tile.shape.width * TILE_SIZE / 2 + 20)
             existing.tile.setScale(0.8)
-                .setVisible(true)
+                .setAlpha(1.0)
                 .setY(offsetY)
                 .setScale(1.0)
                 .setX(offsetX)
                 .setAnchor(0.5)
         }
-        showPatchBelt(tiles.drop(3))
+    }
 
-        bonusTiles.reversed().forEachIndexed { i, tile ->
-            var existing2 = visibleTiles.firstOrNull { it.tileId == tile.id }
-            if (existing2 == null) { visibleTiles.add(showTile(tile)) } else { return@forEachIndexed }
-            existing2 = visibleTiles.firstOrNull { it.tileId == tile.id }!!
-            existing2.priceTag.setVisible(false)
-            existing2.tile
+    /**
+     * Init - show bonus tiles on timeline
+     */
+    private fun showBonusPatches(bonusTiles: List<Tile>) {
+        bonusTiles.forEach { tile ->
+            val atile = g.createSprite()
                 .setAnchor(0.5)
-                .setY(159)
-                .setX(
-                    when(i) {
-                        0 -> 1431
-                        1 -> 1311
-                        2 -> 1071
-                        3 -> 951
-                        4 -> 831
-                        else -> throw IllegalStateException()
-                    }
-                )
+                .setBaseWidth(TILE_SIZE * tile.shape.width)
+                .setBaseHeight(TILE_SIZE * tile.shape.height)
                 .setScale(0.33)
+                .setImage(tile.image)
+                .setZIndex(100)
+                .setY(159)
+                .setX(429 - tile.id * 20)
                 .setRotation(Math.random())
-                .setZIndex(50 - i)
+
+            interactive.addResize(atile, atile, 1.0, 1000, InteractiveDisplayModule.HOVER_ONLY)
+
+            visibleTiles.add(TileEntity(tile.id, atile, null))
         }
-        g.commitWorldState(0.1)
+    }
+
+    fun showTilesBelt(tiles: List<Tile>) {
+        showAvailablePatches(tiles.take(3))
+        showPatchBelt(tiles.drop(3))
     }
 
     private val anchors = mapOf(
@@ -303,8 +322,7 @@ class Interface {
         if (tileid == -1) return
         visibleTiles.firstOrNull { it.tileId == tileid }?.let { tile ->
             val anchor = anchors[mirrored to orientation] ?: throw IllegalStateException("Ooops this shouldn't happen. Orientation should be in range of 0-3. Please provide author of this game with this error message and shared replay.")
-            tile.priceTag.isVisible = false
-            g.commitWorldState(0.1)
+            tile.priceTag?.setAlpha(0.0)
             tile.tile
                 .setScaleX(if (mirrored) -1.0 else 1.0)
                 .setScaleY(1.0)
@@ -316,7 +334,6 @@ class Interface {
                 .setZIndex(900)
             visibleTiles.remove(tile)
             interactive.untrack(tile.tile)
-            g.commitWorldState(0.98)
             tile.tile.setZIndex(10)
         } ?: throw IllegalStateException("No tile with tileid = $tileid found")
     }
