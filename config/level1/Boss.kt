@@ -53,6 +53,7 @@ private fun tryApplyTileToBoard(board: Array<Array<Boolean>>, tileShape: TileSha
 }
 
 fun main(args: Array<String>?) {
+    val r = kotlin.random.Random(0L)
     val scanner = Scanner(System.`in`)
 
     val myBoard = Array(BOARD_HEIGHT) { Array(BOARD_WIDTH) { false } }
@@ -78,8 +79,10 @@ fun main(args: Array<String>?) {
 
         for (tile in availableTiles) {
             if (tile.price > myScore) { continue }
-            for (x in 0 until BOARD_WIDTH) {
-                for (y in 0 until BOARD_HEIGHT) {
+            val randomX = (0 until BOARD_WIDTH).shuffled(r)
+            val randomY = (0 until BOARD_HEIGHT).shuffled(r)
+            for (x in randomX) {
+                for (y in randomY) {
                     if (tryApplyTileToBoard(myBoard, tile.shape, x, y)) {
                         for (y1 in 0 until BOARD_HEIGHT) {
                             for (x1 in 0 until BOARD_WIDTH) {
