@@ -1,9 +1,6 @@
 package com.codingame.game
 
-import com.codingame.gameengine.module.entities.Entity
-import com.codingame.gameengine.module.entities.GraphicEntityModule
-import com.codingame.gameengine.module.entities.Sprite
-import com.codingame.gameengine.module.entities.Text
+import com.codingame.gameengine.module.entities.*
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import view.modules.InteractiveDisplayModule
@@ -26,6 +23,10 @@ class Interface {
     private var player1TimeToken: Sprite? = null
     private var player2TimeToken: Sprite? = null
     private var bonusButton: Sprite? = null
+    private var player1Message: Text? = null
+    private var player2Message: Text? = null
+    private var player1MessageGroup: Group? = null
+    private var player2MessageGroup: Group? = null
 
     private val visibleTiles = mutableListOf<TileEntity>()
 
@@ -184,6 +185,42 @@ class Interface {
                 .setImage("bonus.png")
         }
 
+        val box1 = g.createSprite()
+            .setX(122)
+            .setY(210)
+            .setBaseWidth(500)
+            .setBaseHeight(80)
+            .setImage("messageBox1.png")
+
+        player1Message = g.createText()
+            .setMaxWidth(464)
+            .setY(263)
+            .setX(372)
+            .setFillColor(0XFFFFFF)
+            .setTextAlign(TextBasedEntity.TextAlign.CENTER)
+            .setZIndex(4)
+            .setAnchor(0.5)
+        player1MessageGroup = g.createGroup(box1, player1Message)
+            .setVisible(false)
+
+        val box2 = g.createSprite()
+            .setX(1302)
+            .setY(210)
+            .setBaseWidth(500)
+            .setBaseHeight(80)
+            .setImage("messageBox2.png")
+
+        player2Message = g.createText()
+            .setMaxWidth(464)
+            .setY(263)
+            .setX(1548)
+            .setFillColor(0XFFFFFF)
+            .setTextAlign(TextBasedEntity.TextAlign.CENTER)
+            .setZIndex(4)
+            .setAnchor(0.5)
+        player2MessageGroup = g.createGroup(box2, player2Message)
+            .setVisible(false)
+
         showAvailablePatches(patches.take(3))
         showPatchBelt(patches.drop(3))
         showBonusPatches(bonusPatches)
@@ -336,5 +373,18 @@ class Interface {
             interactive.untrack(tile.tile)
             tile.tile.setZIndex(10)
         } ?: throw IllegalStateException("No tile with tileid = $tileid found")
+    }
+
+    fun showMessage(playerId: Int, text: String) {
+        when(playerId) {
+            0 -> {
+                player1Message?.text = text
+                player1MessageGroup?.isVisible = text.isNotBlank()
+            }
+            1 -> {
+                player2Message?.text = text
+                player2MessageGroup?.isVisible = text.isNotBlank()
+            }
+        }
     }
 }

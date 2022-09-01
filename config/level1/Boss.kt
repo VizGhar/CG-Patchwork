@@ -90,7 +90,7 @@ fun main(args: Array<String>?) {
                             }
                             System.err.println()
                         }
-                        println("PLAY ${tile.id} 0 0 $x $y")
+                        println("PLAY ${tile.id} $x $y")
                         continue@gameLoop
                     }
                 }

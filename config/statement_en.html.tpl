@@ -404,6 +404,9 @@ text-align: center;">
             <li>
             Design on <a href="https://www.figma.com/file/7diUIxEWdBphhC6MSSp48s/Patchwork---Codingame?node-id=0%3A1">Figma</a>
             </li>
+            <li>
+                UI supports message bubbles. Anything after last valid entry is considered message.
+            </li>
         </ul>
         </div>
     </div>
@@ -531,35 +534,49 @@ text-align: center;">
                     </li>
                     <li>
                         <const>PLAY</const>
-                        <var>patchId</var> <var>rotations</var> <var>horizontalFlip</var> <var>x</var> <var>y</var>
+                        <var>patchId</var> <var>x</var> <var>y</var> <var>horizontalFlip</var> <var>rotations</var>
                     </li>
                 </ul>
-            </div>
 
-            <div class="title">Output for one Game Turn</div>
-            <div class="text">
-                Example of usage:<br>
-                <const>PLAY</const>
-                <br><var>patchId</var> <br><var>rotations</var> - how many times to rotate patch clockwise<br><var>horizontalFlip</var>
+                <span class="statement-lineno">Example:</span><br/><br/>
+<const>PLAY</const>
+                <br><var>patchId</var><br>
+                
+                <!-- BEGIN level1 -->
+                <var>x</var> and <var>y</var> - coordinates of top/left corner of your patch
+                <br><br>
+                <const>PLAY 3 1 2</const>
+                - places patch with id
+                <const>3</const>
+                on position
+                <const>1</const>
+                <const>2</const>
+                of you quilt board.
+                <!-- END -->
+                
+                    <!-- BEGIN level2 level3 level4 -->
+                    <var>x</var> and <var>y</var> - coordinates of
+                top/left corner of your patch after applying transformations
+                    <br>
+                    <var>horizontalFlip</var>
                 -
                 <const>1</const>
-                if pach should be flipped horizontally first<br><var>x</var> and <var>y</var> - coordinates of
-                top/left corner after applying transformations<br><br>
-                <const>PLAY 3 1 2 6 5</const>
+                if pach should be flipped horizontally first<br><var>rotations</var> - how many times to rotate patch clockwise
+
+                <br><br>
+                <const>PLAY 3 6 5 1 2</const>
                 - places patch with id
                 <const>3</const>
                 on position
                 <const>6</const>
                 <const>5</const>
-                of you quilt board. The patch will be mirrored and rotated
+                of you quilt board. The patch will be flipped horizontally and rotated
                 <const>2</const>
                 time clockwise.
                 <br>
                 <br>
-
-                    <!-- BEGIN level1 level2 -->
-                    <i><var>rotations</var> and <var>horizontalFlip</var> are ignored in this league, so you can keep them at 0</i>
                     <!-- END -->
+
             </div>
         </div>
         <!-- Protocol block -->

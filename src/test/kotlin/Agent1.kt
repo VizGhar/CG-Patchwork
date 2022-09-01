@@ -211,7 +211,7 @@ object Agent2 {
                             }
                             val mirror = rotation.first >= 4
                             val rightRotations = rotation.first % 4
-                            println("PLAY ${tile.id} $rightRotations ${if (mirror) 1 else 0} $x $y")
+                            println("PLAY ${tile.id} $x $y ${if (mirror) 1 else 0} $rightRotations Playing tile ${tile.id}")
                             continue@gameLoop
                         }
                     }

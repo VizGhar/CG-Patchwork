@@ -92,17 +92,44 @@ class Referee : AbstractReferee() {
             if (outputs.size != 1) { activePlayer.deactivate(String.format("%d Single line of input expected", activePlayer.index)); return }
 
             val output = outputs[0].split(" ")
-
+            val message: String
             val move = when {
-                output[0] == "SKIP" -> Move.Skip
-                output[0] == "PLAY" && output.drop(1).take(5).none { it.toIntOrNull() == null } -> Move.Play(
-                    patchId = output[1].toInt(),
-                    x = output[4].toInt(),
-                    y = output[5].toInt(),
-                    flip = output[3].toInt() == 1,
-                    rightRotations = output[2].toInt()
-                )
-                else -> Move.Unknown
+                output[0] == "SKIP" -> {
+                    message = output.drop(1).joinToString(" ")
+                    Move.Skip
+                }
+                output[0] == "PLAY" -> {
+                    val patchId = output.getOrNull(1)?.toIntOrNull()
+                    val x = output.getOrNull(2)?.toIntOrNull()
+                    val y = output.getOrNull(3)?.toIntOrNull()
+                    val flip = if (!league.rotationsAllowed) null else output.getOrNull(4)?.toIntOrNull()
+                    val rightRotations = if (!league.rotationsAllowed) null else output.getOrNull(5)?.toIntOrNull()
+
+                    if (patchId == null || x == null || y == null) {
+                        message = ""
+                        Move.Unknown
+                    } else {
+                        message = if (flip == null) {
+                            output.drop(4).joinToString(" ")
+                        } else if (rightRotations == null) {
+                            output.drop(5).joinToString(" ")
+                        } else {
+                            output.drop(6).joinToString(" ")
+                        }
+
+                        Move.Play(
+                            patchId = patchId,
+                            x = x,
+                            y = y,
+                            flip = flip == 1,
+                            rightRotations = (rightRotations ?: 0) % 4
+                        )
+                    }
+                }
+                else -> {
+                    message = ""
+                    Move.Unknown
+                }
             }
 
             val moveResult = when(move) {
@@ -128,6 +155,10 @@ class Referee : AbstractReferee() {
 
             // UI operations
             val animations = mutableListOf<Animation>()
+            animations += Animation(1) {
+                gui.showMessage(activePlayerId, message)
+                gui.showMessage((activePlayerId + 1) % 2, "")
+            }
             if (move is Move.Play) { animations += Animation(500) { gui.move(activePlayerId, move.patchId, move.x, move.y, move.flip, move.rightRotations) } }
             if (moveResult.bonusAchieved) { animations += Animation(500) { gui.acquireBonus(activePlayerId) } }
             animations += Animation(300) { gui.updateMoney(boardManager.players[0].money, boardManager.players[1].money) }
