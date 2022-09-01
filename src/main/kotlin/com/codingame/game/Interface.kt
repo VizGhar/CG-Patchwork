@@ -45,8 +45,8 @@ class Interface {
     fun acquireBonus(from: Double, playerId: Int) {
         g.commitEntityState(from, bonusButton)
         when(playerId) {
-            0 -> bonusButton?.setX(325)?.setY(60)
-            1 -> bonusButton?.setX(1920-325)?.setY(60)
+            0 -> bonusButton?.setX(325)?.setY(60)?.setScale(1.0)
+            1 -> bonusButton?.setX(1920-325)?.setY(60)?.setScale(1.0)
             else -> {}
         }
     }
@@ -184,8 +184,9 @@ class Interface {
             bonusButton = g.createSprite()
                 .setAnchor(0.5)
                 .setX(960)
-                .setY(50)
+                .setY(40)
                 .setZIndex(3)
+                .setScale(0.8)
                 .setImage("bonus.png")
         }
 
