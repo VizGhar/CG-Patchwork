@@ -4,7 +4,6 @@ import kotlin.random.Random
 
 private const val BOARD_WIDTH = 9
 private const val BOARD_HEIGHT = 9
-private const val BONUS_BUTTON_SIZE = 7
 
 sealed class TurnResult {
     object UnknownCommand: TurnResult()
@@ -135,10 +134,10 @@ class BoardManager(random: Random) {
 
         // check bonus
         if (players.none { it.bonusAchieved }) {
-            out@ for (startX in 0..9-BONUS_BUTTON_SIZE) {
-                u@ for (startY in 0..9-BONUS_BUTTON_SIZE) {
-                    for (windowX in startX until startX+BONUS_BUTTON_SIZE) {
-                        for (windowY in startY until startY+BONUS_BUTTON_SIZE) {
+            out@ for (startX in 0..9 - BONUS_BUTTON_SIZE) {
+                u@ for (startY in 0..9 - BONUS_BUTTON_SIZE) {
+                    for (windowX in startX until startX + BONUS_BUTTON_SIZE) {
+                        for (windowY in startY until startY + BONUS_BUTTON_SIZE) {
                             if (!player.board[windowX][windowY]) continue@u
                         }
                     }

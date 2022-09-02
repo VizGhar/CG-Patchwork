@@ -26,7 +26,8 @@ class Referee : AbstractReferee() {
     private val boardManager by lazy { BoardManager(random) }
 
     override fun init() {
-        leagueInit(gameManager.leagueLevel)
+        League.leagueInit(gameManager.leagueLevel)
+        take(gameManager.gameParameters)
         gameManager.firstTurnMaxTime = 1000
 
         gui.initialize(

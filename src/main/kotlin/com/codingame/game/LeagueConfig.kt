@@ -14,7 +14,7 @@ enum class League(
     val scoreMoneyMultiplier: Int,
     val skipMultiplier: Int,
     val rotationsAllowed: Boolean,
-    val initialButtons: Int
+    private val defaultInitialButtons: Int
     ) {
 
     /**
@@ -31,7 +31,7 @@ enum class League(
         scoreMoneyMultiplier = 0,
         skipMultiplier = 0,
         rotationsAllowed = false,
-        initialButtons = 200
+        defaultInitialButtons = 200
     ),
 
     /**
@@ -50,7 +50,7 @@ enum class League(
         skipMultiplier = 1,
         scoreMoneyMultiplier = 1,
         rotationsAllowed = true,
-        initialButtons = 5,
+        defaultInitialButtons = 5,
     ),
 
     /**
@@ -67,18 +67,22 @@ enum class League(
         skipMultiplier = 1,
         scoreMoneyMultiplier = 1,
         rotationsAllowed = true,
-        initialButtons = 5,
+        defaultInitialButtons = 5,
     );
 
     val tileEarning get() = earnTurns.isNotEmpty()
     val specialPatchesEnabled get() = patchTurns.isNotEmpty()
-}
+    val initialButtons get() = INITIAL_MONEY
 
-fun leagueInit(level: Int) {
-    league = when(level) {
-        1 -> League.L1
-        2 -> League.L2
-        3, 4 -> League.FULL
-        else -> throw IllegalStateException("Only leagues 1-4 supported")
+    companion object {
+        fun leagueInit(level: Int) {
+            league = when (level) {
+                1 -> L1
+                2 -> L2
+                3, 4 -> FULL
+                else -> throw IllegalStateException("Only leagues 1-4 supported")
+            }
+            INITIAL_MONEY = league.defaultInitialButtons
+        }
     }
 }
