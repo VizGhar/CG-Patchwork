@@ -134,10 +134,10 @@ class BoardManager(random: Random) {
 
         // check bonus
         if (players.none { it.bonusAchieved }) {
-            out@ for (startX in 0..4) {
-                u@ for (startY in 0..4) {
-                    for (windowX in startX..startX+4) {
-                        for (windowY in startY..startY+4) {
+            out@ for (startX in 0..2) {
+                u@ for (startY in 0..2) {
+                    for (windowX in startX..startX+6) {
+                        for (windowY in startY..startY+6) {
                             if (!player.board[windowX][windowY]) continue@u
                         }
                     }
