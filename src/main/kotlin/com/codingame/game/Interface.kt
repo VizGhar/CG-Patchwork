@@ -1,16 +1,30 @@
 package com.codingame.game
 
 import com.codingame.gameengine.module.entities.*
+import com.codingame.gameengine.module.toggle.ToggleModule
+import com.codingame.gameengine.module.tooltip.TooltipModule
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import view.modules.InteractiveDisplayModule
 
 private const val TILE_SIZE = 60
 
-data class TileEntity(val tileId: Int, val tile: Sprite, val priceTag: Entity<*>?, val trace: Rectangle?)
+data class TileEntity(
+    val tileId: Int,
+    val tile: Sprite,
+    val priceTag: Entity<*>?,
+    val trace: Rectangle?,
+    val toggleTrace: Entity<*>?
+)
 
 @Singleton
 class Interface {
+
+    @Inject
+    private lateinit var toggleModule: ToggleModule
+
+    @Inject
+    private lateinit var tooltips: TooltipModule
 
     @Inject
     private lateinit var g: GraphicEntityModule
@@ -271,10 +285,20 @@ class Interface {
             .setHeight(TILE_SIZE * tile.shape.height)
             .setZIndex(10000)
 
+        val toggleTrace = g.createPolygon().apply {
+            tile.polygon.forEach { (x, y) -> addPoint(x, y) }
+        }.setAlpha(0.0)
+            .setZIndex(900)
+
+        toggleModule.displayOnToggleState(toggleTrace, "tooltips", true)
+        toggleModule.displayOnToggleState(trace, "tooltips", false)
+
         interactive.addResize(trace, atile, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
         interactive.addResize(trace, priceTag, 1.0, 1000, 100, InteractiveDisplayModule.HOVER_ONLY)
 
-        return TileEntity(tile.id, atile, priceTag, trace)
+        tooltips.setTooltipText(toggleTrace, "Standard Tile\nTile id: ${tile.id}\nShape: ${tile.shape.string()}\nPrice-buttons: ${tile.price}\nPrice-time: ${tile.time}\nEarning: ${tile.earn}")
+
+        return TileEntity(tile.id, atile, priceTag, trace, toggleTrace)
     }
 
     /**
@@ -305,6 +329,11 @@ class Interface {
                 ?.setWidth(availableTileWidth)
                 ?.setHeight(150)
 
+            existing.toggleTrace
+                ?.setX((existing.tile.x - (existing.tile.baseWidth * existing.tile.scaleX)/2).toInt())
+                ?.setY((existing.tile.y - (existing.tile.baseHeight * existing.tile.scaleY)/2).toInt())
+                ?.setScale(0.2)
+
             existing.priceTag
                 ?.setX(30 + (index + 1) * availableTileWidth)
                 ?.setY(offsetY)
@@ -334,6 +363,10 @@ class Interface {
                 .setScale(1.0)
                 .setX(offsetX)
                 .setAnchor(0.5)
+            existing.toggleTrace
+                ?.setY(offsetY - existing.tile.baseHeight/2)
+                ?.setScale(1.0)
+                ?.setX(offsetX - existing.tile.baseWidth/2)
         }
     }
 
@@ -361,16 +394,25 @@ class Interface {
                 .setX(429 - tile.id * 20 - TILE_SIZE / 2)
                 .setZIndex(10000)
 
-            interactive.addResize(trace, atile, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
+            val toggleTrace = g.createRectangle()
+                .setAlpha(0.0)
+                .setWidth(TILE_SIZE)
+                .setHeight(TILE_SIZE)
+                .setY(159 - TILE_SIZE / 2)
+                .setX(429 - tile.id * 20 - TILE_SIZE / 2)
+                .setZIndex(900)
 
-            visibleTiles.add(TileEntity(tile.id, atile, null, trace))
+            interactive.addResize(trace, atile, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
+            toggleModule.displayOnToggleState(toggleTrace, "tooltips", true)
+            tooltips.setTooltipText(toggleTrace, "BONUS PATCH\nTile id: ${tile.id}\nShape: ${tile.shape.string()}")
+            visibleTiles.add(TileEntity(tile.id, atile, null, trace, toggleTrace))
         }
     }
 
     fun showTilesBelt(from: Double, tiles: List<Tile>) {
         g.commitEntityState(
             from,
-            *(visibleTiles.map { it.tile } + visibleTiles.map { it.priceTag } + visibleTiles.map { it.trace }).filterNotNull().toTypedArray()
+            *(visibleTiles.map { it.tile } + visibleTiles.map { it.priceTag } + visibleTiles.map { it.trace } + visibleTiles.map { it.toggleTrace }).filterNotNull().toTypedArray()
         )
         showAvailablePatches(tiles.take(3))
         showPatchBelt(tiles.drop(3))
@@ -393,7 +435,7 @@ class Interface {
         if (tileid == -1) return
         visibleTiles.firstOrNull { it.tileId == tileid }?.let { tile ->
             val anchor = anchors[mirrored to orientation] ?: throw IllegalStateException("Ooops this shouldn't happen. Orientation should be in range of 0-3. Please provide author of this game with this error message and shared replay.")
-            g.commitEntityState(from, *listOfNotNull(tile.priceTag, tile.tile).toTypedArray())
+            g.commitEntityState(from, *listOfNotNull(tile.priceTag, tile.tile, tile.toggleTrace).toTypedArray())
             tile.priceTag?.setAlpha(0.0)
             tile.tile
                 .setScaleX(if (mirrored) -1.0 else 1.0)
@@ -404,6 +446,22 @@ class Interface {
                 .setX(offsetX + x * TILE_SIZE)
                 .setY(offsetY + y * TILE_SIZE)
                 .setZIndex(900)
+
+            tile.toggleTrace
+                ?.setScaleX(if (mirrored) -1.0 else 1.0)
+                ?.setRotation(Math.PI / 4 * orientation.toDouble() * 90)
+                ?.setScaleY(1.0)
+
+            when {
+                !mirrored && orientation == 0 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
+                !mirrored && orientation == 1 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseHeight)?.setY(offsetY + y * TILE_SIZE)
+                !mirrored && orientation == 2 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseWidth)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseHeight)
+                !mirrored && orientation == 3 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseWidth)
+                mirrored && orientation == 0 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseWidth)?.setY(offsetY + y * TILE_SIZE)
+                mirrored && orientation == 1 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseHeight)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseWidth)
+                mirrored && orientation == 2 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseHeight)
+                mirrored && orientation == 3 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
+            }
             interactive.untrack(tile.trace)
             tile.tile.setZIndex(10)
         } ?: throw IllegalStateException("No tile with tileid = $tileid found")
