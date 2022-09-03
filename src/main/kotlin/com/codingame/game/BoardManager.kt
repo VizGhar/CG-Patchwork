@@ -24,7 +24,7 @@ class BoardManager(random: Random) {
     /**
      * First 3 patches are available for purchase
      */
-    val availablePatches : List<Tile> get() = remainingPatches.take(3)
+    private val availablePatches : List<Tile> get() = remainingPatches.take(3)
 
     /**
      * These are 5 special patches (for league 3 and up)

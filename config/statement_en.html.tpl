@@ -439,12 +439,6 @@ text-align: center;">
                 <p><span class="statement-lineno">Line 4: </span> <var>patchEvents</var> integers of
                     <var>patchTime</var>
                     when the "Special Patch" event will occur</p>
-                <p><span class="statement-lineno">Line 5: </span><var>patches</var> - count of pre-shuffled patches - always
-                    <const>33</const>
-                </p>
-                <p><span class="statement-lineno">Next <var>patches</var> times:</span> 5 lines containing values: <var>patchId</var>
-                    <var>patchEarning</var> <var>patchButtonPrice</var> <var>patchTimePrice</var>
-                    <var>patchShape</var></p>
             </div>
         </div>
         <!-- Protocol block -->
@@ -464,7 +458,7 @@ text-align: center;">
                     is empty</p>
                 <p><span class="statement-lineno">Line 11: </span> 3 integers <var>opponentButtons</var> = amount of
                     buttons your opponent currently owns; <var>opponentTime</var> = how far is your opponent's
-                    token on Timeline; <var>opponentEarning</var> = how much you will earn during Button Income event
+                    token on Timeline; <var>opponentEarning</var> = how much your opponent will earn during Button Income event
                     <!-- BEGIN level1 level2 -->
                     <i>(always 0 for this league)</i>
                     <!-- END -->
@@ -475,27 +469,31 @@ text-align: center;">
                     <const>.</const>
                     is empty
                 </p>
-                <p><span class="statement-lineno">Line 21: </span> 1 integer <var>playablePatches</var> = amount of
-                    patches you can play if you can afford it (most of the time
-                    <const>3</const>
-                    <!-- BEGIN level1 level2 -->
-)
-                    <!-- END -->
-                    <!-- BEGIN level3 -->
-, or
-                    <const>1</const>
-                    while resolving "Special Patch" event)
-                    <!-- END -->
+
+                <p><span class="statement-lineno">Line 21: </span><var>patches</var> - count of still not used patches
+                <!-- BEGIN level1 -->
+                 (you can play only first 3 of these)
+                 <!-- END -->
+                <!-- BEGIN level2 level3 level4 -->
+                 (you can play only first 3 of these if <var>bonusPatchId</var> is <const>0</const>, bonus patch otherwise)
+                 <!-- END -->
                 </p>
-                <p><span class="statement-lineno">Next <var>playablePatches</var> times:</span> 5 lines:
-                    <var>patchId</var>
+                <p><span class="statement-lineno">Next <var>patches</var> times:</span> 5 lines containing values: <var>patchId</var>
                     <var>patchEarning</var> <var>patchButtonPrice</var> <var>patchTimePrice</var>
                     <var>patchShape</var></p>
+
+                <p><span class="statement-lineno">Next line: </span> 1 integer <var>bonusPatchId</var>:
+                <!-- BEGIN level1 -->
+                ignore <i>(always 0 for this league)</i>
+                <!-- END --> 
+                <!-- BEGIN level2 level3 level4 -->
+                Id of bonus patch if available (<const>0</const> otherwise)
+                <!-- END -->
+                </p>
+                
                 To describe all fields of patch:
                 <ul>
-                    <li><var>patchId</var> -
-                        <const>0 - 32</const>
-                        for standard patches or negative for Special Patch
+                    <li><var>patchId</var> - patch identifier in range <const>0 - 32</const>
                     </li>
                     <li><var>patchEarning</var> - how much will this patch earn during each "Button income" event
                     <!-- BEGIN level1 -->
@@ -534,7 +532,10 @@ text-align: center;">
                     </li>
                     <li>
                         <const>PLAY</const>
-                        <var>patchId</var> <var>x</var> <var>y</var> <var>horizontalFlip</var> <var>rotations</var>
+                        <var>patchId</var> <var>x</var> <var>y</var>
+                        <!-- BEGIN level2 level3 level4 -->
+                        <var>horizontalFlip</var> <var>rotations</var>
+                        <!-- END -->
                     </li>
                 </ul>
 

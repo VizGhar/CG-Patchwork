@@ -100,8 +100,7 @@ object League1Winner {
     }
 }
 
-object League1Boss {
-
+object Boss1 {
 
     @JvmStatic
     fun main(args: Array<String>?) {
@@ -112,7 +111,6 @@ object League1Boss {
 
         val incomeEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
         val patchEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
-        val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
 
         var specialsPlaced = 0
 
@@ -127,7 +125,9 @@ object League1Boss {
             val oppEarning = scanner.nextInt()
             scanner.nextLine()
             val opponentBoard = (0 until 9).map { scanner.nextLine() }
-            val availableTiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+            val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+            val availableTiles = tiles.take(3)
+            val bonusPatchId = scanner.nextInt()
 
             for (tile in availableTiles) {
                 if (tile.price > myScore) {
@@ -145,7 +145,7 @@ object League1Boss {
                                 }
                                 System.err.println()
                             }
-                            println("PLAY ${tile.id} 0 0 $x $y")
+                            println("PLAY ${tile.id} $x $y")
                             continue@gameLoop
                         }
                     }
@@ -156,7 +156,142 @@ object League1Boss {
     }
 }
 
-object Agent2 {
+object Boss2 {
+
+    @JvmStatic
+    fun main(args: Array<String>?) {
+        val r = kotlin.random.Random(0L)
+        val scanner = Scanner(System.`in`)
+
+        val myBoard = Array(BOARD_HEIGHT) { Array(BOARD_WIDTH) { false } }
+
+        val incomeEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
+        val patchEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
+
+        gameLoop@ while (true) {
+            val myScore = scanner.nextInt()
+            val myTime = scanner.nextInt()
+            val myEarning = scanner.nextInt()
+            scanner.nextLine()
+            val board = (0 until 9).map { scanner.nextLine() }
+            val oppScore = scanner.nextInt()
+            val oppTime = scanner.nextInt()
+            val oppEarning = scanner.nextInt()
+            scanner.nextLine()
+            val opponentBoard = (0 until 9).map { scanner.nextLine() }
+            val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+            val bonusPatchId = scanner.nextInt()
+            val availableTiles = if (bonusPatchId == 0) tiles.take(3) else listOf(Tile(bonusPatchId, listOf(listOf(true)), 0, 0, 0))
+
+            for (tile in availableTiles) {
+                if (tile.price > myScore) { continue }
+                val randomX = (0 until BOARD_WIDTH).shuffled(r)
+                val randomY = (0 until BOARD_HEIGHT).shuffled(r)
+                for (x in randomX) {
+                    for (y in randomY) {
+
+                        val rotations = arrayOf(
+                            0 to tile.shape,
+                            1 to tile.shape.rightRotated,
+                            2 to tile.shape.rightRotated.rightRotated,
+                            3 to tile.shape.rightRotated.rightRotated.rightRotated,
+                            4 to tile.shape.mirrored,
+                            5 to tile.shape.mirrored.rightRotated,
+                            6 to tile.shape.mirrored.rightRotated.rightRotated,
+                            7 to tile.shape.mirrored.rightRotated.rightRotated.rightRotated
+                        )
+
+                        rotations.shuffle()
+
+                        val rotation = rotations.firstOrNull { tryApplyTileToBoard(myBoard, it.second, x, y) }
+
+                        if (rotation != null) {
+                            for (y1 in 0 until BOARD_HEIGHT) {
+                                for (x1 in 0 until BOARD_WIDTH) {
+                                    System.err.print(if (myBoard[y1][x1]) 'O' else '.')
+                                }
+                                System.err.println()
+                            }
+                            val mirror = rotation.first >= 4
+                            val rightRotations = rotation.first % 4
+                            println("PLAY ${tile.id} $x $y ${if (mirror) 1 else 0} $rightRotations")
+                            continue@gameLoop
+                        }
+                    }
+                }
+            }
+            println("SKIP")
+        }
+    }
+}
+
+object Boss3 {
+
+    @JvmStatic
+    fun main(args: Array<String>?) {
+        val scanner = Scanner(System.`in`)
+
+        val myBoard = Array(BOARD_HEIGHT) { Array(BOARD_WIDTH) { false } }
+
+        val incomeEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
+        val patchEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
+
+        gameLoop@ while (true) {
+            val myScore = scanner.nextInt()
+            val myTime = scanner.nextInt()
+            val myEarning = scanner.nextInt()
+            scanner.nextLine()
+            val board = (0 until 9).map { scanner.nextLine() }
+            val oppScore = scanner.nextInt()
+            val oppTime = scanner.nextInt()
+            val oppEarning = scanner.nextInt()
+            scanner.nextLine()
+            val opponentBoard = (0 until 9).map { scanner.nextLine() }
+            val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+            val bonusPatchId = scanner.nextInt()
+            val availableTiles = if (bonusPatchId == 0) tiles.take(3) else listOf(Tile(bonusPatchId, listOf(listOf(true)), 0, 0, 0))
+
+            for (tile in availableTiles) {
+                if (tile.price > myScore) { continue }
+                for (x in 0 until BOARD_WIDTH) {
+                    for (y in 0 until BOARD_HEIGHT) {
+
+                        val rotations = arrayOf(
+                            0 to tile.shape,
+                            1 to tile.shape.rightRotated,
+                            2 to tile.shape.rightRotated.rightRotated,
+                            3 to tile.shape.rightRotated.rightRotated.rightRotated,
+                            4 to tile.shape.mirrored,
+                            5 to tile.shape.mirrored.rightRotated,
+                            6 to tile.shape.mirrored.rightRotated.rightRotated,
+                            7 to tile.shape.mirrored.rightRotated.rightRotated.rightRotated
+                        )
+
+                        rotations.shuffle()
+
+                        val rotation = rotations.firstOrNull { tryApplyTileToBoard(myBoard, it.second, x, y) }
+
+                        if (rotation != null) {
+                            for (y1 in 0 until BOARD_HEIGHT) {
+                                for (x1 in 0 until BOARD_WIDTH) {
+                                    System.err.print(if (myBoard[y1][x1]) 'O' else '.')
+                                }
+                                System.err.println()
+                            }
+                            val mirror = rotation.first >= 4
+                            val rightRotations = rotation.first % 4
+                            println("PLAY ${tile.id} $x $y ${if (mirror) 1 else 0} $rightRotations")
+                            continue@gameLoop
+                        }
+                    }
+                }
+            }
+            println("SKIP")
+        }
+    }
+}
+
+object Boss4 {
 
     private const val BOARD_WIDTH = 9
     private const val BOARD_HEIGHT = 9
@@ -244,7 +379,6 @@ object Agent2 {
 
         val incomeEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
         val patchEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
-        val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
 
         var specialsPlaced = 0
 
@@ -259,7 +393,10 @@ object Agent2 {
             val oppEarning = scanner.nextInt()
             scanner.nextLine()
             val opponentBoard = (0 until 9).map { scanner.nextLine() }
-            val availableTiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+            val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+            val bonusTileId = scanner.nextInt()
+
+            val availableTiles = if (bonusTileId == 0)tiles.take(3)
                 .filter { it.price <= myScore }
                 .sortedByDescending {
                     // it will earn this much buttons whole game
@@ -268,7 +405,7 @@ object Agent2 {
                     val spaceValue = it.shape.sumOf { it.count() } * 2
 
                     remainingEarningTurns + spaceValue - it.price - it.time / 2
-                }
+                } else listOf(Tile(bonusTileId, listOf(listOf(true)), 0, 0, 0))
 
             data class Spec(val tileId:Int, val x:Int, val y: Int, val orientation: Int, val flip: Boolean)
 
@@ -314,4 +451,57 @@ object Agent2 {
         }
     }
 
+}
+
+
+object AgentDummy {
+
+    /**
+     * Become the master of patchworking by filling your quilt canvas with patches. Be careful! Every patch costs you a few Buttons and it also takes some Time to sew it on your canvas.
+     **/
+    @JvmStatic
+    fun main(args: Array<String>?) {
+        val input = Scanner(System.`in`)
+        val incomeEvents = input.nextInt() // the amount of "Button income" events that will happen
+        for (i in 0 until incomeEvents) {
+            val incomeTime = input.nextInt() // when the "Button income" will happen
+        }
+        val patchEvents = input.nextInt() // the amount of "Special Patch" events that will happen
+        for (i in 0 until patchEvents) {
+            val patchTime = input.nextInt() // when the "Special Patch" will happen
+        }
+
+        // game loop
+        while (true) {
+            val myButtons = input.nextInt() // how many Buttons you hold right now
+            val myTime = input.nextInt() // where is my time token placed on timeline
+            val myEarning =
+                input.nextInt() // how much will you earn during "Button income" phase with your current quilt board
+            for (i in 0 until 9) {
+                val line =
+                    input.next() // represents row of a board board "O....O.." means, 1st and 6th field is covered by patch on this row
+            }
+            val opponentButtons = input.nextInt() // how many Buttons your opponent holds right now
+            val opponentTime = input.nextInt() // where is opponent time token placed on timeline
+            val opponentEarning =
+                input.nextInt() // how much will opponent earn during "Button income" phase with his current quilt board
+            for (i in 0 until 9) {
+                val line = input.next()
+            }
+            val patches = input.nextInt() // how many patches there are in total in a game
+            for (i in 0 until patches) {
+                val patchId = input.nextInt()
+                val patchEarning = input.nextInt() // how much Buttons you will acquire for this tile when "Button income" timepoint is reached
+                val patchButtonPrice = input.nextInt() // how much Buttons does it cost to buy this patch
+                val patchTimePrice = input.nextInt() // how much time does it take to sew this patch
+                val patchShape = input.next() // representation of patch shape "O.O|OOO|O.O" represents H shaped tile
+            }
+            val bonusPatchId = input.nextInt() // 0 if no bonus patch is available
+
+            // Write an answer using println()
+            // To debug: System.err.println("Debug messages...");
+
+            println("SKIP")
+        }
+    }
 }

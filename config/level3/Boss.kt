@@ -59,9 +59,6 @@ fun main(args: Array<String>?) {
 
     val incomeEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
     val patchEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
-    val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
-
-    var specialsPlaced = 0
 
     gameLoop@ while (true) {
         val myScore = scanner.nextInt()
@@ -74,7 +71,9 @@ fun main(args: Array<String>?) {
         val oppEarning = scanner.nextInt()
         scanner.nextLine()
         val opponentBoard = (0 until 9).map { scanner.nextLine() }
-        val availableTiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+        val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+        val bonusPatchId = scanner.nextInt()
+        val availableTiles = if (bonusPatchId == 0) tiles.take(3) else listOf(Tile(bonusPatchId, listOf(listOf(true)), 0, 0, 0))
 
         for (tile in availableTiles) {
             if (tile.price > myScore) { continue }

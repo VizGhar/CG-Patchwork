@@ -1,7 +1,3 @@
-import java.util.*
-
-typealias TileShape = List<List<Boolean>>
-
 private const val BOARD_WIDTH = 9
 private const val BOARD_HEIGHT = 9
 
@@ -87,7 +83,6 @@ fun main(args: Array<String>?) {
 
     val incomeEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
     val patchEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
-    val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
 
     var specialsPlaced = 0
 
@@ -102,7 +97,10 @@ fun main(args: Array<String>?) {
         val oppEarning = scanner.nextInt()
         scanner.nextLine()
         val opponentBoard = (0 until 9).map { scanner.nextLine() }
-        val availableTiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+        val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+        val bonusTileId = scanner.nextInt()
+
+        val availableTiles = if (bonusTileId == 0)tiles.take(3)
             .filter { it.price <= myScore }
             .sortedByDescending {
                 // it will earn this much buttons whole game
@@ -111,7 +109,7 @@ fun main(args: Array<String>?) {
                 val spaceValue = it.shape.sumOf { it.count() } * 2
 
                 remainingEarningTurns + spaceValue - it.price - it.time / 2
-            }
+            } else listOf(Tile(bonusTileId, listOf(listOf(true)), 0, 0, 0))
 
         data class Spec(val tileId:Int, val x:Int, val y: Int, val orientation: Int, val flip: Boolean)
 

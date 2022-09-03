@@ -57,10 +57,6 @@ class Referee : AbstractReferee() {
             activePlayer.sendInputLine(league.earnTurns.joinToString(" "))
             activePlayer.sendInputLine(league.patchTurns.size.toString())
             activePlayer.sendInputLine(league.patchTurns.joinToString(" "))
-            activePlayer.sendInputLine(boardManager.remainingPatches.size.toString())
-            for (tile in boardManager.remainingPatches) {
-                activePlayer.sendInputLine(tile.toString())
-            }
         }
 
         // every turn (including first one)
@@ -74,16 +70,15 @@ class Referee : AbstractReferee() {
             activePlayer.sendInputLine(boardOpponent.board[i].joinToString("") { if (it) "O" else "." })
         }
 
-        // available tiles specification
-        if (boardManager.players[activePlayerId].availablePatches == 0) {
-            val playerTiles = boardManager.availablePatches
-            activePlayer.sendInputLine(playerTiles.size.toString())
-            for (tile in playerTiles) {
-                activePlayer.sendInputLine(tile.toString())
-            }
+        activePlayer.sendInputLine(boardManager.remainingPatches.size.toString())
+        for (tile in boardManager.remainingPatches) {
+            activePlayer.sendInputLine(tile.toString())
+        }
+
+        if (boardManager.players[activePlayerId].availablePatches != 0) {
+            activePlayer.sendInputLine(boardManager.gameBonusPatches[0].id.toString())
         } else {
-            activePlayer.sendInputLine("1")
-            activePlayer.sendInputLine(boardManager.gameBonusPatches[0].toString())
+            activePlayer.sendInputLine("0")
         }
 
         activePlayer.execute()
@@ -204,6 +199,9 @@ class Referee : AbstractReferee() {
             if (boardManager.players.any { it.position < TOTAL_TURNS }) { return }
             boardManager.computeScore().forEachIndexed { index, score -> gameManager.players[index].score = score }
         } catch (e: AbstractPlayer.TimeoutException) {
+            boardManager.computeScore().forEachIndexed { index, score -> gameManager.players[index].score = score }
+            activePlayer.score = -1
+            gameManager.endGame()
             activePlayer.deactivate(String.format("$%d timeout!", activePlayer.index))
         }
         gameManager.endGame()

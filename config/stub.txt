@@ -2,15 +2,14 @@ read incomeEvents:int
 loopline incomeEvents incomeTime:int
 read patchEvents:int
 loopline patchEvents patchTime:int
-read patches:int
-loop patches read patchId:int patchEarning:int patchButtonPrice:int patchTimePrice:int patchShape:word(15)
 gameloop
 read myButtons:int myTime:int myEarning:int
 loop 9 read line:word(9)
 read opponentButtons:int opponentTime:int opponentEarning:int
 loop 9 read line:word(9)
-read playablePatches:int
-loop playablePatches read patchId:int patchEarning:int patchButtonPrice:int patchTimePrice:int patchShape:word(15)
+read patches:int
+loop patches read patchId:int patchEarning:int patchButtonPrice:int patchTimePrice:int patchShape:word(15)
+read bonusPatchId:int
 write SKIP
 
 STATEMENT
@@ -21,7 +20,7 @@ incomeEvents: the amount of "Button income" events that will happen
 incomeTime: when the "Button income" will happen
 patchEvents: the amount of "Special Patch" events that will happen
 patchTime: when the "Special Patch" will happen
-patches: how many patches there are in total in a game
+patches: count of still not used patches (you can play only one of first 3) 
 patchEarning: how much Buttons you will acquire for this tile when "Button income" timepoint is reached
 patchButtonPrice: how much Buttons does it cost to buy this patch
 patchTimePrice: how much time does it take to sew this patch
@@ -34,3 +33,4 @@ opponentTime: where is opponent time token placed on timeline
 opponentEarning: how much will opponent earn during "Button income" phase with his current quilt board
 line: represents row of a board board "O....O.." means, 1st and 6th field is covered by patch on this row
 playablePatches: number of patches you can play (3 most of the time, 1 in case of "Special Patch" event)
+bonusPatchId: 0 if no bonus patch is available

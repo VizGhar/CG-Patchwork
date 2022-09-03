@@ -53,15 +53,13 @@ private fun tryApplyTileToBoard(board: Array<Array<Boolean>>, tileShape: TileSha
 }
 
 fun main(args: Array<String>?) {
+    val r = kotlin.random.Random(0L)
     val scanner = Scanner(System.`in`)
 
     val myBoard = Array(BOARD_HEIGHT) { Array(BOARD_WIDTH) { false } }
 
     val incomeEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
     val patchEvents = (0 until scanner.nextInt()).map { scanner.nextInt() }
-    val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
-
-    var specialsPlaced = 0
 
     gameLoop@ while (true) {
         val myScore = scanner.nextInt()
@@ -74,12 +72,16 @@ fun main(args: Array<String>?) {
         val oppEarning = scanner.nextInt()
         scanner.nextLine()
         val opponentBoard = (0 until 9).map { scanner.nextLine() }
-        val availableTiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+        val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+        val bonusPatchId = scanner.nextInt()
+        val availableTiles = if (bonusPatchId == 0) tiles.take(3) else listOf(Tile(bonusPatchId, listOf(listOf(true)), 0, 0, 0))
 
         for (tile in availableTiles) {
             if (tile.price > myScore) { continue }
-            for (x in 0 until BOARD_WIDTH) {
-                for (y in 0 until BOARD_HEIGHT) {
+            val randomX = (0 until BOARD_WIDTH).shuffled(r)
+            val randomY = (0 until BOARD_HEIGHT).shuffled(r)
+            for (x in randomX) {
+                for (y in randomY) {
 
                     val rotations = arrayOf(
                         0 to tile.shape,
