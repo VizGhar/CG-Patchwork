@@ -149,7 +149,7 @@ class Referee : AbstractReferee() {
 
             if (moveResult !is TurnResult.OK) {
                 boardManager.computeScore().forEachIndexed { index, score -> gameManager.players[index].score = score }
-                activePlayer.score = 0
+                activePlayer.score = -1
                 gameManager.endGame()
                 return
             }
