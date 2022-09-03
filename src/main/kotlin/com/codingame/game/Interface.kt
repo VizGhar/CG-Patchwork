@@ -32,6 +32,8 @@ class Interface {
     @Inject
     private lateinit var interactive: InteractiveDisplayModule
 
+    data class EarningButton(val playerId: Int, val x: Int, val y: Int, val scale: Double, val targetX: Int, val targetY: Int, val targetScale: Double, val sprite: Sprite)
+    private var buttons: MutableList<EarningButton> = mutableListOf()
     private var player1MoneyText: Text? = null
     private var player2MoneyText: Text? = null
     private var player1TimeToken: Sprite? = null
@@ -44,23 +46,59 @@ class Interface {
 
     private val visibleTiles = mutableListOf<TileEntity>()
 
-    fun updateMoney(from: Double, player1Money: Int, player2Money: Int) {
-        g.commitEntityState(from, player1MoneyText, player2MoneyText)
+    fun updateMoney(from: Double, playerId: Int, player1Money: Int, player2Money: Int) {
+        val btns = buttons.filter { it.playerId == playerId }
+        g.commitEntityState(from, *btns.map { it.sprite }.toTypedArray())
+        btns.forEach {
+            it.sprite.setAlpha(1.0)
+        }
+
+        g.commitEntityState(from + 0.001, *btns.map { it.sprite }.toTypedArray())
+
+        btns.forEach {
+            it.sprite.setX(it.targetX, Curve.EASE_IN)
+                .setY(it.targetY, Curve.EASE_IN)
+                .setScale(it.targetScale, Curve.EASE_IN)
+        }
         player1MoneyText?.text = "$player1Money"
         player2MoneyText?.text = "$player2Money"
     }
 
-    fun updateTime(from: Double, player1Time: Int, player2Time: Int) {
+    fun updateTime(from: Double, player1Time: Int, player2Time: Int, step: Boolean) {
         g.commitEntityState(from, player1TimeToken, player2TimeToken)
-        player1TimeToken?.x = 430 + 20 * player1Time
-        player2TimeToken?.x = 430 + 20 * player2Time
+        val time1 = player1TimeToken ?: throw IllegalStateException()
+        val time2 = player2TimeToken ?: throw IllegalStateException()
+        if (!step) {
+            time1.x = 430 + 20 * player1Time
+            time2.x = 430 + 20 * player2Time
+        } else {
+            if (time1.x < 430 + 20 * player1Time) {
+                time1.x += 20
+            } else if (time2.x < 430 + 20 * player2Time) {
+                time2.x += 20
+            }
+        }
     }
 
-    fun acquireBonus(from: Double, playerId: Int) {
+    fun acquireBonusBegin(from: Double) {
         g.commitEntityState(from, bonusButton)
+        bonusButton
+            ?.setX(g.world.width/2)
+            ?.setY(g.world.height/2)
+            ?.setScale(10.0)
+            ?.setZIndex(5000)
+            ?.setRotation(Math.PI)
+    }
+
+    fun acquireBonusMiddle(from: Double) {
+        bonusButton
+            ?.setRotation(2 * Math.PI)
+    }
+
+    fun acquireBonusEnd(from: Double, playerId: Int) {
         when(playerId) {
-            0 -> bonusButton?.setX(325)?.setY(60)
-            1 -> bonusButton?.setX(1920-325)?.setY(60)
+            0 -> bonusButton?.setX(325)?.setY(60)?.setScale(1.0)?.setZIndex(50)?.setRotation(Math.PI)
+            1 -> bonusButton?.setX(1920-325)?.setY(60)?.setScale(1.0)?.setZIndex(50)?.setRotation(-2 * Math.PI)
             else -> {}
         }
     }
@@ -264,14 +302,14 @@ class Interface {
                 .setBaseHeight(60)
                 .setImage("pricetag.png"),
             g.createText("${tile.price} ")
-                .setFontFamily("Brush Script MT")
+                .setAnchorY(0.0)
                 .setX(75)
                 .setY(7)
                 .setZIndex(3)
                 .setFontSize(40)
                 .setFillColor(0x000000),
             g.createText("${tile.time} ")
-                .setFontFamily("Brush Script MT")
+                .setAnchorY(0.0)
                 .setX(157)
                 .setY(7)
                 .setZIndex(3)
@@ -462,9 +500,35 @@ class Interface {
                 mirrored && orientation == 2 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseHeight)
                 mirrored && orientation == 3 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
             }
+
+            val earning = tiles.firstOrNull { it.id == tileid }?.earn ?: 0
+            if (earning > 0) {
+                val buttonX = offsetX + x * TILE_SIZE + if (orientation % 2 == 0) tile.tile.baseWidth / 2 else tile.tile.baseHeight / 2
+                val buttonY = offsetY + y * TILE_SIZE + if (orientation % 2 == 0) tile.tile.baseHeight / 2 else tile.tile.baseWidth / 2
+                val buttonTargetX = if (playerId == 0) 200 else 1720
+                val buttonTargetY = 100
+                val buttonScale = 1.0 * earning
+                val btn = g.createSprite()
+                    .setImage("button.png")
+                    .setRotation(tile.tile.rotation)
+                    .setAnchor(0.5)
+                    .setScale(buttonScale)
+                    .setZIndex(20000)
+                    .setX(buttonX)
+                    .setY(buttonY)
+                    .setAlpha(0.0)
+                buttons.add(EarningButton(playerId, buttonX, buttonY, buttonScale, buttonTargetX, buttonTargetY, 1.0, btn))
+            }
+
             interactive.untrack(tile.trace)
             tile.tile.setZIndex(10)
         } ?: throw IllegalStateException("No tile with tileid = $tileid found")
+    }
+
+    fun returnMoney() {
+        buttons.forEach {
+            it.sprite.setX(it.x).setY(it.y).setScale(it.scale).setAlpha(0.0)
+        }
     }
 
     fun showMessage(playerId: Int, text: String) {
@@ -485,19 +549,21 @@ class Interface {
             tile.priceTag
                 ?.setZIndex(5000)
                 ?.setAlpha(1.0)
+                ?.setY(tile.priceTag.y - 60)
                 ?.setScale(3.0, Curve.EASE_IN_AND_OUT)
         }
     }
 
-    fun pulseIn(from: Double, playerId: Int) {
+    fun pulseIn(from: Double, playerId: Int, change: Int) {
         val moneyText = when(playerId) {
             0 -> player1MoneyText
             else -> player2MoneyText
         }
         moneyText
             ?.setScale(5.0, Curve.LINEAR)
-            ?.setText((moneyText.text.toInt() - 1).toString())
+            ?.setText((moneyText.text.toInt() + change).toString())
     }
+
     fun pulseOut(from: Double, playerId: Int) {
         when(playerId) {
             0 -> player1MoneyText

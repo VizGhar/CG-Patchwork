@@ -166,7 +166,7 @@ class Referee : AbstractReferee() {
                 // pulse players button icon for each button spent
                 animations += (1..(tiles.firstOrNull { it.id == move.patchId }?.price ?: 0)).map {
                     listOf(
-                        Animation(200) { from -> gui.pulseIn(from, activePlayerId) },
+                        Animation(200) { from -> gui.pulseIn(from, activePlayerId, -1) },
                         Animation(200) { from -> gui.pulseOut(from, activePlayerId) })
                 }.flatten()
 
@@ -175,11 +175,29 @@ class Referee : AbstractReferee() {
             }
 
             // move time token
-            animations += Animation(300) { from -> gui.updateTime(from, boardManager.players[0].position, boardManager.players[1].position) }
+            if (moveResult.skippedTimepoints == 0) {
+                animations += Animation(300) { from -> gui.updateTime(from, boardManager.players[0].position, boardManager.players[1].position, false) }
+            } else {
+                for (i in 0 until moveResult.skippedTimepoints) {
+                    animations += Animation(300) { from -> gui.updateTime(from, boardManager.players[0].position, boardManager.players[1].position, true) }
+                    animations += Animation(200) { from -> gui.pulseIn(from, activePlayerId, +1) }
+                    animations += Animation(200) { from -> gui.pulseOut(from, activePlayerId) }
+                }
+            }
 
-            if (moveResult.bonusAchieved) { animations += Animation(500) { from -> gui.acquireBonus(from, activePlayerId) } }
-            animations += Animation(300) { from -> gui.updateMoney(from, boardManager.players[0].money, boardManager.players[1].money) }
+            if (moveResult.bonusAchieved) {
+                animations += Animation(500) { from -> gui.acquireBonusBegin(from) }
+                animations += Animation(500) { from -> gui.acquireBonusMiddle(from)}
+                animations += Animation(500) { from -> gui.acquireBonusEnd(from, activePlayerId) }
+            }
+
+            if (moveResult.earnReached) {
+                animations += Animation(600) { from -> gui.updateMoney(from, activePlayerId, boardManager.players[0].money, boardManager.players[1].money) }
+                animations += Animation(10) { from -> gui.returnMoney() }
+            }
+
             animations += Animation(1000) { from -> gui.showTilesBelt(from, boardManager.remainingPatches) }
+
             animations.run(g, gameManager)
 
             // End game

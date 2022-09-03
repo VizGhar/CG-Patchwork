@@ -10,7 +10,7 @@ sealed class TurnResult {
     object InvalidTileId: TurnResult()
     object InvalidTilePlacement: TurnResult()
     object NoMoney: TurnResult()
-    data class OK(val bonusAchieved: Boolean): TurnResult()
+    data class OK(val bonusAchieved: Boolean, val earnReached: Boolean, val skippedTimepoints: Int): TurnResult()
 }
 
 class BoardManager(random: Random) {
@@ -115,7 +115,7 @@ class BoardManager(random: Random) {
         // pay for tile and move player's token
         val timeDelta = minOf(tile.time, TOTAL_TURNS - player.position)
         player.money -= tile.price
-        timeAdvance(player, timeDelta)
+        val earnReached = timeAdvance(player, timeDelta)
         lastPlay = playerId
 
         // adjust remaining patches
@@ -147,7 +147,7 @@ class BoardManager(random: Random) {
                 }
             }
         }
-        return TurnResult.OK(bonusAchieved)
+        return TurnResult.OK(bonusAchieved, earnReached, 0)
     }
 
     fun playSkip(): TurnResult {
@@ -172,19 +172,20 @@ class BoardManager(random: Random) {
         )
 
         player.money += delta * league.skipMultiplier
-        timeAdvance(player, delta)
+        val earnReached = timeAdvance(player, delta)
         lastPlay = playerId
 
-        return TurnResult.OK(false)
+        return TurnResult.OK(false, earnReached, delta)
     }
 
-    private fun timeAdvance(player: PlayerData, positionDelta: Int) {
+    private fun timeAdvance(player: PlayerData, positionDelta: Int): Boolean {
         val positionBefore = player.position
         player.position += positionDelta
         val positionAfter = player.position
 
         // resolve Button Income
         val earning = league.earnTurns.count { it in (positionBefore + 1)..positionAfter } * player.playedTiles.sumOf { it.earn }
+        val success = earning > 0
         player.money += earning
 
         // resolve Special Patch
@@ -195,6 +196,7 @@ class BoardManager(random: Random) {
         if (positionAfter >= TOTAL_TURNS && players.none { it.finishedFirst }) {
             player.finishedFirst = true
         }
+        return success
     }
 
     fun computeScore() =
