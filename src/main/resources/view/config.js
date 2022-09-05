@@ -20,7 +20,7 @@ export const options = [
       'ON': true,
       'OFF': false
     },
-    default: true
+    default: false
   })
 ]
 
