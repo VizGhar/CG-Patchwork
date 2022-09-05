@@ -6,6 +6,7 @@ import com.codingame.gameengine.module.tooltip.TooltipModule
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import view.modules.InteractiveDisplayModule
+import kotlin.random.Random
 
 private const val TILE_SIZE = 60
 
@@ -14,7 +15,8 @@ data class TileEntity(
     val tile: Sprite,
     val priceTag: Entity<*>?,
     val trace: Rectangle?,
-    val toggleTrace: Entity<*>?
+    val toggleTrace: Entity<*>?,
+    val debugTrace: Entity<*>?
 )
 
 @Singleton
@@ -38,6 +40,8 @@ class Interface {
     private var buttons: MutableList<EarningButton> = mutableListOf()
     private var player1MoneyText: Text? = null
     private var player2MoneyText: Text? = null
+    private var player1IncomeMoneyText: Text? = null
+    private var player2IncomeMoneyText: Text? = null
     private var player1TimeToken: Sprite? = null
     private var player2TimeToken: Sprite? = null
     private var bonusButton: Sprite? = null
@@ -64,6 +68,17 @@ class Interface {
         }
         player1MoneyText?.text = "$player1Money"
         player2MoneyText?.text = "$player2Money"
+    }
+
+    fun updateIncome(from: Double, playerId: Int, income: Int) {
+        val t = if (playerId == 0) {
+            player1IncomeMoneyText!!
+        } else {
+            player2IncomeMoneyText!!
+        }
+        g.commitEntityState(from, t)
+
+        t.setText("+ $income")
     }
 
     fun updateTime(from: Double, player1Time: Int, player2Time: Int, step: Boolean) {
@@ -233,6 +248,30 @@ class Interface {
             .setFontSize(32)
             .setFillColor(0xFFFFFF)
 
+        player1IncomeMoneyText = g.createText("+ ${player1Data.earning}")
+            .setAnchor(0.5)
+            .setX(350)
+            .setY(100)
+            .setMaxWidth(100)
+            .setZIndex(3)
+            .setFontSize(32)
+            .setFillColor(0xFFFFFF)
+            .also {
+                toggleModule.displayOnToggleState(it, "tooltips", true)
+            }
+
+        player2IncomeMoneyText = g.createText("+ ${player2Data.earning}")
+            .setAnchor(0.5)
+            .setX(1570)
+            .setY(100)
+            .setMaxWidth(100)
+            .setZIndex(3)
+            .setFontSize(32)
+            .setFillColor(0xFFFFFF)
+            .also {
+                toggleModule.displayOnToggleState(it, "tooltips", true)
+            }
+
         if (league.scoreBonusMultiplier > 0) {
             bonusButton = g.createSprite()
                 .setAnchor(0.5)
@@ -285,6 +324,60 @@ class Interface {
         showAvailablePatches(patches.take(3))
         showPatchBelt(patches.drop(3))
         showBonusPatches(bonusPatches)
+
+        val verticalOffset1 = 320
+        val horizontalOffset1 = 100
+        val verticalOffset2 = 320
+        val horizontalOffset2 = 1280
+
+        for(x in 0 until 9) {
+            for (y in 0 until 9) {
+                g.createRectangle()
+                    .setY(y * 60 + verticalOffset2)
+                    .setX(x * 60 + horizontalOffset2)
+                    .setWidth(60)
+                    .setHeight(60)
+                    .setLineWidth(3.0)
+                    .setZIndex(100000)
+                    .setFillAlpha(0.1)
+                    .also {
+                        toggleModule.displayOnToggleState(it, "tooltips", true)
+                        tooltips.setTooltipText(it, "Coordinates: $x,$y")
+                    }
+
+                g.createText("$x,$y")
+                    .setAnchor(0.5)
+                    .setY(y * 60 + verticalOffset2 + 30)
+                    .setX(x * 60 + horizontalOffset2 + 30)
+                    .setZIndex(200000)
+                    .also {
+                        toggleModule.displayOnToggleState(it, "tooltips", true)
+                    }
+
+                g.createRectangle()
+                    .setY(y * 60 + verticalOffset1)
+                    .setX(x * 60 + horizontalOffset1)
+                    .setWidth(60)
+                    .setHeight(60)
+                    .setLineWidth(3.0)
+                    .setZIndex(50)
+                    .setZIndex(100000)
+                    .setFillAlpha(0.1)
+                    .also {
+                        tooltips.setTooltipText(it, "Coordinates: $x,$y")
+                        toggleModule.displayOnToggleState(it, "tooltips", true)
+                    }
+
+                g.createText("$x,$y")
+                    .setAnchor(0.5)
+                    .setY(y * 60 + verticalOffset1 + 30)
+                    .setX(x * 60 + horizontalOffset1 + 30)
+                    .setZIndex(200000)
+                    .also {
+                        toggleModule.displayOnToggleState(it, "tooltips", true)
+                    }
+            }
+        }
     }
 
     private fun showTile(tile: Tile): TileEntity {
@@ -329,15 +422,24 @@ class Interface {
         }.setAlpha(0.0)
             .setZIndex(900)
 
+        val debugTrace = g.createPolygon().apply {
+            tile.polygon.forEach { (x, y) -> addPoint(x, y) }
+        }
+            .setFillColor(Random.nextInt(0xFFFFFF))
+            .setAlpha(1.0)
+            .setZIndex(800)
+
+        toggleModule.displayOnToggleState(atile, "tooltips", false)
         toggleModule.displayOnToggleState(toggleTrace, "tooltips", true)
         toggleModule.displayOnToggleState(trace, "tooltips", false)
+        toggleModule.displayOnToggleState(debugTrace, "tooltips", true)
 
         interactive.addResize(trace, atile, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
         interactive.addResize(trace, priceTag, 1.0, 1000, 100, InteractiveDisplayModule.HOVER_ONLY)
 
         tooltips.setTooltipText(toggleTrace, "Standard Tile\nTile id: ${tile.id}\nShape: ${tile.shape.string()}\nPrice-buttons: ${tile.price}\nPrice-time: ${tile.time}\nEarning: ${tile.earn}")
 
-        return TileEntity(tile.id, atile, priceTag, trace, toggleTrace)
+        return TileEntity(tile.id, atile, priceTag, trace, toggleTrace, debugTrace)
     }
 
     /**
@@ -373,6 +475,11 @@ class Interface {
                 ?.setY((existing.tile.y - (existing.tile.baseHeight * existing.tile.scaleY)/2).toInt())
                 ?.setScale(0.2)
 
+            existing.debugTrace
+                ?.setX((existing.tile.x - (existing.tile.baseWidth * existing.tile.scaleX)/2).toInt())
+                ?.setY((existing.tile.y - (existing.tile.baseHeight * existing.tile.scaleY)/2).toInt())
+                ?.setScale(0.2)
+
             existing.priceTag
                 ?.setX(30 + (index + 1) * availableTileWidth)
                 ?.setY(offsetY)
@@ -403,6 +510,10 @@ class Interface {
                 .setX(offsetX)
                 .setAnchor(0.5)
             existing.toggleTrace
+                ?.setY(offsetY - existing.tile.baseHeight/2)
+                ?.setScale(1.0)
+                ?.setX(offsetX - existing.tile.baseWidth/2)
+            existing.debugTrace
                 ?.setY(offsetY - existing.tile.baseHeight/2)
                 ?.setScale(1.0)
                 ?.setX(offsetX - existing.tile.baseWidth/2)
@@ -441,17 +552,34 @@ class Interface {
                 .setX(429 - tile.id * 20 - TILE_SIZE / 2)
                 .setZIndex(900)
 
+            val debugTrace = g.createRectangle()
+                .setAlpha(1.0)
+                .setWidth(TILE_SIZE)
+                .setHeight(TILE_SIZE)
+                .setY(159 - TILE_SIZE / 2)
+                .setX(429 - tile.id * 20 - TILE_SIZE / 2)
+                .setZIndex(700)
+                .setFillColor(Random.nextInt(0xFFFFFF))
+
             interactive.addResize(trace, atile, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
+            toggleModule.displayOnToggleState(atile, "tooltips", false)
             toggleModule.displayOnToggleState(toggleTrace, "tooltips", true)
+            toggleModule.displayOnToggleState(debugTrace, "tooltips", true)
             tooltips.setTooltipText(toggleTrace, "BONUS PATCH\nTile id: ${tile.id}\nShape: ${tile.shape.string()}")
-            visibleTiles.add(TileEntity(tile.id, atile, null, trace, toggleTrace))
+            visibleTiles.add(TileEntity(tile.id, atile, null, trace, toggleTrace, debugTrace))
         }
     }
 
     fun showTilesBelt(from: Double, tiles: List<Tile>) {
         g.commitEntityState(
             from,
-            *(visibleTiles.map { it.tile } + visibleTiles.map { it.priceTag } + visibleTiles.map { it.trace } + visibleTiles.map { it.toggleTrace }).filterNotNull().toTypedArray()
+            *(
+                    visibleTiles.map { it.tile } +
+                            visibleTiles.map { it.priceTag } +
+                            visibleTiles.map { it.trace } +
+                            visibleTiles.map { it.toggleTrace } +
+                            visibleTiles.map { it.debugTrace }
+                    ).filterNotNull().toTypedArray()
         )
         showAvailablePatches(tiles.take(3))
         showPatchBelt(tiles.drop(3))
@@ -474,7 +602,7 @@ class Interface {
         if (tileid == -1) return
         visibleTiles.firstOrNull { it.tileId == tileid }?.let { tile ->
             val anchor = anchors[mirrored to orientation] ?: throw IllegalStateException("Ooops this shouldn't happen. Orientation should be in range of 0-3. Please provide author of this game with this error message and shared replay.")
-            g.commitEntityState(from, *listOfNotNull(tile.priceTag, tile.tile, tile.toggleTrace).toTypedArray())
+            g.commitEntityState(from, *listOfNotNull(tile.priceTag, tile.tile, tile.toggleTrace, tile.debugTrace, player1IncomeMoneyText, player2IncomeMoneyText).toTypedArray())
             tile.priceTag?.setAlpha(0.0)
             tile.tile
                 .setScaleX(if (mirrored) -1.0 else 1.0)
@@ -491,6 +619,11 @@ class Interface {
                 ?.setRotation(Math.PI / 4 * orientation.toDouble() * 90)
                 ?.setScaleY(1.0)
 
+            tile.debugTrace
+                ?.setScaleX(if (mirrored) -1.0 else 1.0)
+                ?.setRotation(Math.PI / 4 * orientation.toDouble() * 90)
+                ?.setScaleY(1.0)
+
             when {
                 !mirrored && orientation == 0 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
                 !mirrored && orientation == 1 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseHeight)?.setY(offsetY + y * TILE_SIZE)
@@ -500,6 +633,17 @@ class Interface {
                 mirrored && orientation == 1 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseHeight)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseWidth)
                 mirrored && orientation == 2 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseHeight)
                 mirrored && orientation == 3 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
+            }
+
+            when {
+                !mirrored && orientation == 0 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
+                !mirrored && orientation == 1 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseHeight)?.setY(offsetY + y * TILE_SIZE)
+                !mirrored && orientation == 2 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseWidth)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseHeight)
+                !mirrored && orientation == 3 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseWidth)
+                mirrored && orientation == 0 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseWidth)?.setY(offsetY + y * TILE_SIZE)
+                mirrored && orientation == 1 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseHeight)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseWidth)
+                mirrored && orientation == 2 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseHeight)
+                mirrored && orientation == 3 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
             }
 
             val earning = tiles.firstOrNull { it.id == tileid }?.earn ?: 0
@@ -548,7 +692,7 @@ class Interface {
     fun enlarge(patchId: Int) {
         visibleTiles.firstOrNull { it.tileId == patchId }?.let { tile ->
             tile.priceTag
-                ?.setZIndex(5000)
+                ?.setZIndex(500000)
                 ?.setAlpha(1.0)
                 ?.setY(tile.priceTag.y - 60)
                 ?.setScale(3.0, Curve.EASE_IN_AND_OUT)

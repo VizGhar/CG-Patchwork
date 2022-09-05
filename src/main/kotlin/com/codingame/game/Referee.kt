@@ -167,6 +167,7 @@ class Referee : AbstractReferee() {
 
                 // move patch to proper position
                 animations += Animation(500) { from -> gui.move(from, activePlayerId, move.patchId, move.x, move.y, move.flip, move.rightRotations) }
+                animations += Animation(10) { from -> gui.updateIncome(from, activePlayerId, boardManager.players[activePlayerId].earning) }
             }
 
             // move time token

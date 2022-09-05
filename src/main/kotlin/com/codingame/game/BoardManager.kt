@@ -53,7 +53,9 @@ class BoardManager(random: Random) {
         var finishedFirst: Boolean = false,
         val playedTiles: MutableList<Tile> = mutableListOf(),
         val board: Array<Array<Boolean>> = Array(9) { Array(9) { false } }
-    )
+    ) {
+        val earning get() = playedTiles.sumOf { it.earn }
+    }
 
     private fun tryApplyTileToBoard(board: Array<Array<Boolean>>, tileShape: TileShape, x: Int, y: Int) : Boolean {
         for (shapeY in tileShape.indices) {
