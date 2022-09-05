@@ -196,7 +196,7 @@ class Referee : AbstractReferee() {
             animations.run(g, gameManager)
 
             // End game
-            if (boardManager.players.any { it.position < TOTAL_TURNS }) { return }
+            if (boardManager.players.any { it.position < league.gameDuration }) { return }
             boardManager.computeScore().forEachIndexed { index, score -> gameManager.players[index].score = score }
         } catch (e: AbstractPlayer.TimeoutException) {
             boardManager.computeScore().forEachIndexed { index, score -> gameManager.players[index].score = score }

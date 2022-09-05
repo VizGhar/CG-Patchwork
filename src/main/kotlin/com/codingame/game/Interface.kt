@@ -32,6 +32,8 @@ class Interface {
     @Inject
     private lateinit var interactive: InteractiveDisplayModule
 
+    private val timeTokenOffset get() = if (league== League.L1) 771 else 430
+
     data class EarningButton(val playerId: Int, val x: Int, val y: Int, val scale: Double, val targetX: Int, val targetY: Int, val targetScale: Double, val sprite: Sprite)
     private var buttons: MutableList<EarningButton> = mutableListOf()
     private var player1MoneyText: Text? = null
@@ -69,12 +71,12 @@ class Interface {
         val time1 = player1TimeToken ?: throw IllegalStateException()
         val time2 = player2TimeToken ?: throw IllegalStateException()
         if (!step) {
-            time1.x = 430 + 20 * player1Time
-            time2.x = 430 + 20 * player2Time
+            time1.x = timeTokenOffset + 20 * player1Time
+            time2.x = timeTokenOffset + 20 * player2Time
         } else {
-            if (time1.x < 430 + 20 * player1Time) {
+            if (time1.x < timeTokenOffset + 20 * player1Time) {
                 time1.x += 20
-            } else if (time2.x < 430 + 20 * player2Time) {
+            } else if (time2.x < timeTokenOffset + 20 * player2Time) {
                 time2.x += 20
             }
         }
@@ -117,6 +119,20 @@ class Interface {
             .setY(0)
             .setImage("background.jpeg")
 
+        if (league == League.L1) {
+            g.createSprite()
+                .setZIndex(1)
+                .setX(747)
+                .setY(142)
+                .setImage("Half Timeline.png")
+        } else {
+            g.createSprite()
+                .setZIndex(1)
+                .setX(410)
+                .setY(146)
+                .setImage("Full Timeline.png")
+        }
+
         g.createSprite()
             .setZIndex(100)
             .setX(30)
@@ -143,7 +159,7 @@ class Interface {
             .setImage("TimeToken1.png")
             .setAnchorX(0.5)
             .setAnchorY(1.0)
-            .setX(430)
+            .setX(timeTokenOffset)
             .setY(140)
             .setZIndex(2)
 
@@ -151,34 +167,19 @@ class Interface {
             .setImage("TimeToken2.png")
             .setAnchorX(0.5)
             .setAnchorY(0.0)
-            .setX(430)
+            .setX(timeTokenOffset)
             .setY(180)
             .setZIndex(2)
 
-        (0..53).forEach {
-            if (it in league.earnTurns) {
-                g.createSprite()
-                    .setBaseWidth(20)
-                    .setBaseHeight(20)
-                    .setAnchor(0.5)
-                    .setX(430 + it * 20)
-                    .setY(160)
-                    .setImage("button.png")
-                    .setZIndex(3)
-            }
-
-            g.createCircle()
-                .setRadius(6)
-                .setX(430 + it * 20)
+        for (it in league.earnTurns) {
+            g.createSprite()
+                .setBaseWidth(20)
+                .setBaseHeight(20)
+                .setAnchor(0.5)
+                .setX(timeTokenOffset + it * 20)
                 .setY(160)
-                .setZIndex(2)
-                .setFillColor(
-                    when {
-                        it in league.earnTurns -> 0xFB7575
-                        it in league.patchTurns -> 0x83DBD6
-                        else -> 0x728AB7
-                    }
-                )
+                .setImage("button.png")
+                .setZIndex(3)
         }
 
         g.createSprite()
@@ -304,14 +305,14 @@ class Interface {
             g.createText("${tile.price} ")
                 .setAnchorY(0.0)
                 .setX(75)
-                .setY(0)
+                .setY(-7)
                 .setZIndex(3)
                 .setFontSize(40)
                 .setFillColor(0x000000),
             g.createText("${tile.time} ")
                 .setAnchorY(0.0)
                 .setX(157)
-                .setY(0)
+                .setY(-7)
                 .setZIndex(3)
                 .setFontSize(40)
                 .setFillColor(0x000000)

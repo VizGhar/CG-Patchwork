@@ -113,7 +113,7 @@ class BoardManager(random: Random) {
         player.playedTiles.add(tile)
 
         // pay for tile and move player's token
-        val timeDelta = minOf(tile.time, TOTAL_TURNS - player.position)
+        val timeDelta = minOf(tile.time, league.gameDuration - player.position)
         player.money -= tile.price
         val earnReached = timeAdvance(player, timeDelta)
         lastPlay = playerId
@@ -168,7 +168,7 @@ class BoardManager(random: Random) {
 
         val delta = minOf(
             opponent.position - player.position + 1,
-            TOTAL_TURNS - player.position
+            league.gameDuration - player.position
         )
 
         player.money += delta * league.skipMultiplier
@@ -193,7 +193,7 @@ class BoardManager(random: Random) {
         player.availablePatches += patches.size
 
         // resolve player Finishes first
-        if (positionAfter >= TOTAL_TURNS && players.none { it.finishedFirst }) {
+        if (positionAfter >= league.gameDuration && players.none { it.finishedFirst }) {
             player.finishedFirst = true
         }
         return success
@@ -202,7 +202,7 @@ class BoardManager(random: Random) {
     fun computeScore() =
         players.map { playerData ->
             // standard scoring
-            val minusPoints = playerData.board.sumOf { row -> row.count { taken -> !taken } }   * league.scoreMinusPointsMultiplier      // 0 for league 0. -2 otherwise
+            val minusPoints = playerData.board.sumOf { row -> row.count { taken -> !taken } }   * league.scoreMinusPointsMultiplier      // 0 for league 1. -2 otherwise
             val plusPoints = playerData.board.sumOf { row -> row.count { taken -> taken } }     * league.scoreFilledMultiplier           // 1 for league 1. 0 otherwise
             val money = playerData.money                                                        * league.scoreMoneyMultiplier            // 0 for league 1. 1 otherwise
             val bonusPoints = (if (playerData.bonusAchieved) 1 else 0)                          * league.scoreBonusMultiplier            // 7 for league 3. 0 otherwise

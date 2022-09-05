@@ -8,9 +8,9 @@ object PatchWorkMain {
 //        gameRunner.addAgent(League1Winner::class.java)
 //        gameRunner.addAgent("python3 src/test/kotlin/agent.py");
 
-        gameRunner.addAgent(Boss2::class.java)
-        gameRunner.addAgent(Boss2::class.java)
-        gameRunner.setLeagueLevel(2)
+        gameRunner.addAgent(Boss4::class.java)
+        gameRunner.addAgent(Boss4::class.java)
+        gameRunner.setLeagueLevel(4)
         gameRunner.start()
     }
 }

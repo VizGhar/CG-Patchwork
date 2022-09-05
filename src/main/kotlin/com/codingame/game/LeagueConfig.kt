@@ -1,8 +1,5 @@
 package com.codingame.game
 
-
-const val TOTAL_TURNS = 53
-
 lateinit var league: League
 
 enum class League(
@@ -14,6 +11,7 @@ enum class League(
     val scoreMoneyMultiplier: Int,
     val skipMultiplier: Int,
     val rotationsAllowed: Boolean,
+    val gameDuration: Int,
     private val defaultInitialButtons: Int
     ) {
 
@@ -31,6 +29,7 @@ enum class League(
         scoreMoneyMultiplier = 0,
         skipMultiplier = 0,
         rotationsAllowed = false,
+        gameDuration = 19,
         defaultInitialButtons = 200
     ),
 
@@ -50,6 +49,7 @@ enum class League(
         skipMultiplier = 1,
         scoreMoneyMultiplier = 1,
         rotationsAllowed = true,
+        gameDuration = 53,
         defaultInitialButtons = 5,
     ),
 
@@ -67,6 +67,7 @@ enum class League(
         skipMultiplier = 1,
         scoreMoneyMultiplier = 1,
         rotationsAllowed = true,
+        gameDuration = 53,
         defaultInitialButtons = 5,
     );
 

@@ -1,0 +1,1 @@
+[{"index":0,"name":"Carl Fredricksen","avatar":"https://cdn-games.codingame.com/community/3996809-1661712962734/1bd46756a7f0fd647541b319a1d3f5295cd519fa7b0e058f576498f0ab43c08e.jpeg","agentId":0},{"index":1,"name":"Russell","avatar":"https://cdn-games.codingame.com/community/3996809-1661712962734/cca3988f14f3d9a6d00345d5065c409191b8a567e89eb9a5ca26524fd87c333c.jpeg","agentId":1}]

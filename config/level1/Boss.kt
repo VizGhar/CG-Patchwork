@@ -75,7 +75,7 @@ fun main(args: Array<String>?) {
         scanner.nextLine()
         val opponentBoard = (0 until 9).map { scanner.nextLine() }
         val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
-        val availableTiles = tiles.take(3)
+        val availableTiles = tiles.take(3).shuffled(r)
         val bonusPatchId = scanner.nextInt()
 
         for (tile in availableTiles) {
