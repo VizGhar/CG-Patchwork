@@ -1,5 +1,9 @@
+import java.util.*
+
 private const val BOARD_WIDTH = 9
 private const val BOARD_HEIGHT = 9
+
+typealias TileShape = List<List<Boolean>>
 
 data class Tile(
     val id: Int,
