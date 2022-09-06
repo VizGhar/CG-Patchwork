@@ -49,6 +49,7 @@ class Interface {
     private var player2Message: Text? = null
     private var player1MessageGroup: Group? = null
     private var player2MessageGroup: Group? = null
+    private var debugCoords: Array<Array<Array<Text?>>> = Array(2) { Array(9) { Array(9) { null } } }
 
     private val visibleTiles = mutableListOf<TileEntity>()
 
@@ -79,6 +80,20 @@ class Interface {
         g.commitEntityState(from, t)
 
         t.setText("+ $income")
+    }
+
+    fun updateDebugCoords(from: Double, playerId: Int, board: Array<Array<Boolean>>) {
+        val t = debugCoords[playerId]
+        g.commitEntityState(from, *(t.flatten().toTypedArray()))
+        for(x in 0 until 9) {
+            for(y in 0 until 9) {
+                val taken = board[y][x]
+                t[x][y]
+                    ?.setFillColor(if (taken) 0xFF0000 else 0x000000)
+                    ?.setStrokeColor(if (taken) 0xFFFFFF else 0x000000)
+                    ?.setStrokeThickness(if (taken) 5.0 else 0.0)
+            }
+        }
     }
 
     fun updateTime(from: Double, player1Time: Int, player2Time: Int, step: Boolean) {
@@ -274,6 +289,8 @@ class Interface {
 
         if (league.scoreBonusMultiplier > 0) {
             bonusButton = g.createSprite()
+                .setBaseWidth(80)
+                .setBaseHeight(80)
                 .setAnchor(0.5)
                 .setX(960)
                 .setY(50)
@@ -352,6 +369,7 @@ class Interface {
                     .setZIndex(200000)
                     .also {
                         toggleModule.displayOnToggleState(it, "tooltips", true)
+                        debugCoords[1][x][y] = it
                     }
 
                 g.createRectangle()
@@ -375,6 +393,7 @@ class Interface {
                     .setZIndex(200000)
                     .also {
                         toggleModule.displayOnToggleState(it, "tooltips", true)
+                        debugCoords[0][x][y] = it
                     }
             }
         }
@@ -426,10 +445,10 @@ class Interface {
             tile.polygon.forEach { (x, y) -> addPoint(x, y) }
         }
             .setFillColor(Random.nextInt(0xFFFFFF))
-            .setAlpha(1.0)
+            .setAlpha(0.8)
             .setZIndex(800)
 
-        toggleModule.displayOnToggleState(atile, "tooltips", false)
+//        toggleModule.displayOnToggleState(atile, "tooltips", false)
         toggleModule.displayOnToggleState(toggleTrace, "tooltips", true)
         toggleModule.displayOnToggleState(trace, "tooltips", false)
         toggleModule.displayOnToggleState(debugTrace, "tooltips", true)

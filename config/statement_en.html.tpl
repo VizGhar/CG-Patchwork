@@ -78,7 +78,8 @@ text-align: center;">
             you a few <strong>Buttons</strong> and it also takes some <strong>Time</strong> to sew it on your canvas.
             Those are your most valuable resources<br><br>
             This game is heavily inspired by 2 player board game <a
-                href="https://boardgamegeek.com/boardgame/163412/patchwork">Patchwork</a>.
+                href="https://boardgamegeek.com/boardgame/163412/patchwork">Patchwork</a>.<br/><br/>
+                My thanks to <a href="https://www.codingame.com/profile/b3168ed8b0bc58c683ae18284d2087e21969904">Butanium</a> for his help with custom interaction module (zooming to patches on mouse hover)
         </div>
     </div>
 
@@ -407,6 +408,7 @@ text-align: center;">
             <li>
                 UI supports message bubbles. Anything after last valid entry is considered message.
             </li>
+            <li>Patch with id <const>32</const> and <const>OO</const> shape is always last in deck after initial shuffling</li>
         </ul>
         </div>
     </div>
