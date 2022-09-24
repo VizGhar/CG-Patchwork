@@ -7,8 +7,8 @@ private const val BOARD_HEIGHT = 9
 
 sealed class TurnResult {
     object UnknownCommand: TurnResult()
-    object InvalidTileId: TurnResult()
-    object InvalidTilePlacement: TurnResult()
+    object InvalidPatchId: TurnResult()
+    object InvalidPatchPlacement: TurnResult()
     object NoMoney: TurnResult()
     data class OK(val bonusAchieved: Boolean, val earnReached: Boolean, val skippedTimepoints: Int): TurnResult()
 }
@@ -17,19 +17,19 @@ class BoardManager(random: Random) {
 
     /**
      * Shuffled patches for this instance of game.
-     * There are 32 shuffled patches + 1 finalTile always at the end
+     * There are 32 shuffled patches + 1 finalPatch always at the end
      */
-    var remainingPatches : MutableList<Tile> = (tiles.shuffled(random) + finalTile).toMutableList()
+    var remainingPatches : MutableList<Patch> = (patches.shuffled(random) + finalPatch).toMutableList()
 
     /**
      * First 3 patches are available for purchase
      */
-    private val availablePatches : List<Tile> get() = remainingPatches.take(3)
+    private val availablePatches : List<Patch> get() = remainingPatches.take(3)
 
     /**
      * These are 5 special patches (for league 3 and up)
      */
-    val gameBonusPatches = if (league.specialPatchesEnabled) bonusTiles.toMutableList() else mutableListOf()
+    val gameBonusPatches = if (league.specialPatchesEnabled) bonusPatches.toMutableList() else mutableListOf()
 
     /**
      * Data about both players
@@ -51,23 +51,23 @@ class BoardManager(random: Random) {
         var availablePatches: Int = 0,
         var bonusAchieved: Boolean = false,
         var finishedFirst: Boolean = false,
-        val playedTiles: MutableList<Tile> = mutableListOf(),
+        val playedPatches: MutableList<Patch> = mutableListOf(),
         val board: Array<Array<Boolean>> = Array(9) { Array(9) { false } }
     ) {
-        val earning get() = playedTiles.sumOf { it.earn }
+        val earning get() = playedPatches.sumOf { it.earn }
     }
 
-    private fun tryApplyTileToBoard(board: Array<Array<Boolean>>, tileShape: TileShape, x: Int, y: Int) : Boolean {
-        for (shapeY in tileShape.indices) {
-            for (shapeX in tileShape[shapeY].indices) {
+    private fun tryApplyPatchToBoard(board: Array<Array<Boolean>>, patchShape: PatchShape, x: Int, y: Int) : Boolean {
+        for (shapeY in patchShape.indices) {
+            for (shapeX in patchShape[shapeY].indices) {
                 if (x + shapeX >= BOARD_WIDTH) return false
                 if (y + shapeY >= BOARD_HEIGHT) return false
-                if (board[y + shapeY][x + shapeX] && tileShape[shapeY][shapeX]) return false
+                if (board[y + shapeY][x + shapeX] && patchShape[shapeY][shapeX]) return false
             }
         }
-        for (shapeY in tileShape.indices) {
-            for (shapeX in tileShape[shapeY].indices) {
-                board[y + shapeY][x + shapeX] = board[y + shapeY][x + shapeX] or tileShape[shapeY][shapeX]
+        for (shapeY in patchShape.indices) {
+            for (shapeX in patchShape[shapeY].indices) {
+                board[y + shapeY][x + shapeX] = board[y + shapeY][x + shapeX] or patchShape[shapeY][shapeX]
             }
         }
         return true
@@ -86,48 +86,48 @@ class BoardManager(random: Random) {
         else -> 1                                               // standard 1
     }
 
-    fun playTile(tileId: Int, requiredOrientation: Int, isFlipRequired: Boolean, x: Int, y: Int) : TurnResult {
+    fun playPatch(patchId: Int, requiredOrientation: Int, isFlipRequired: Boolean, x: Int, y: Int) : TurnResult {
         val orientation = if (league.rotationsAllowed) requiredOrientation else 0
         val flip = if (league.rotationsAllowed) isFlipRequired else false
         val playerId = actualPlayerId
         val player = players[playerId]
 
-        // pick tile
-        val tile = when {
-            player.availablePatches > 0 && tileId != gameBonusPatches[0].id -> return TurnResult.InvalidTileId
+        // pick patch
+        val patch = when {
+            player.availablePatches > 0 && patchId != gameBonusPatches[0].id -> return TurnResult.InvalidPatchId
             player.availablePatches > 0 -> gameBonusPatches[0]
-            player.availablePatches == 0 && tileId !in availablePatches.map { it.id } -> return TurnResult.InvalidTileId
-            player.availablePatches == 0 -> remainingPatches.first { it.id == tileId }.let { if(league.earnTurns.isEmpty()) it.copy(earn = 0) else it }
+            player.availablePatches == 0 && patchId !in availablePatches.map { it.id } -> return TurnResult.InvalidPatchId
+            player.availablePatches == 0 -> remainingPatches.first { it.id == patchId }.let { if(league.earnTurns.isEmpty()) it.copy(earn = 0) else it }
             else -> throw IllegalStateException("Ooops this shouldn't happen. Available patches should be non negative integer. Please provide author of this game with this error message and shared replay.")
         }
 
         // check price vs. money
-        if (tile.price > player.money) return TurnResult.NoMoney
+        if (patch.price > player.money) return TurnResult.NoMoney
 
-        // place tile on player's board
-        val shape = tile.shape.all[(if (flip) 4 else 0) + orientation]
-        val tilePlaced = tryApplyTileToBoard(player.board, shape, x, y)
-        if (!tilePlaced) return TurnResult.InvalidTilePlacement
+        // place patch on player's board
+        val shape = patch.shape.all[(if (flip) 4 else 0) + orientation]
+        val patchPlaced = tryApplyPatchToBoard(player.board, shape, x, y)
+        if (!patchPlaced) return TurnResult.InvalidPatchPlacement
 
-        // !! tile placed on board Successfully !!
+        // !! patch placed on board Successfully !!
 
-        // store played tile
-        player.playedTiles.add(tile)
+        // store played patch
+        player.playedPatches.add(patch)
 
-        // pay for tile and move player's token
-        val timeDelta = minOf(tile.time, league.gameDuration - player.position)
-        player.money -= tile.price
+        // pay for patch and move player's token
+        val timeDelta = minOf(patch.time, league.gameDuration - player.position)
+        player.money -= patch.price
         val earnReached = timeAdvance(player, timeDelta)
         lastPlay = playerId
 
         // adjust remaining patches
-        if (gameBonusPatches.isEmpty() || tile.id != gameBonusPatches[0].id) {
-            val jumpBy = availablePatches.indexOfFirst{ tile.id == it.id}
+        if (gameBonusPatches.isEmpty() || patch.id != gameBonusPatches[0].id) {
+            val jumpBy = availablePatches.indexOfFirst{ patch.id == it.id}
             remainingPatches = (remainingPatches.drop(jumpBy + 1) + remainingPatches.take(jumpBy)).toMutableList()
         }
 
-        // remove bonus tile if it was played now
-        if (gameBonusPatches.isNotEmpty() && tile.id == gameBonusPatches[0].id) {
+        // remove bonus patch if it was played now
+        if (gameBonusPatches.isNotEmpty() && patch.id == gameBonusPatches[0].id) {
             gameBonusPatches.removeAt(0)
             player.availablePatches--
         }
@@ -162,7 +162,7 @@ class BoardManager(random: Random) {
             for (y in 0 until 9) {
                 for (x in 0 until 9) {
                     if (!player.board[y][x]) {
-                        return playTile(gameBonusPatches[0].id, 0, false, x, y)
+                        return playPatch(gameBonusPatches[0].id, 0, false, x, y)
                     }
                 }
             }
@@ -186,7 +186,7 @@ class BoardManager(random: Random) {
         val positionAfter = player.position
 
         // resolve Button Income
-        val earning = league.earnTurns.count { it in (positionBefore + 1)..positionAfter } * player.playedTiles.sumOf { it.earn }
+        val earning = league.earnTurns.count { it in (positionBefore + 1)..positionAfter } * player.playedPatches.sumOf { it.earn }
         val success = earning > 0
         player.money += earning
 

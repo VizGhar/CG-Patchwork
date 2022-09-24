@@ -26,8 +26,8 @@ class Referee : AbstractReferee() {
     private val boardManager by lazy { BoardManager(random) }
 
     override fun init() {
-        League.leagueInit(gameManager.leagueLevel)
-        take(gameManager.gameParameters)
+        League.leagueInit(gameManager.leagueLevel)  // init game
+        take(gameManager.gameParameters)            // override game settings with expert mode rules
         gameManager.firstTurnMaxTime = 1000
 
         gui.initialize(
@@ -60,19 +60,19 @@ class Referee : AbstractReferee() {
         }
 
         // every turn (including first one)
-        activePlayer.sendInputLine("${boardMe.money} ${boardMe.position} ${boardMe.playedTiles.sumOf { it.earn }}")
+        activePlayer.sendInputLine("${boardMe.money} ${boardMe.position} ${boardMe.playedPatches.sumOf { it.earn }}")
         for (i in 0..8) {
             activePlayer.sendInputLine(boardMe.board[i].joinToString("") { if (it) "O" else "." })
         }
 
-        activePlayer.sendInputLine("${boardOpponent.money} ${boardOpponent.position} ${boardOpponent.playedTiles.sumOf { it.earn }}")
+        activePlayer.sendInputLine("${boardOpponent.money} ${boardOpponent.position} ${boardOpponent.playedPatches.sumOf { it.earn }}")
         for (i in 0..8) {
             activePlayer.sendInputLine(boardOpponent.board[i].joinToString("") { if (it) "O" else "." })
         }
 
         activePlayer.sendInputLine(boardManager.remainingPatches.size.toString())
-        for (tile in boardManager.remainingPatches) {
-            activePlayer.sendInputLine(tile.toString())
+        for (patch in boardManager.remainingPatches) {
+            activePlayer.sendInputLine(patch.toString())
         }
 
         if (boardManager.players[activePlayerId].availablePatches != 0) {
@@ -129,16 +129,16 @@ class Referee : AbstractReferee() {
             }
 
             val moveResult = when(move) {
-                is Move.Play -> boardManager.playTile(move.patchId, move.rightRotations, move.flip, move.x, move.y)
+                is Move.Play -> boardManager.playPatch(move.patchId, move.rightRotations, move.flip, move.x, move.y)
                 Move.Skip -> boardManager.playSkip()
                 Move.Unknown -> TurnResult.UnknownCommand
             }
 
             when(moveResult){
                 TurnResult.UnknownCommand -> activePlayer.deactivate(String.format("$%d unknown command", activePlayer.index))
-                TurnResult.InvalidTileId -> activePlayer.deactivate(String.format("$%d cannot pick this tile", activePlayer.index))
-                TurnResult.InvalidTilePlacement -> activePlayer.deactivate(String.format("$%d cannot place tile on that position${if (!league.rotationsAllowed) ". Be aware, you cannot do rotations/flips in this league." else ""}", activePlayer.index))
-                TurnResult.NoMoney -> activePlayer.deactivate(String.format("$%d cannot afford to buy required tile", activePlayer.index))
+                TurnResult.InvalidPatchId -> activePlayer.deactivate(String.format("$%d cannot pick this patch", activePlayer.index))
+                TurnResult.InvalidPatchPlacement -> activePlayer.deactivate(String.format("$%d cannot place patch on that position${if (!league.rotationsAllowed) ". Be aware, you cannot do rotations/flips in this league." else ""}", activePlayer.index))
+                TurnResult.NoMoney -> activePlayer.deactivate(String.format("$%d cannot afford to buy required patch", activePlayer.index))
                 is TurnResult.OK -> {}
             }
 
@@ -159,9 +159,9 @@ class Referee : AbstractReferee() {
                 // enlarge selected label
                 animations += Animation(300) { gui.enlarge(move.patchId) }
                 // pulse players button icon for each button spent
-                animations += (1..(tiles.firstOrNull { it.id == move.patchId }?.price ?: 0)).map {
+                animations += (1..(patches.firstOrNull { it.id == move.patchId }?.price ?: 0)).map {
                     listOf(
-                        Animation(200) { from -> gui.pulseIn(from, activePlayerId, -1) },
+                        Animation(200) { gui.pulseIn(activePlayerId, -1) },
                         Animation(200) { from -> gui.pulseOut(from, activePlayerId) })
                 }.flatten()
 
@@ -179,15 +179,15 @@ class Referee : AbstractReferee() {
             } else {
                 for (i in 0 until moveResult.skippedTimepoints) {
                     animations += Animation(300) { from -> gui.updateTime(from, boardManager.players[0].position, boardManager.players[1].position, true) }
-                    animations += Animation(200) { from -> gui.pulseIn(from, activePlayerId, +1) }
+                    animations += Animation(200) { gui.pulseIn(activePlayerId, +1) }
                     animations += Animation(200) { from -> gui.pulseOut(from, activePlayerId) }
                 }
             }
 
             if (moveResult.bonusAchieved) {
                 animations += Animation(500) { from -> gui.acquireBonusBegin(from) }
-                animations += Animation(500) { from -> gui.acquireBonusMiddle(from)}
-                animations += Animation(500) { from -> gui.acquireBonusEnd(from, activePlayerId) }
+                animations += Animation(500) { gui.acquireBonusMiddle()}
+                animations += Animation(500) { gui.acquireBonusEnd(activePlayerId) }
             }
 
             if (moveResult.earnReached) {
@@ -195,7 +195,7 @@ class Referee : AbstractReferee() {
                 animations += Animation(10) { from -> gui.returnMoney() }
             }
 
-            animations += Animation(1000) { from -> gui.showTilesBelt(from, boardManager.remainingPatches) }
+            animations += Animation(1000) { from -> gui.showPatchesBelt(from, boardManager.remainingPatches) }
 
             animations.run(g, gameManager)
 

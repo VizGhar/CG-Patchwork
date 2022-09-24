@@ -1,50 +1,50 @@
 import java.util.*
 
-typealias TileShape = List<List<Boolean>>
+typealias PatchShape = List<List<Boolean>>
 
 private const val BOARD_WIDTH = 9
 private const val BOARD_HEIGHT = 9
 
-data class Tile(
+data class Patch(
     val id: Int,
-    val shape: TileShape,
+    val shape: PatchShape,
     val earn: Int,
     val price: Int,
     val time: Int
 )
 
-val TileShape.width: Int get() = get(0).size
+val PatchShape.width: Int get() = get(0).size
 
-fun Scanner.nextTile() : Tile {
-    val tileId = nextInt()
-    val tileEarn = nextInt()
-    val tilePrice = nextInt()
-    val tileTime = nextInt()
+fun Scanner.nextPatch() : Patch {
+    val patchId = nextInt()
+    val patchEarn = nextInt()
+    val patchPrice = nextInt()
+    val patchTime = nextInt()
     val shape = next()
     nextLine()
-    return Tile(tileId, parseShape(shape), tileEarn, tilePrice, tileTime)
+    return Patch(patchId, parseShape(shape), patchEarn, patchPrice, patchTime)
 }
 
-private fun parseShape(s: String) : TileShape =
+private fun parseShape(s: String) : PatchShape =
     s.split("|").map { it.map { it == 'O' } }
 
-val TileShape.mirrored: TileShape get() =
+val PatchShape.mirrored: PatchShape get() =
     this.map { it.reversed() }
 
-val TileShape.rightRotated: TileShape get() =
+val PatchShape.rightRotated: PatchShape get() =
     List(width) { row -> this.map { it[row] }.reversed() }
 
-private fun tryApplyTileToBoard(board: Array<Array<Boolean>>, tileShape: TileShape, x: Int, y: Int) : Boolean {
-    for (shapeY in tileShape.indices) {
-        for (shapeX in tileShape[shapeY].indices) {
+private fun tryApplyPatchToBoard(board: Array<Array<Boolean>>, patchShape: PatchShape, x: Int, y: Int) : Boolean {
+    for (shapeY in patchShape.indices) {
+        for (shapeX in patchShape[shapeY].indices) {
             if (x + shapeX >= BOARD_WIDTH) return false
             if (y + shapeY >= BOARD_HEIGHT) return false
-            if (board[y + shapeY][x + shapeX] && tileShape[shapeY][shapeX]) return false
+            if (board[y + shapeY][x + shapeX] && patchShape[shapeY][shapeX]) return false
         }
     }
-    for (shapeY in tileShape.indices) {
-        for (shapeX in tileShape[shapeY].indices) {
-            board[y + shapeY][x + shapeX] = board[y + shapeY][x + shapeX] or tileShape[shapeY][shapeX]
+    for (shapeY in patchShape.indices) {
+        for (shapeX in patchShape[shapeY].indices) {
+            board[y + shapeY][x + shapeX] = board[y + shapeY][x + shapeX] or patchShape[shapeY][shapeX]
         }
     }
     return true
@@ -74,22 +74,22 @@ object League1Winner {
             val oppEarning = scanner.nextInt()
             scanner.nextLine()
             val opponentBoard = (0 until 9).map { scanner.nextLine() }
-            val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
-            val tile = tiles.take(3).maxByOrNull { it.shape.sumOf { it.count { it } } } ?: throw IllegalStateException()
+            val patches = (0 until scanner.nextInt()).map { scanner.nextPatch() }
+            val patch = patches.take(3).maxByOrNull { it.shape.sumOf { it.count { it } } } ?: throw IllegalStateException()
             val bonusPatchId = scanner.nextInt()
 
             val randomX = (0 until BOARD_WIDTH)
             val randomY = (0 until BOARD_HEIGHT)
             for (x in randomX) {
                 for (y in randomY) {
-                    if (tryApplyTileToBoard(myBoard, tile.shape, x, y)) {
+                    if (tryApplyPatchToBoard(myBoard, patch.shape, x, y)) {
                         for (y1 in 0 until BOARD_HEIGHT) {
                             for (x1 in 0 until BOARD_WIDTH) {
                                 System.err.print(if (myBoard[y1][x1]) 'O' else '.')
                             }
                             System.err.println()
                         }
-                        println("PLAY ${tile.id} $x $y")
+                        println("PLAY ${patch.id} $x $y")
                         continue@gameLoop
                     }
                 }
@@ -124,12 +124,12 @@ object Boss1 {
             val oppEarning = scanner.nextInt()
             scanner.nextLine()
             val opponentBoard = (0 until 9).map { scanner.nextLine() }
-            val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
-            val availableTiles = tiles.take(3).shuffled(r)
+            val patches = (0 until scanner.nextInt()).map { scanner.nextPatch() }
+            val availablePatches = patches.take(3).shuffled(r)
             val bonusPatchId = scanner.nextInt()
 
-            for (tile in availableTiles) {
-                if (tile.price > myScore) {
+            for (patch in availablePatches) {
+                if (patch.price > myScore) {
                     continue
                 }
 
@@ -137,14 +137,14 @@ object Boss1 {
                 val randomY = (0 until BOARD_HEIGHT).shuffled(r)
                 for (x in randomX) {
                     for (y in randomY) {
-                        if (tryApplyTileToBoard(myBoard, tile.shape, x, y)) {
+                        if (tryApplyPatchToBoard(myBoard, patch.shape, x, y)) {
                             for (y1 in 0 until BOARD_HEIGHT) {
                                 for (x1 in 0 until BOARD_WIDTH) {
                                     System.err.print(if (myBoard[y1][x1]) 'O' else '.')
                                 }
                                 System.err.println()
                             }
-                            println("PLAY ${tile.id} $x $y")
+                            println("PLAY ${patch.id} $x $y")
                             continue@gameLoop
                         }
                     }
@@ -178,31 +178,31 @@ object Boss2 {
             val oppEarning = scanner.nextInt()
             scanner.nextLine()
             val opponentBoard = (0 until 9).map { scanner.nextLine() }
-            val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+            val patches = (0 until scanner.nextInt()).map { scanner.nextPatch() }
             val bonusPatchId = scanner.nextInt()
-            val availableTiles = if (bonusPatchId == 0) tiles.take(3) else listOf(Tile(bonusPatchId, listOf(listOf(true)), 0, 0, 0))
+            val availablePatches = if (bonusPatchId == 0) patches.take(3) else listOf(Patch(bonusPatchId, listOf(listOf(true)), 0, 0, 0))
 
-            for (tile in availableTiles) {
-                if (tile.price > myScore) { continue }
+            for (patch in availablePatches) {
+                if (patch.price > myScore) { continue }
                 val randomX = (0 until BOARD_WIDTH).shuffled(r)
                 val randomY = (0 until BOARD_HEIGHT).shuffled(r)
                 for (x in randomX) {
                     for (y in randomY) {
 
                         val rotations = arrayOf(
-                            0 to tile.shape,
-                            1 to tile.shape.rightRotated,
-                            2 to tile.shape.rightRotated.rightRotated,
-                            3 to tile.shape.rightRotated.rightRotated.rightRotated,
-                            4 to tile.shape.mirrored,
-                            5 to tile.shape.mirrored.rightRotated,
-                            6 to tile.shape.mirrored.rightRotated.rightRotated,
-                            7 to tile.shape.mirrored.rightRotated.rightRotated.rightRotated
+                            0 to patch.shape,
+                            1 to patch.shape.rightRotated,
+                            2 to patch.shape.rightRotated.rightRotated,
+                            3 to patch.shape.rightRotated.rightRotated.rightRotated,
+                            4 to patch.shape.mirrored,
+                            5 to patch.shape.mirrored.rightRotated,
+                            6 to patch.shape.mirrored.rightRotated.rightRotated,
+                            7 to patch.shape.mirrored.rightRotated.rightRotated.rightRotated
                         )
 
                         rotations.shuffle()
 
-                        val rotation = rotations.firstOrNull { tryApplyTileToBoard(myBoard, it.second, x, y) }
+                        val rotation = rotations.firstOrNull { tryApplyPatchToBoard(myBoard, it.second, x, y) }
 
                         if (rotation != null) {
                             for (y1 in 0 until BOARD_HEIGHT) {
@@ -213,7 +213,7 @@ object Boss2 {
                             }
                             val mirror = rotation.first >= 4
                             val rightRotations = rotation.first % 4
-                            println("PLAY ${tile.id} $x $y ${if (mirror) 1 else 0} $rightRotations")
+                            println("PLAY ${patch.id} $x $y ${if (mirror) 1 else 0} $rightRotations")
                             continue@gameLoop
                         }
                     }
@@ -246,29 +246,29 @@ object Boss3 {
             val oppEarning = scanner.nextInt()
             scanner.nextLine()
             val opponentBoard = (0 until 9).map { scanner.nextLine() }
-            val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
+            val patches = (0 until scanner.nextInt()).map { scanner.nextPatch() }
             val bonusPatchId = scanner.nextInt()
-            val availableTiles = if (bonusPatchId == 0) tiles.take(3) else listOf(Tile(bonusPatchId, listOf(listOf(true)), 0, 0, 0))
+            val availablePatches = if (bonusPatchId == 0) patches.take(3) else listOf(Patch(bonusPatchId, listOf(listOf(true)), 0, 0, 0))
 
-            for (tile in availableTiles) {
-                if (tile.price > myScore) { continue }
+            for (patch in availablePatches) {
+                if (patch.price > myScore) { continue }
                 for (x in 0 until BOARD_WIDTH) {
                     for (y in 0 until BOARD_HEIGHT) {
 
                         val rotations = arrayOf(
-                            0 to tile.shape,
-                            1 to tile.shape.rightRotated,
-                            2 to tile.shape.rightRotated.rightRotated,
-                            3 to tile.shape.rightRotated.rightRotated.rightRotated,
-                            4 to tile.shape.mirrored,
-                            5 to tile.shape.mirrored.rightRotated,
-                            6 to tile.shape.mirrored.rightRotated.rightRotated,
-                            7 to tile.shape.mirrored.rightRotated.rightRotated.rightRotated
+                            0 to patch.shape,
+                            1 to patch.shape.rightRotated,
+                            2 to patch.shape.rightRotated.rightRotated,
+                            3 to patch.shape.rightRotated.rightRotated.rightRotated,
+                            4 to patch.shape.mirrored,
+                            5 to patch.shape.mirrored.rightRotated,
+                            6 to patch.shape.mirrored.rightRotated.rightRotated,
+                            7 to patch.shape.mirrored.rightRotated.rightRotated.rightRotated
                         )
 
                         rotations.shuffle()
 
-                        val rotation = rotations.firstOrNull { tryApplyTileToBoard(myBoard, it.second, x, y) }
+                        val rotation = rotations.firstOrNull { tryApplyPatchToBoard(myBoard, it.second, x, y) }
 
                         if (rotation != null) {
                             for (y1 in 0 until BOARD_HEIGHT) {
@@ -279,7 +279,7 @@ object Boss3 {
                             }
                             val mirror = rotation.first >= 4
                             val rightRotations = rotation.first % 4
-                            println("PLAY ${tile.id} $x $y ${if (mirror) 1 else 0} $rightRotations")
+                            println("PLAY ${patch.id} $x $y ${if (mirror) 1 else 0} $rightRotations")
                             continue@gameLoop
                         }
                     }
@@ -295,48 +295,48 @@ object Boss4 {
     private const val BOARD_WIDTH = 9
     private const val BOARD_HEIGHT = 9
 
-    data class Tile(
+    data class Patch(
         val id: Int,
-        val shape: TileShape,
+        val shape: PatchShape,
         val earn: Int,
         val price: Int,
         val time: Int
     )
 
-    val TileShape.width: Int get() = get(0).size
+    val PatchShape.width: Int get() = get(0).size
 
-    fun Scanner.nextTile(): Tile {
-        val tileId = nextInt()
-        val tileEarn = nextInt()
-        val tilePrice = nextInt()
-        val tileTime = nextInt()
+    fun Scanner.nextPatch(): Patch {
+        val patchId = nextInt()
+        val patchEarn = nextInt()
+        val patchPrice = nextInt()
+        val patchTime = nextInt()
         val shape = next()
         nextLine()
-        return Tile(tileId, parseShape(shape), tileEarn, tilePrice, tileTime)
+        return Patch(patchId, parseShape(shape), patchEarn, patchPrice, patchTime)
     }
 
-    private fun parseShape(s: String): TileShape =
+    private fun parseShape(s: String): PatchShape =
         s.split("|").map { it.map { it == 'O' } }
 
-    val TileShape.mirrored: TileShape
+    val PatchShape.mirrored: PatchShape
         get() =
             this.map { it.reversed() }
 
-    val TileShape.rightRotated: TileShape
+    val PatchShape.rightRotated: PatchShape
         get() =
             List(width) { row -> this.map { it[row] }.reversed() }
 
-    private fun tryApplyTileToBoard(board: Array<Array<Boolean>>, tileShape: TileShape, x: Int, y: Int): Boolean {
-        for (shapeY in tileShape.indices) {
-            for (shapeX in tileShape[shapeY].indices) {
+    private fun tryApplyPatchToBoard(board: Array<Array<Boolean>>, patchShape: PatchShape, x: Int, y: Int): Boolean {
+        for (shapeY in patchShape.indices) {
+            for (shapeX in patchShape[shapeY].indices) {
                 if (x + shapeX >= BOARD_WIDTH) return false
                 if (y + shapeY >= BOARD_HEIGHT) return false
-                if (board[y + shapeY][x + shapeX] && tileShape[shapeY][shapeX]) return false
+                if (board[y + shapeY][x + shapeX] && patchShape[shapeY][shapeX]) return false
             }
         }
-        for (shapeY in tileShape.indices) {
-            for (shapeX in tileShape[shapeY].indices) {
-                board[y + shapeY][x + shapeX] = board[y + shapeY][x + shapeX] or tileShape[shapeY][shapeX]
+        for (shapeY in patchShape.indices) {
+            for (shapeX in patchShape[shapeY].indices) {
+                board[y + shapeY][x + shapeX] = board[y + shapeY][x + shapeX] or patchShape[shapeY][shapeX]
             }
         }
         return true
@@ -392,10 +392,10 @@ object Boss4 {
             val oppEarning = scanner.nextInt()
             scanner.nextLine()
             val opponentBoard = (0 until 9).map { scanner.nextLine() }
-            val tiles = (0 until scanner.nextInt()).map { scanner.nextTile() }
-            val bonusTileId = scanner.nextInt()
+            val patches = (0 until scanner.nextInt()).map { scanner.nextPatch() }
+            val bonusPatchId = scanner.nextInt()
 
-            val availableTiles = if (bonusTileId == 0)tiles.take(3)
+            val availablePatches = if (bonusPatchId == 0)patches.take(3)
                 .filter { it.price <= myScore }
                 .sortedByDescending {
                     // it will earn this much buttons whole game
@@ -404,33 +404,33 @@ object Boss4 {
                     val spaceValue = it.shape.sumOf { it.count() } * 2
 
                     remainingEarningTurns + spaceValue - it.price - it.time / 2
-                } else listOf(Tile(bonusTileId, listOf(listOf(true)), 0, 0, 0))
+                } else listOf(Patch(bonusPatchId, listOf(listOf(true)), 0, 0, 0))
 
-            data class Spec(val tileId:Int, val x:Int, val y: Int, val orientation: Int, val flip: Boolean)
+            data class Spec(val patchId:Int, val x:Int, val y: Int, val orientation: Int, val flip: Boolean)
 
             val solutions = mutableListOf<Pair<Spec, Double>>()
 
 
-            for (tile in availableTiles) {
+            for (patch in availablePatches) {
                 for (x in 0 until BOARD_WIDTH) {
                     for (y in 0 until BOARD_HEIGHT) {
 
                         val rotations = mapOf(
-                            (0 to false) to tile.shape,
-                            (1 to false) to tile.shape.rightRotated,
-                            (2 to false) to tile.shape.rightRotated.rightRotated,
-                            (3 to false) to tile.shape.rightRotated.rightRotated.rightRotated,
-                            (0 to true) to tile.shape.mirrored,
-                            (1 to true) to tile.shape.mirrored.rightRotated,
-                            (2 to true) to tile.shape.mirrored.rightRotated.rightRotated,
-                            (3 to true) to tile.shape.mirrored.rightRotated.rightRotated.rightRotated
+                            (0 to false) to patch.shape,
+                            (1 to false) to patch.shape.rightRotated,
+                            (2 to false) to patch.shape.rightRotated.rightRotated,
+                            (3 to false) to patch.shape.rightRotated.rightRotated.rightRotated,
+                            (0 to true) to patch.shape.mirrored,
+                            (1 to true) to patch.shape.mirrored.rightRotated,
+                            (2 to true) to patch.shape.mirrored.rightRotated.rightRotated,
+                            (3 to true) to patch.shape.mirrored.rightRotated.rightRotated.rightRotated
                         )
 
                         for (flip in arrayOf(true, false)) {
                             for (rotation in arrayOf(0, 1, 2, 3)) {
-                                val spec = Spec(tile.id, x, y, rotation, flip)
+                                val spec = Spec(patch.id, x, y, rotation, flip)
                                 val copy = myBoard.copy()
-                                val accepted = tryApplyTileToBoard(copy, rotations[rotation to flip]!!, x, y)
+                                val accepted = tryApplyPatchToBoard(copy, rotations[rotation to flip]!!, x, y)
                                 if (accepted) {
                                     solutions.add(spec to copy.countAmountOfHoles().toDouble())
                                 }
@@ -443,7 +443,7 @@ object Boss4 {
             System.err.println("Solutions - ${solutions.size}")
             if (solutions.isNotEmpty()) {
                 val (s) = solutions.minByOrNull { it.second }!!
-                println("PLAY ${s.tileId} ${s.x} ${s.y} ${if (s.flip) 1 else 0} ${s.orientation}")
+                println("PLAY ${s.patchId} ${s.x} ${s.y} ${if (s.flip) 1 else 0} ${s.orientation}")
             } else {
                 println("SKIP")
             }
@@ -490,10 +490,10 @@ object AgentDummy {
             val patches = input.nextInt() // how many patches there are in total in a game
             for (i in 0 until patches) {
                 val patchId = input.nextInt()
-                val patchEarning = input.nextInt() // how much Buttons you will acquire for this tile when "Button income" timepoint is reached
+                val patchEarning = input.nextInt() // how much Buttons you will acquire for this patch when "Button income" timepoint is reached
                 val patchButtonPrice = input.nextInt() // how much Buttons does it cost to buy this patch
                 val patchTimePrice = input.nextInt() // how much time does it take to sew this patch
-                val patchShape = input.next() // representation of patch shape "O.O|OOO|O.O" represents H shaped tile
+                val patchShape = input.next() // representation of patch shape "O.O|OOO|O.O" represents H shaped patch
             }
             val bonusPatchId = input.nextInt() // 0 if no bonus patch is available
 

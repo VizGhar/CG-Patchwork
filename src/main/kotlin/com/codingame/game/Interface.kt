@@ -10,9 +10,9 @@ import kotlin.random.Random
 
 private const val TILE_SIZE = 60
 
-data class TileEntity(
-    val tileId: Int,
-    val tile: Sprite,
+data class PatchEntity(
+    val patchId: Int,
+    val patch: Sprite,
     val priceTag: Entity<*>?,
     val trace: Rectangle?,
     val toggleTrace: Entity<*>?,
@@ -51,7 +51,7 @@ class Interface {
     private var player2MessageGroup: Group? = null
     private var debugCoords: Array<Array<Array<Text?>>> = Array(2) { Array(9) { Array(9) { null } } }
 
-    private val visibleTiles = mutableListOf<TileEntity>()
+    private val visiblePatches = mutableListOf<PatchEntity>()
 
     fun updateMoney(from: Double, playerId: Int, player1Money: Int, player2Money: Int) {
         val btns = buttons.filter { it.playerId == playerId }
@@ -122,12 +122,11 @@ class Interface {
             ?.setRotation(Math.PI)
     }
 
-    fun acquireBonusMiddle(from: Double) {
-        bonusButton
-            ?.setRotation(2 * Math.PI)
+    fun acquireBonusMiddle() {
+        bonusButton?.rotation = 2 * Math.PI
     }
 
-    fun acquireBonusEnd(from: Double, playerId: Int) {
+    fun acquireBonusEnd(playerId: Int) {
         when(playerId) {
             0 -> bonusButton?.setX(325)?.setY(60)?.setScale(1.0)?.setZIndex(50)?.setRotation(Math.PI)
             1 -> bonusButton?.setX(1920-325)?.setY(60)?.setScale(1.0)?.setZIndex(50)?.setRotation(-2 * Math.PI)
@@ -140,8 +139,8 @@ class Interface {
         player2: Player,
         player1Data: BoardManager.PlayerData,
         player2Data: BoardManager.PlayerData,
-        patches: MutableList<Tile>,
-        bonusPatches: MutableList<Tile>
+        patches: MutableList<Patch>,
+        bonusPatches: MutableList<Patch>
     ) {
         g.createSprite()
             .setZIndex(0)
@@ -399,13 +398,13 @@ class Interface {
         }
     }
 
-    private fun showTile(tile: Tile): TileEntity {
-        val atile = g.createSprite()
-            .setImage(tile.image)
+    private fun showPatch(patch: Patch): PatchEntity {
+        val aPatch = g.createSprite()
+            .setImage(patch.image)
             .setZIndex(100)
             .setScale(1.0)
-            .setBaseWidth(TILE_SIZE * tile.shape.width)
-            .setBaseHeight(TILE_SIZE * tile.shape.height)
+            .setBaseWidth(TILE_SIZE * patch.shape.width)
+            .setBaseHeight(TILE_SIZE * patch.shape.height)
 
         val priceTag = g.createGroup(
             g.createSprite()
@@ -414,14 +413,14 @@ class Interface {
                 .setBaseWidth(200)
                 .setBaseHeight(60)
                 .setImage("pricetag.png"),
-            g.createText("${tile.price} ")
+            g.createText("${patch.price} ")
                 .setAnchorY(0.0)
                 .setX(75)
                 .setY(-7)
                 .setZIndex(3)
                 .setFontSize(40)
                 .setFillColor(0x000000),
-            g.createText("${tile.time} ")
+            g.createText("${patch.time} ")
                 .setAnchorY(0.0)
                 .setX(157)
                 .setY(-7)
@@ -432,75 +431,74 @@ class Interface {
 
         val trace = g.createRectangle()
             .setAlpha(0.0)
-            .setWidth(TILE_SIZE * tile.shape.width)
-            .setHeight(TILE_SIZE * tile.shape.height)
+            .setWidth(TILE_SIZE * patch.shape.width)
+            .setHeight(TILE_SIZE * patch.shape.height)
             .setZIndex(10000)
 
         val toggleTrace = g.createPolygon().apply {
-            tile.polygon.forEach { (x, y) -> addPoint(x, y) }
+            patch.polygon.forEach { (x, y) -> addPoint(x, y) }
         }.setAlpha(0.0)
             .setZIndex(900)
 
         val debugTrace = g.createPolygon().apply {
-            tile.polygon.forEach { (x, y) -> addPoint(x, y) }
+            patch.polygon.forEach { (x, y) -> addPoint(x, y) }
         }
             .setFillColor(Random.nextInt(0xFFFFFF))
             .setAlpha(0.8)
             .setZIndex(800)
 
-//        toggleModule.displayOnToggleState(atile, "tooltips", false)
         toggleModule.displayOnToggleState(toggleTrace, "tooltips", true)
         toggleModule.displayOnToggleState(trace, "tooltips", false)
         toggleModule.displayOnToggleState(debugTrace, "tooltips", true)
 
-        interactive.addResize(trace, atile, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
+        interactive.addResize(trace, aPatch, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
         interactive.addResize(trace, priceTag, 1.0, 1000, 100, InteractiveDisplayModule.HOVER_ONLY)
 
-        tooltips.setTooltipText(toggleTrace, "Standard Tile\nTile id: ${tile.id}\nShape: ${tile.shape.string()}\nPrice-buttons: ${tile.price}\nPrice-time: ${tile.time}\nEarning: ${tile.earn}")
+        tooltips.setTooltipText(toggleTrace, "Standard Patch\nPatch id: ${patch.id}\nShape: ${patch.shape.string()}\nPrice-buttons: ${patch.price}\nPrice-time: ${patch.time}\nEarning: ${patch.earn}")
 
-        return TileEntity(tile.id, atile, priceTag, trace, toggleTrace, debugTrace)
+        return PatchEntity(patch.id, aPatch, priceTag, trace, toggleTrace, debugTrace)
     }
 
     /**
      * Show remaining >= 30 patches on bottom of the screen
      */
-    private fun showPatchBelt(tiles: List<Tile>) {
-        if (tiles.isEmpty()) return
-        val totalTilesCount = tiles.count()
+    private fun showPatchBelt(patches: List<Patch>) {
+        if (patches.isEmpty()) return
+        val totalPatchesCount = patches.count()
 
-        val availableTileWidth = (g.world.width - 80) / totalTilesCount
+        val availablePatchWidth = (g.world.width - 80) / totalPatchesCount
 
-        tiles.forEachIndexed { index, tile ->
-            var existing = visibleTiles.firstOrNull { it.tileId == tile.id }
-            if (existing == null) { visibleTiles.add(showTile(tile)) }
+        patches.forEachIndexed { index, patch ->
+            var existing = visiblePatches.firstOrNull { it.patchId == patch.id }
+            if (existing == null) { visiblePatches.add(showPatch(patch)) }
 
-            existing = visibleTiles.firstOrNull { it.tileId == tile.id }!!
+            existing = visiblePatches.firstOrNull { it.patchId == patch.id }!!
 
             val offsetY = 979
-            existing.tile.setAnchor(0.5)
+            existing.patch.setAnchor(0.5)
                 .setAlpha(1.0)
-                .setX(30 + index * availableTileWidth + availableTileWidth / 2)
+                .setX(30 + index * availablePatchWidth + availablePatchWidth / 2)
                 .setY(offsetY)
                 .setScale(0.2)
 
             existing.trace
-                ?.setX(30 + index * availableTileWidth)
+                ?.setX(30 + index * availablePatchWidth)
                 ?.setY(910)
-                ?.setWidth(availableTileWidth)
+                ?.setWidth(availablePatchWidth)
                 ?.setHeight(150)
 
             existing.toggleTrace
-                ?.setX((existing.tile.x - (existing.tile.baseWidth * existing.tile.scaleX)/2).toInt())
-                ?.setY((existing.tile.y - (existing.tile.baseHeight * existing.tile.scaleY)/2).toInt())
+                ?.setX((existing.patch.x - (existing.patch.baseWidth * existing.patch.scaleX)/2).toInt())
+                ?.setY((existing.patch.y - (existing.patch.baseHeight * existing.patch.scaleY)/2).toInt())
                 ?.setScale(0.2)
 
             existing.debugTrace
-                ?.setX((existing.tile.x - (existing.tile.baseWidth * existing.tile.scaleX)/2).toInt())
-                ?.setY((existing.tile.y - (existing.tile.baseHeight * existing.tile.scaleY)/2).toInt())
+                ?.setX((existing.patch.x - (existing.patch.baseWidth * existing.patch.scaleX)/2).toInt())
+                ?.setY((existing.patch.y - (existing.patch.baseHeight * existing.patch.scaleY)/2).toInt())
                 ?.setScale(0.2)
 
             existing.priceTag
-                ?.setX(30 + (index + 1) * availableTileWidth)
+                ?.setX(30 + (index + 1) * availablePatchWidth)
                 ?.setY(offsetY)
                 ?.setScale(0.0)
         }
@@ -509,50 +507,50 @@ class Interface {
     /**
      * Show top 3 patches that can be purchased
      */
-    private fun showAvailablePatches(tiles: List<Tile>) {
-        tiles.forEachIndexed { i, tile ->
-            var existing = visibleTiles.firstOrNull { it.tileId == tile.id }
-            if (existing == null) { visibleTiles.add(showTile(tile)) }
+    private fun showAvailablePatches(patches: List<Patch>) {
+        patches.forEachIndexed { i, patch ->
+            var existing = visiblePatches.firstOrNull { it.patchId == patch.id }
+            if (existing == null) { visiblePatches.add(showPatch(patch)) }
 
-            existing = visibleTiles.firstOrNull { it.tileId == tile.id }!!
+            existing = visiblePatches.firstOrNull { it.patchId == patch.id }!!
 
             val offsetX = (g.world.width - 180) / 2
-            val offsetY = 300 + i * 180 + (TILE_SIZE * (3 - tile.shape.height)) / 2 + TILE_SIZE*tile.shape.height / 2
+            val offsetY = 300 + i * 180 + (TILE_SIZE * (3 - patch.shape.height)) / 2 + TILE_SIZE*patch.shape.height / 2
             existing.priceTag
-                ?.setY(offsetY + (tile.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE*tile.shape.height / 2)
-                ?.setX(offsetX + tile.shape.width * TILE_SIZE / 2 + 20)
+                ?.setY(offsetY + (patch.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE*patch.shape.height / 2)
+                ?.setX(offsetX + patch.shape.width * TILE_SIZE / 2 + 20)
                 ?.setScale(1.0)
-            existing.tile.setScale(0.8)
+            existing.patch.setScale(0.8)
                 .setAlpha(1.0)
                 .setY(offsetY)
                 .setScale(1.0)
                 .setX(offsetX)
                 .setAnchor(0.5)
             existing.toggleTrace
-                ?.setY(offsetY - existing.tile.baseHeight/2)
+                ?.setY(offsetY - existing.patch.baseHeight/2)
                 ?.setScale(1.0)
-                ?.setX(offsetX - existing.tile.baseWidth/2)
+                ?.setX(offsetX - existing.patch.baseWidth/2)
             existing.debugTrace
-                ?.setY(offsetY - existing.tile.baseHeight/2)
+                ?.setY(offsetY - existing.patch.baseHeight/2)
                 ?.setScale(1.0)
-                ?.setX(offsetX - existing.tile.baseWidth/2)
+                ?.setX(offsetX - existing.patch.baseWidth/2)
         }
     }
 
     /**
-     * Init - show bonus tiles on timeline
+     * Init - show bonus patches on timeline
      */
-    private fun showBonusPatches(bonusTiles: List<Tile>) {
-        bonusTiles.forEach { tile ->
-            val atile = g.createSprite()
+    private fun showBonusPatches(bonusPatches: List<Patch>) {
+        bonusPatches.forEach { patch ->
+            val aPatch = g.createSprite()
                 .setAnchor(0.5)
-                .setBaseWidth(TILE_SIZE * tile.shape.width)
-                .setBaseHeight(TILE_SIZE * tile.shape.height)
+                .setBaseWidth(TILE_SIZE * patch.shape.width)
+                .setBaseHeight(TILE_SIZE * patch.shape.height)
                 .setScale(0.33)
-                .setImage(tile.image)
+                .setImage(patch.image)
                 .setZIndex(100)
                 .setY(159)
-                .setX(429 - tile.id * 20)
+                .setX(429 - patch.id * 20)
                 .setRotation(Math.random())
 
             val trace = g.createRectangle()
@@ -560,7 +558,7 @@ class Interface {
                 .setWidth(TILE_SIZE)
                 .setHeight(TILE_SIZE)
                 .setY(159 - TILE_SIZE / 2)
-                .setX(429 - tile.id * 20 - TILE_SIZE / 2)
+                .setX(429 - patch.id * 20 - TILE_SIZE / 2)
                 .setZIndex(10000)
 
             val toggleTrace = g.createRectangle()
@@ -568,7 +566,7 @@ class Interface {
                 .setWidth(TILE_SIZE)
                 .setHeight(TILE_SIZE)
                 .setY(159 - TILE_SIZE / 2)
-                .setX(429 - tile.id * 20 - TILE_SIZE / 2)
+                .setX(429 - patch.id * 20 - TILE_SIZE / 2)
                 .setZIndex(900)
 
             val debugTrace = g.createRectangle()
@@ -576,32 +574,32 @@ class Interface {
                 .setWidth(TILE_SIZE)
                 .setHeight(TILE_SIZE)
                 .setY(159 - TILE_SIZE / 2)
-                .setX(429 - tile.id * 20 - TILE_SIZE / 2)
+                .setX(429 - patch.id * 20 - TILE_SIZE / 2)
                 .setZIndex(700)
                 .setFillColor(Random.nextInt(0xFFFFFF))
 
-            interactive.addResize(trace, atile, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
-            toggleModule.displayOnToggleState(atile, "tooltips", false)
+            interactive.addResize(trace, aPatch, 1.0, 1000, 0, InteractiveDisplayModule.HOVER_ONLY)
+            toggleModule.displayOnToggleState(aPatch, "tooltips", false)
             toggleModule.displayOnToggleState(toggleTrace, "tooltips", true)
             toggleModule.displayOnToggleState(debugTrace, "tooltips", true)
-            tooltips.setTooltipText(toggleTrace, "BONUS PATCH\nTile id: ${tile.id}\nShape: ${tile.shape.string()}")
-            visibleTiles.add(TileEntity(tile.id, atile, null, trace, toggleTrace, debugTrace))
+            tooltips.setTooltipText(toggleTrace, "BONUS PATCH\nPatch id: ${patch.id}\nShape: ${patch.shape.string()}")
+            visiblePatches.add(PatchEntity(patch.id, aPatch, null, trace, toggleTrace, debugTrace))
         }
     }
 
-    fun showTilesBelt(from: Double, tiles: List<Tile>) {
+    fun showPatchesBelt(from: Double, patches: List<Patch>) {
         g.commitEntityState(
             from,
             *(
-                    visibleTiles.map { it.tile } +
-                            visibleTiles.map { it.priceTag } +
-                            visibleTiles.map { it.trace } +
-                            visibleTiles.map { it.toggleTrace } +
-                            visibleTiles.map { it.debugTrace }
+                    visiblePatches.map { it.patch } +
+                            visiblePatches.map { it.priceTag } +
+                            visiblePatches.map { it.trace } +
+                            visiblePatches.map { it.toggleTrace } +
+                            visiblePatches.map { it.debugTrace }
                     ).filterNotNull().toTypedArray()
         )
-        showAvailablePatches(tiles.take(3))
-        showPatchBelt(tiles.drop(3))
+        showAvailablePatches(patches.take(3))
+        showPatchBelt(patches.drop(3))
     }
 
     private val anchors = mapOf(
@@ -615,15 +613,15 @@ class Interface {
         (true to 3) to (0.0 to 0.0)
     )
 
-    fun move(from: Double, playerId: Int, tileid: Int, x: Int, y: Int, mirrored: Boolean, orientation: Int) {
+    fun move(from: Double, playerId: Int, patchId: Int, x: Int, y: Int, mirrored: Boolean, orientation: Int) {
         val offsetX = if (playerId == 0) 100 else g.world.width - 100 - 9 * TILE_SIZE
         val offsetY = 320
-        if (tileid == -1) return
-        visibleTiles.firstOrNull { it.tileId == tileid }?.let { tile ->
+        if (patchId == -1) return
+        visiblePatches.firstOrNull { it.patchId == patchId }?.let { patch ->
             val anchor = anchors[mirrored to orientation] ?: throw IllegalStateException("Ooops this shouldn't happen. Orientation should be in range of 0-3. Please provide author of this game with this error message and shared replay.")
-            g.commitEntityState(from, *listOfNotNull(tile.priceTag, tile.tile, tile.toggleTrace, tile.debugTrace, player1IncomeMoneyText, player2IncomeMoneyText).toTypedArray())
-            tile.priceTag?.setAlpha(0.0)
-            tile.tile
+            g.commitEntityState(from, *listOfNotNull(patch.priceTag, patch.patch, patch.toggleTrace, patch.debugTrace, player1IncomeMoneyText, player2IncomeMoneyText).toTypedArray())
+            patch.priceTag?.setAlpha(0.0)
+            patch.patch
                 .setScaleX(if (mirrored) -1.0 else 1.0)
                 .setScaleY(1.0)
                 .setAnchorX(anchor.first)
@@ -633,48 +631,48 @@ class Interface {
                 .setY(offsetY + y * TILE_SIZE)
                 .setZIndex(900)
 
-            tile.toggleTrace
+            patch.toggleTrace
                 ?.setScaleX(if (mirrored) -1.0 else 1.0)
                 ?.setRotation(Math.PI / 4 * orientation.toDouble() * 90)
                 ?.setScaleY(1.0)
 
-            tile.debugTrace
+            patch.debugTrace
                 ?.setScaleX(if (mirrored) -1.0 else 1.0)
                 ?.setRotation(Math.PI / 4 * orientation.toDouble() * 90)
                 ?.setScaleY(1.0)
 
             when {
-                !mirrored && orientation == 0 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
-                !mirrored && orientation == 1 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseHeight)?.setY(offsetY + y * TILE_SIZE)
-                !mirrored && orientation == 2 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseWidth)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseHeight)
-                !mirrored && orientation == 3 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseWidth)
-                mirrored && orientation == 0 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseWidth)?.setY(offsetY + y * TILE_SIZE)
-                mirrored && orientation == 1 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseHeight)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseWidth)
-                mirrored && orientation == 2 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseHeight)
-                mirrored && orientation == 3 -> tile.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
+                !mirrored && orientation == 0 -> patch.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
+                !mirrored && orientation == 1 -> patch.toggleTrace?.setX(offsetX + x * TILE_SIZE + patch.patch.baseHeight)?.setY(offsetY + y * TILE_SIZE)
+                !mirrored && orientation == 2 -> patch.toggleTrace?.setX(offsetX + x * TILE_SIZE + patch.patch.baseWidth)?.setY(offsetY + y * TILE_SIZE + patch.patch.baseHeight)
+                !mirrored && orientation == 3 -> patch.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + patch.patch.baseWidth)
+                mirrored && orientation == 0 -> patch.toggleTrace?.setX(offsetX + x * TILE_SIZE + patch.patch.baseWidth)?.setY(offsetY + y * TILE_SIZE)
+                mirrored && orientation == 1 -> patch.toggleTrace?.setX(offsetX + x * TILE_SIZE + patch.patch.baseHeight)?.setY(offsetY + y * TILE_SIZE + patch.patch.baseWidth)
+                mirrored && orientation == 2 -> patch.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + patch.patch.baseHeight)
+                mirrored && orientation == 3 -> patch.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
             }
 
             when {
-                !mirrored && orientation == 0 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
-                !mirrored && orientation == 1 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseHeight)?.setY(offsetY + y * TILE_SIZE)
-                !mirrored && orientation == 2 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseWidth)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseHeight)
-                !mirrored && orientation == 3 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseWidth)
-                mirrored && orientation == 0 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseWidth)?.setY(offsetY + y * TILE_SIZE)
-                mirrored && orientation == 1 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE + tile.tile.baseHeight)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseWidth)
-                mirrored && orientation == 2 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + tile.tile.baseHeight)
-                mirrored && orientation == 3 -> tile.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
+                !mirrored && orientation == 0 -> patch.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
+                !mirrored && orientation == 1 -> patch.debugTrace?.setX(offsetX + x * TILE_SIZE + patch.patch.baseHeight)?.setY(offsetY + y * TILE_SIZE)
+                !mirrored && orientation == 2 -> patch.debugTrace?.setX(offsetX + x * TILE_SIZE + patch.patch.baseWidth)?.setY(offsetY + y * TILE_SIZE + patch.patch.baseHeight)
+                !mirrored && orientation == 3 -> patch.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + patch.patch.baseWidth)
+                mirrored && orientation == 0 -> patch.debugTrace?.setX(offsetX + x * TILE_SIZE + patch.patch.baseWidth)?.setY(offsetY + y * TILE_SIZE)
+                mirrored && orientation == 1 -> patch.debugTrace?.setX(offsetX + x * TILE_SIZE + patch.patch.baseHeight)?.setY(offsetY + y * TILE_SIZE + patch.patch.baseWidth)
+                mirrored && orientation == 2 -> patch.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE + patch.patch.baseHeight)
+                mirrored && orientation == 3 -> patch.debugTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
             }
 
-            val earning = tiles.firstOrNull { it.id == tileid }?.earn ?: 0
+            val earning = patches.firstOrNull { it.id == patchId }?.earn ?: 0
             if (earning > 0) {
-                val buttonX = offsetX + x * TILE_SIZE + if (orientation % 2 == 0) tile.tile.baseWidth / 2 else tile.tile.baseHeight / 2
-                val buttonY = offsetY + y * TILE_SIZE + if (orientation % 2 == 0) tile.tile.baseHeight / 2 else tile.tile.baseWidth / 2
+                val buttonX = offsetX + x * TILE_SIZE + if (orientation % 2 == 0) patch.patch.baseWidth / 2 else patch.patch.baseHeight / 2
+                val buttonY = offsetY + y * TILE_SIZE + if (orientation % 2 == 0) patch.patch.baseHeight / 2 else patch.patch.baseWidth / 2
                 val buttonTargetX = if (playerId == 0) 200 else 1720
                 val buttonTargetY = 100
                 val buttonScale = 1.0 * earning
                 val btn = g.createSprite()
                     .setImage("button.png")
-                    .setRotation(tile.tile.rotation)
+                    .setRotation(patch.patch.rotation)
                     .setAnchor(0.5)
                     .setScale(buttonScale)
                     .setZIndex(20000)
@@ -684,9 +682,9 @@ class Interface {
                 buttons.add(EarningButton(playerId, buttonX, buttonY, buttonScale, buttonTargetX, buttonTargetY, 1.0, btn))
             }
 
-            interactive.untrack(tile.trace)
-            tile.tile.setZIndex(10)
-        } ?: throw IllegalStateException("No tile with tileid = $tileid found")
+            interactive.untrack(patch.trace)
+            patch.patch.setZIndex(10)
+        } ?: throw IllegalStateException("No patch with patchId = $patchId found")
     }
 
     fun returnMoney() {
@@ -709,16 +707,16 @@ class Interface {
     }
 
     fun enlarge(patchId: Int) {
-        visibleTiles.firstOrNull { it.tileId == patchId }?.let { tile ->
-            tile.priceTag
+        visiblePatches.firstOrNull { it.patchId == patchId }?.let { patch ->
+            patch.priceTag
                 ?.setZIndex(500000)
                 ?.setAlpha(1.0)
-                ?.setY(tile.priceTag.y - 60)
+                ?.setY(patch.priceTag.y - 60)
                 ?.setScale(3.0, Curve.EASE_IN_AND_OUT)
         }
     }
 
-    fun pulseIn(from: Double, playerId: Int, change: Int) {
+    fun pulseIn(playerId: Int, change: Int) {
         val moneyText = when(playerId) {
             0 -> player1MoneyText
             else -> player2MoneyText

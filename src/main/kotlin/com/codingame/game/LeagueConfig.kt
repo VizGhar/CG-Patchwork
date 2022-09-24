@@ -71,7 +71,6 @@ enum class League(
         defaultInitialButtons = 5,
     );
 
-    val tileEarning get() = earnTurns.isNotEmpty()
     val specialPatchesEnabled get() = patchTurns.isNotEmpty()
     val initialButtons get() = INITIAL_MONEY
 

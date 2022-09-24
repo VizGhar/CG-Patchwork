@@ -15,10 +15,10 @@ patches = int(input())  # how many patches there are in total in a game
 for i in range(patches):
     inputs = input().split()
     patch_id = int(inputs[0])
-    patch_earning = int(inputs[1])  # how much Buttons you will acquire for this tile when "Button income" timepoint is reached
+    patch_earning = int(inputs[1])  # how much Buttons you will acquire for this patch when "Button income" timepoint is reached
     patch_button_price = int(inputs[2])  # how much Buttons does it cost to buy this patch
     patch_time_price = int(inputs[3])  # how much time does it take to sew this patch
-    patch_shape = inputs[4]  # representation of patch shape "O.O|OOO|O.O" represents H shaped tile
+    patch_shape = inputs[4]  # representation of patch shape "O.O|OOO|O.O" represents H shaped patch
 
 # game loop
 while True:

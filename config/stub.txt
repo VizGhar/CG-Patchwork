@@ -21,10 +21,10 @@ incomeTime: when the "Button income" will happen
 patchEvents: the amount of "Special Patch" events that will happen
 patchTime: when the "Special Patch" will happen
 patches: count of still not used patches (you can play only one of first 3) 
-patchEarning: how much Buttons you will acquire for this tile when "Button income" timepoint is reached
+patchEarning: how much Buttons you will acquire for this patch when "Button income" timepoint is reached
 patchButtonPrice: how much Buttons does it cost to buy this patch
 patchTimePrice: how much time does it take to sew this patch
-patchShape: representation of patch shape "O.O|OOO|O.O" represents H shaped tile
+patchShape: representation of patch shape "O.O|OOO|O.O" represents H shaped patch
 myButtons: how many Buttons you hold right now
 myTime: where is my time token placed on timeline
 myEarning: how much will you earn during "Button income" phase with your current quilt board

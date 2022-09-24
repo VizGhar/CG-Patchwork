@@ -322,7 +322,7 @@ text-align: center;">
                 <!-- BEGIN level4 -->
                 <li>Add
                     <const>7</const>
-                    if you own <strong>Bonus Tile</strong></li>
+                    if you own <strong>Bonus Button</strong></li>
                     <!-- END -->
             </ul>
                     
@@ -330,7 +330,7 @@ text-align: center;">
                 <div class="statement-new-league-rule">
                     Add
                     <const>7</const>
-                    if you own <strong>Bonus Tile</strong></li>
+                    if you own <strong>Bonus Button</strong></li>
                 </div>
                 <br/>
                 <!-- END -->
@@ -406,9 +406,15 @@ text-align: center;">
             Design on <a href="https://www.figma.com/file/7diUIxEWdBphhC6MSSp48s/Patchwork---Codingame?node-id=0%3A1">Figma</a>
             </li>
             <li>
+            Official board game version <a href="https://www.ultraboardgames.com/patchwork/game-rules.php">rules</a>.
+            </li>
+            <li>
                 UI supports message bubbles. Anything after last valid entry is considered message.
             </li>
             <li>Patch with id <const>32</const> and <const>OO</const> shape is always last in deck after initial shuffling</li>
+            <li>
+            There are some <a href="https://github.com/VizGhar/CG-Patchwork/blob/master/src/main/kotlin/com/codingame/game/Config.kt">Expert Mode fields</a> (if you don't know what Expert Mode is ask in forum/discord)
+            </li>
         </ul>
         </div>
     </div>
@@ -472,7 +478,7 @@ text-align: center;">
                     is empty
                 </p>
 
-                <p><span class="statement-lineno">Line 21: </span><var>patches</var> - count of still not used patches
+                <p><span class="statement-lineno">Line 21: </span><var>patches</var> - count of patches not yet used
                 <!-- BEGIN level1 -->
                  (you can play only first 3 of these)
                  <!-- END -->
