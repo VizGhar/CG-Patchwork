@@ -157,17 +157,6 @@ class BoardManager(random: Random) {
         val player = players[playerId]
         val opponent = players[(playerId + 1) % 2]
 
-        // If SKIP called - apply patch automatically to first free space
-        if (player.availablePatches > 0) {
-            for (y in 0 until 9) {
-                for (x in 0 until 9) {
-                    if (!player.board[y][x]) {
-                        return playPatch(gameBonusPatches[0].id, 0, false, x, y)
-                    }
-                }
-            }
-        }
-
         val delta = minOf(
             opponent.position - player.position + 1,
             league.gameDuration - player.position
@@ -217,4 +206,19 @@ class BoardManager(random: Random) {
                 else -> it
             }
         }
+
+    fun provideAutoPlaceBonusPatch() : Move {
+        if (players[actualPlayerId].availablePatches == 0) {
+            return Move.Skip
+        } else {
+            for (y in 0 until 9) {
+                for (x in 0 until 9) {
+                    if (!players[actualPlayerId].board[y][x]) {
+                        return Move.Play(gameBonusPatches[0].id, x, y, false, 0)
+                    }
+                }
+            }
+            return Move.Skip
+        }
+    }
 }

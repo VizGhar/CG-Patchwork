@@ -92,7 +92,7 @@ class Referee : AbstractReferee() {
             val move = when {
                 output[0] == "SKIP" -> {
                     message = output.drop(1).joinToString(" ")
-                    Move.Skip
+                    boardManager.provideAutoPlaceBonusPatch()
                 }
                 output[0] == "PLAY" -> {
                     val patchId = output.getOrNull(1)?.toIntOrNull()
@@ -155,6 +155,7 @@ class Referee : AbstractReferee() {
                 gui.showMessage(activePlayerId, message)
                 gui.showMessage((activePlayerId + 1) % 2, "")
             }
+
             if (move is Move.Play) {
                 // enlarge selected label
                 animations += Animation(300) { gui.enlarge(move.patchId) }
