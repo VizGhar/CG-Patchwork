@@ -486,6 +486,7 @@ class Interface {
                 ?.setY(910)
                 ?.setWidth(availablePatchWidth)
                 ?.setHeight(150)
+                ?.setVisible(true)
 
             existing.toggleTrace
                 ?.setX((existing.patch.x - (existing.patch.baseWidth * existing.patch.scaleX)/2).toInt())
@@ -516,6 +517,8 @@ class Interface {
 
             val offsetX = (g.world.width - 180) / 2
             val offsetY = 300 + i * 180 + (TILE_SIZE * (3 - patch.shape.height)) / 2 + TILE_SIZE*patch.shape.height / 2
+            existing.trace
+                ?.setVisible(false)
             existing.priceTag
                 ?.setY(offsetY + (patch.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE*patch.shape.height / 2)
                 ?.setX(offsetX + patch.shape.width * TILE_SIZE / 2 + 20)
@@ -640,6 +643,9 @@ class Interface {
                 ?.setScaleX(if (mirrored) -1.0 else 1.0)
                 ?.setRotation(Math.PI / 4 * orientation.toDouble() * 90)
                 ?.setScaleY(1.0)
+
+            patch.trace
+                ?.setVisible(false)
 
             when {
                 !mirrored && orientation == 0 -> patch.toggleTrace?.setX(offsetX + x * TILE_SIZE)?.setY(offsetY + y * TILE_SIZE)
