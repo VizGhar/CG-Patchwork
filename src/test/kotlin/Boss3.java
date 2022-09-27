@@ -113,15 +113,14 @@ class Boss3 {
         return true;
     }
 
-    private static Patch bonusPatch(int id) {
-        List<List<Boolean>> shape = new ArrayList<>();
-        List<Boolean> a = new ArrayList<>();
-        a.add(true);
-        shape.add(a);
-        return new Patch(id, shape, 0, 0, 0);
-    }
-
     public static void main(String args[]) {
+        boolean[][] board = new boolean[BOARD_HEIGHT][BOARD_WIDTH];
+        for (int y = 0; y < BOARD_HEIGHT; y++) {
+            for (int x = 0; x < BOARD_WIDTH; x++) {
+                board[y][x] = false;
+            }
+        }
+
         Random r = new Random(0L);
         Scanner in = new Scanner(System.in);
         int incomeEvents = in.nextInt(); // the amount of "Button income" events that will happen
@@ -135,15 +134,11 @@ class Boss3 {
 
         // game loop
         while (true) {
-            boolean[][] board = new boolean[BOARD_HEIGHT][BOARD_WIDTH];
             int myButtons = in.nextInt(); // how many Buttons you hold right now
             int myTime = in.nextInt(); // where is my time token placed on timeline
             int myEarning = in.nextInt(); // how much will you earn during "Button income" phase with your current quilt board
-            for (int y = 0; y < 9; y++) {
+            for (int i = 0; i < 9; i++) {
                 String line = in.next(); // represents row of a board board "O....O.." means, 1st and 6th field is covered by patch on this row
-                for (int x = 0; x < BOARD_WIDTH; x++) {
-                    board[y][x] = line.charAt(x) == 'O';
-                }
             }
             int opponentButtons = in.nextInt(); // how many Buttons your opponent holds right now
             int opponentTime = in.nextInt(); // where is opponent time token placed on timeline
@@ -156,34 +151,26 @@ class Boss3 {
             ArrayList<Patch> patchesList = new ArrayList<>();
             for (int i = 0; i < patches; i++) { patchesList.add(getPatch(in)); }
 
-            int bonusPatchId = in.nextInt(); // 0 if no bonus patch is available
 
             ArrayList<Patch> availablePatches = new ArrayList<>();
-            if (bonusPatchId != 0) {
-                availablePatches.add(bonusPatch(bonusPatchId));
-            } else {
-                for (int i = 0; i < 3; i++) {
-                    if (patchesList.size() >= i + 1) {
-                        availablePatches.add(patchesList.get(i));
-                    }
+            for (int i = 0; i < 3; i++) {
+                if (patchesList.size() >= i + 1) {
+                    availablePatches.add(patchesList.get(i));
                 }
             }
+
+            int bonusPatchId = in.nextInt(); // 0 if no bonus patch is available
 
             ArrayList<Integer> ys = new ArrayList<>();
             ArrayList<Integer> xs = new ArrayList<>();
             for (int y = 0; y < BOARD_HEIGHT; y++) { ys.add(y); }
             for (int x = 0; x < BOARD_HEIGHT; x++) { xs.add(x); }
+            Collections.shuffle(ys);
+            Collections.shuffle(xs);
 
             if (availablePatches.isEmpty()) {
                 System.out.println("SKIP");
                 continue;
-            }
-
-            for (int y = 0; y < 9; y++) {
-                for (int x = 0; x < BOARD_WIDTH; x++) {
-                    System.err.print(board[y][x]? 'O' : '.');
-                }
-                System.err.println();
             }
 
             boolean s = false;
