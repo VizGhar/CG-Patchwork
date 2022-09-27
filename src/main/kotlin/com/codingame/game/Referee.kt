@@ -89,7 +89,7 @@ class Referee : AbstractReferee() {
 
             val output = outputs[0].split(" ")
             val message: String
-            val move = when {
+            var move = when {
                 output[0] == "SKIP" -> {
                     message = output.drop(1).joinToString(" ")
                     boardManager.provideAutoPlaceBonusPatch()
@@ -128,17 +128,25 @@ class Referee : AbstractReferee() {
                 }
             }
 
-            val moveResult = when(move) {
-                is Move.Play -> boardManager.playPatch(move.patchId, move.rightRotations, move.flip, move.x, move.y)
-                Move.Skip -> boardManager.playSkip()
-                Move.Unknown -> TurnResult.UnknownCommand
-            }
+            var moveResult = getMoveResult(move)
 
             when(moveResult){
                 TurnResult.UnknownCommand -> activePlayer.deactivate(String.format("$%d unknown command", activePlayer.index))
-                TurnResult.InvalidPatchId -> activePlayer.deactivate(String.format("$%d cannot pick this patch", activePlayer.index))
-                TurnResult.InvalidPatchPlacement -> activePlayer.deactivate(String.format("$%d cannot place patch on that position${if (!league.rotationsAllowed) ". Be aware, you cannot do rotations/flips in this league." else ""}", activePlayer.index))
-                TurnResult.NoMoney -> activePlayer.deactivate(String.format("$%d cannot afford to buy required patch", activePlayer.index))
+                TurnResult.InvalidPatchId -> {
+                    gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} cannot pick this patch - calling SKIP instead")
+                    move = boardManager.provideAutoPlaceBonusPatch()
+                    moveResult = getMoveResult(move)
+                }
+                TurnResult.InvalidPatchPlacement -> {
+                    gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} cannot place patch there - calling SKIP instead")
+                    move = boardManager.provideAutoPlaceBonusPatch()
+                    moveResult = getMoveResult(move)
+                }
+                TurnResult.NoMoney -> {
+                    gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} cannot afford to buy required patch - calling SKIP instead")
+                    move = boardManager.provideAutoPlaceBonusPatch()
+                    moveResult = getMoveResult(move)
+                }
                 is TurnResult.OK -> {}
             }
 
@@ -147,6 +155,10 @@ class Referee : AbstractReferee() {
                 activePlayer.score = -1
                 gameManager.endGame()
                 return
+            }
+
+            if (moveResult.bonusAchieved) {
+                gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} won 7x7 Bonus Button")
             }
 
             // UI operations
@@ -211,6 +223,13 @@ class Referee : AbstractReferee() {
         }
         gameManager.endGame()
     }
+
+    private fun getMoveResult(move: Move): TurnResult =
+        when(move) {
+            is Move.Play -> boardManager.playPatch(move.patchId, move.rightRotations, move.flip, move.x, move.y)
+            Move.Skip -> boardManager.playSkip()
+            Move.Unknown -> TurnResult.UnknownCommand
+        }
 
     override fun onEnd() {
         endScreenModule.setScores(gameManager.players.map { it.score }.toIntArray())

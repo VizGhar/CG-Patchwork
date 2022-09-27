@@ -140,6 +140,17 @@ text-align: center;">
                         command
                     </li>
                 </ul>
+                If you use <const>PLAY</const> incorrectly <const>SKIP</const> will be used instead.
+                    <!-- BEGIN level4 level5 -->
+                    <br/>
+                    <!-- BEGIN level4 -->
+                                    <div class="statement-new-league-rule">
+<!-- END -->
+                    If you use <const>SKIP</const> while playing <strong>Special Patch</strong> the tile will be placed on first available position.
+                                        <!-- BEGIN level4 -->
+                                    </div>
+<!-- END -->
+                    <!-- END -->
             </div>
         </div>
         <br>
@@ -378,21 +389,7 @@ text-align: center;">
                             <const>PLAY</const>
                             are allowed)
                         </li>
-                        <li>
-                            <const>PLAY</const>
-                            unavailable or non-existent patch
-                        </li>
-                        <li>
-                            <const>PLAY</const>
-                            patch with invalid placement (outside quilt board/overlaping other patch)
-                        </li>
-                        <li>
-                            <const>PLAY</const>
-                            patch you have no money for
-                            <!-- BEGIN level1 level2 -->
-                            (can't happen in this league)
-                            <!-- END -->
-                        </li>
+
                         <li>Your opponent have more points at the end of the game or he has same amount of points but
                             finishes first
                         </li>
