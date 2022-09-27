@@ -19,6 +19,16 @@ class Player {
             this.price = price;
             this.time = time;
         }
+
+        private int score(int remainingEarningTurns) {
+            int spaceValue = 0;
+            for (int y = 0; y < shape.size(); y++) {
+                for (int x = 0; x < shape.size(); x++) {
+                    if (shape.get(y).get(x)) spaceValue++;
+                }
+            }
+            return remainingEarningTurns + spaceValue + price - time / 2;
+        }
     }
 
     private static class Rotation {
@@ -121,12 +131,84 @@ class Player {
         return new Patch(id, shape, 0, 0, 0);
     }
 
+    static class Position {
+        public int x;
+        public int y;
+
+        public Position(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    static Position findFreeSpace(boolean[][] map) {
+        for (int x = 0; x < BOARD_WIDTH; x++) {
+            for (int y = 0; y < BOARD_HEIGHT; y++) {
+                if (!map[y][x]) return new Position(x, y);
+            }
+        }
+        return null;
+    }
+
+    static void fill(boolean[][] map, int x, int y) {
+        if (x < 0 || x > BOARD_WIDTH - 1 || y < 0 || y > BOARD_HEIGHT - 1 || map[y][x]) return;
+        map[y][x] = true;
+        fill(map, x - 1, y);
+        fill(map, x + 1, y);
+        fill(map, x, y - 1);
+        fill(map, x, y + 1);
+    }
+
+
+    static boolean[][] copy(boolean[][] map) {
+        boolean[][] copy = new boolean[BOARD_HEIGHT][BOARD_WIDTH];
+        for (int x = 0; x < BOARD_WIDTH; x++) {
+            for (int y = 0; y < BOARD_HEIGHT; y++) {
+                copy[y][x] = map[y][x];
+            }
+        }
+        return copy;
+    }
+
+    static int countAmountOfHoles(boolean[][] map) {
+        boolean[][] copy = copy(map);
+        int count = 0;
+        while (true) {
+            Position space = findFreeSpace(copy);
+            if (space == null) break;
+            fill(copy, space.x, space.y);
+            count++;
+        }
+        return count;
+    }
+
+    static class Poss {
+        int holes;
+        int x;
+        int y;
+        int flip;
+        int right;
+        int id;
+
+        public Poss(int holes, int x, int y, int flip, int right, int id) {
+            this.holes = holes;
+            this.x = x;
+            this.y = y;
+            this.flip = flip;
+            this.right = right;
+            this.id = id;
+        }
+    }
+
     public static void main(String args[]) {
+
         Random r = new Random(0L);
         Scanner in = new Scanner(System.in);
         int incomeEvents = in.nextInt(); // the amount of "Button income" events that will happen
+        ArrayList<Integer> incomeEventsA = new ArrayList<>();
         for (int i = 0; i < incomeEvents; i++) {
             int incomeTime = in.nextInt(); // when the "Button income" will happen
+            incomeEventsA.add(incomeTime);
         }
         int patchEvents = in.nextInt(); // the amount of "Special Patch" events that will happen
         for (int i = 0; i < patchEvents; i++) {
@@ -136,10 +218,11 @@ class Player {
         // game loop
         while (true) {
             boolean[][] board = new boolean[BOARD_HEIGHT][BOARD_WIDTH];
+
             int myButtons = in.nextInt(); // how many Buttons you hold right now
             int myTime = in.nextInt(); // where is my time token placed on timeline
             int myEarning = in.nextInt(); // how much will you earn during "Button income" phase with your current quilt board
-            for (int y = 0; y < 9; y++) {
+            for (int y = 0; y < BOARD_HEIGHT; y++) {
                 String line = in.next(); // represents row of a board board "O....O.." means, 1st and 6th field is covered by patch on this row
                 for (int x = 0; x < BOARD_WIDTH; x++) {
                     board[y][x] = line.charAt(x) == 'O';
@@ -148,7 +231,7 @@ class Player {
             int opponentButtons = in.nextInt(); // how many Buttons your opponent holds right now
             int opponentTime = in.nextInt(); // where is opponent time token placed on timeline
             int opponentEarning = in.nextInt(); // how much will opponent earn during "Button income" phase with his current quilt board
-            for (int i = 0; i < 9; i++) {
+            for (int i = 0; i < BOARD_HEIGHT; i++) {
                 String line = in.next();
             }
             int patches = in.nextInt(); // count of still not used patches (you can play only one of first 3)
@@ -164,51 +247,54 @@ class Player {
             } else {
                 for (int i = 0; i < 3; i++) {
                     if (patchesList.size() >= i + 1) {
-                        availablePatches.add(patchesList.get(i));
+                        Patch patch = patchesList.get(i);
+                        if (patch.price > myButtons) continue;
+                        availablePatches.add(patch);
                     }
                 }
             }
-
-            ArrayList<Integer> ys = new ArrayList<>();
-            ArrayList<Integer> xs = new ArrayList<>();
-            for (int y = 0; y < BOARD_HEIGHT; y++) { ys.add(y); }
-            for (int x = 0; x < BOARD_HEIGHT; x++) { xs.add(x); }
 
             if (availablePatches.isEmpty()) {
                 System.out.println("SKIP");
                 continue;
             }
 
-            for (int y = 0; y < 9; y++) {
-                for (int x = 0; x < BOARD_WIDTH; x++) {
-                    System.err.print(board[y][x]? 'O' : '.');
-                }
-                System.err.println();
-            }
+            int remainingEarningTurns = 0;
+            for (int earningTurn : incomeEventsA) { if (earningTurn > myTime) remainingEarningTurns++; }
+            final int re = remainingEarningTurns;
 
-            boolean s = false;
+            availablePatches.sort(Comparator.comparingInt(o -> -o.score(re)));
+
+            ArrayList<Integer> ys = new ArrayList<>();
+            ArrayList<Integer> xs = new ArrayList<>();
+            for (int y = 0; y < BOARD_HEIGHT; y++) { ys.add(y); }
+            for (int x = 0; x < BOARD_HEIGHT; x++) { xs.add(x); }
+
+            ArrayList<Poss> possibilities = new ArrayList<>();
             for (Patch patch : availablePatches) {
                 if (patch.price > myButtons) { continue; }
-                if (s) break;
                 List<Rotation> rotations = allOrientations(patch.shape);
                 Collections.shuffle(rotations, r);
 
                 for (int x : xs) {
-                    if (s) break;
                     for (int y : ys) {
-                        if (s) break;
                         for (Rotation rotation : rotations) {
-                            if (tryApplyPatchToBoard(board, rotation.shape, x, y)) {
-                                System.out.println("PLAY " + patch.id + " " + x + " " + y + " " + (rotation.flip ? 1 : 0) + " " + rotation.rightRotations);
-                                s = true;
-                                break;
+                            boolean[][] copy = copy(board);
+                            if (tryApplyPatchToBoard(copy, rotation.shape, x, y)) {
+                                int holes = countAmountOfHoles(copy);
+                                possibilities.add(new Poss(holes, x, y, rotation.flip ? 1 : 0, rotation.rightRotations, patch.id));
                             }
                         }
                     }
                 }
             }
-            if (s) continue;
-            System.out.println("SKIP");
+            possibilities.sort(Comparator.comparingInt(o -> o.holes));
+            if (possibilities.isEmpty()) {
+                System.out.println("SKIP");
+            } else {
+                Poss poss = possibilities.get(0);
+                System.out.println("PLAY " + poss.id + " " + poss.x + " " + poss.y + " " + poss.flip + " " + poss.right);
+            }
         }
     }
 }

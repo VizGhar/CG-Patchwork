@@ -6,8 +6,6 @@ enum class League(
     val patchTurns: List<Int>,
     val earnTurns: List<Int>,
     val scoreBonusMultiplier: Int,
-    val scoreFilledMultiplier: Int,
-    val scoreMinusPointsMultiplier: Int,
     val scoreMoneyMultiplier: Int,
     val skipMultiplier: Int,
     val rotationsAllowed: Boolean,
@@ -24,8 +22,6 @@ enum class League(
         patchTurns = listOf(),
         earnTurns = listOf(),
         scoreBonusMultiplier = 0,
-        scoreFilledMultiplier = 1,
-        scoreMinusPointsMultiplier = 0,
         scoreMoneyMultiplier = 0,
         skipMultiplier = 0,
         rotationsAllowed = false,
@@ -34,41 +30,53 @@ enum class League(
     ),
 
     /**
-     * Now earning is turned on. But neither bonus button not special patches are available.
-     * Scoring works normal
+     * Rotations allowed.
      *
      * + rotations
-     * + money
      */
     L2(
         patchTurns = listOf(),
+        earnTurns = listOf(),
+        scoreBonusMultiplier = 0,
+        skipMultiplier = 0,
+        scoreMoneyMultiplier = 0,
+        rotationsAllowed = true,
+        gameDuration = 53,
+        defaultInitialButtons = 200
+    ),
+
+    /**
+     * Normal money flow
+     *
+     * + earning turns
+     * + skip turns earns money
+     */
+    L3(
+        patchTurns = listOf(),
         earnTurns = listOf(5, 11, 17, 23, 29, 35, 41, 47, 53),
         scoreBonusMultiplier = 0,
-        scoreFilledMultiplier = 0,
-        scoreMinusPointsMultiplier = -2,
         skipMultiplier = 1,
         scoreMoneyMultiplier = 1,
         rotationsAllowed = true,
         gameDuration = 53,
-        defaultInitialButtons = 5,
+        defaultInitialButtons = 5
     ),
 
     /**
      * Fully featured game
      *
+     * + special patches
      * + bonuses
      */
     FULL(
         patchTurns = listOf(20, 26, 32, 44, 50),
         earnTurns = listOf(5, 11, 17, 23, 29, 35, 41, 47, 53),
         scoreBonusMultiplier = 7,
-        scoreFilledMultiplier = 0,
-        scoreMinusPointsMultiplier = -2,
         skipMultiplier = 1,
         scoreMoneyMultiplier = 1,
         rotationsAllowed = true,
         gameDuration = 53,
-        defaultInitialButtons = 5,
+        defaultInitialButtons = 5
     );
 
     val specialPatchesEnabled get() = patchTurns.isNotEmpty()
@@ -79,8 +87,9 @@ enum class League(
             league = when (level) {
                 1 -> L1
                 2 -> L2
-                3, 4 -> FULL
-                else -> throw IllegalStateException("Only leagues 1-4 supported")
+                3 -> L3
+                4, 5 -> FULL
+                else -> throw IllegalStateException("Only leagues 1-5 supported")
             }
             INITIAL_MONEY = league.defaultInitialButtons
         }

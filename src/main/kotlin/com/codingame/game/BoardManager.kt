@@ -193,11 +193,10 @@ class BoardManager(random: Random) {
     fun computeScore() =
         players.map { playerData ->
             // standard scoring
-            val minusPoints = playerData.board.sumOf { row -> row.count { taken -> !taken } }   * league.scoreMinusPointsMultiplier      // 0 for league 1. -2 otherwise
-            val plusPoints = playerData.board.sumOf { row -> row.count { taken -> taken } }     * league.scoreFilledMultiplier           // 1 for league 1. 0 otherwise
+            val minusPoints = playerData.board.sumOf { row -> row.count { taken -> !taken } }   * -2                                     // 0 for league 1. -2 otherwise
             val money = playerData.money                                                        * league.scoreMoneyMultiplier            // 0 for league 1. 1 otherwise
             val bonusPoints = (if (playerData.bonusAchieved) 1 else 0)                          * league.scoreBonusMultiplier            // 7 for league 3. 0 otherwise
-            200 + plusPoints + bonusPoints + money + minusPoints
+            200 + bonusPoints + money + minusPoints
         }.let {
             // draw - player who finishes first win
             when {
