@@ -166,7 +166,7 @@ class BoardManager(random: Random) {
         val earnReached = timeAdvance(player, delta)
         lastPlay = playerId
 
-        return TurnResult.OK(false, earnReached, delta)
+        return TurnResult.OK(false, earnReached, delta * league.skipMultiplier)
     }
 
     private fun timeAdvance(player: PlayerData, positionDelta: Int): Boolean {
