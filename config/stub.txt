@@ -10,6 +10,8 @@ loop 9 read line:word(9)
 read patches:int
 loop patches read patchId:int patchEarning:int patchButtonPrice:int patchTimePrice:int patchShape:word(15)
 read bonusPatchId:int
+read opponentMoves:int
+loop opponentMoves read opponentMove:string(20)
 write SKIP
 
 STATEMENT
@@ -34,3 +36,5 @@ opponentEarning: how much will opponent earn during "Button income" phase with h
 line: represents row of a board board "O....O.." means, 1st and 6th field is covered by patch on this row
 playablePatches: number of patches you can play (3 most of the time, 1 in case of "Special Patch" event)
 bonusPatchId: 0 if no bonus patch is available
+opponentMoves: how many actions did your opponent played before your moves
+opponentMove: action your opponent played

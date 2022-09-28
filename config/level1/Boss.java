@@ -115,7 +115,11 @@ class Player {
             }
 
             int bonusPatchId = in.nextInt(); // 0 if no bonus patch is available
-
+            int gameLogCount = in.nextInt();
+            in.nextLine();
+            for (int i = 0; i < gameLogCount; i++) {
+                String log = in.nextLine();
+            }
             ArrayList<Integer> ys = new ArrayList<>();
             ArrayList<Integer> xs = new ArrayList<>();
             for (int y = 0; y < BOARD_HEIGHT; y++) { ys.add(y); }

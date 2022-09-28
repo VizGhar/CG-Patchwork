@@ -498,7 +498,7 @@ text-align: center;">
                  (you can play only first 3 of these if <var>bonusPatchId</var> is <const>0</const>, bonus patch otherwise)
                  <!-- END -->
                 </p>
-                <p><span class="statement-lineno">Next <var>patches</var> times:</span> 5 lines containing values: <var>patchId</var>
+                <p><span class="statement-lineno">Next <var>patches</var> lines:</span> <var>patchId</var>
                     <var>patchEarning</var> <var>patchButtonPrice</var> <var>patchTimePrice</var>
                     <var>patchShape</var></p>
 
@@ -510,7 +510,10 @@ text-align: center;">
                 Id of bonus patch if available (<const>0</const> otherwise)
                 <!-- END -->
                 </p>
-                
+                                <p><span class="statement-lineno">Next line: </span> 1 integer <var>opponentMoves</var>: how many moves your opponet played since your last move
+                </p>
+
+<p><span class="statement-lineno">Next <var>opponentMoves</var> lines:</span> <var>opponentMove</var> - move description (<const>SKIP</const> or <const>PLAY</const> with all its attributes)</p>
                 To describe all fields of patch:
                 <ul>
                     <li><var>patchId</var> - patch identifier in range <const>0 - 32</const>
