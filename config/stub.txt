@@ -8,7 +8,7 @@ loop 9 read line:word(9)
 read opponentButtons:int opponentTime:int opponentEarning:int
 loop 9 read line:word(9)
 read patches:int
-loop patches read patchId:int patchEarning:int patchButtonPrice:int patchTimePrice:int patchShape:word(15)
+loop patches read patchId:int patchEarning:int patchButtonPrice:int patchTimePrice:int patchShape:word(20)
 read bonusPatchId:int
 read opponentMoves:int
 loop opponentMoves read opponentMove:string(20)
