@@ -240,7 +240,11 @@ class Player {
             for (int i = 0; i < patches; i++) { patchesList.add(getPatch(in)); }
 
             int bonusPatchId = in.nextInt(); // 0 if no bonus patch is available
-
+            int gameLogCount = in.nextInt();
+            in.nextLine();
+            for (int i = 0; i < gameLogCount; i++) {
+                String log = in.nextLine();
+            }
             ArrayList<Patch> availablePatches = new ArrayList<>();
             if (bonusPatchId != 0) {
                 availablePatches.add(bonusPatch(bonusPatchId));

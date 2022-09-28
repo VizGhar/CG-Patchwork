@@ -25,6 +25,10 @@ class Referee : AbstractReferee() {
     private val random by lazy { SecureRandom(gameManager.seed.toString().toByteArray()).asKotlinRandom() }
     private val boardManager by lazy { BoardManager(random) }
 
+    private var lastActivePlayerId = -1
+    private val gameLogPlayer0 = mutableListOf<String>()
+    private val gameLogPlayer1 = mutableListOf<String>()
+
     override fun init() {
         League.leagueInit(gameManager.leagueLevel)  // init game
         take(gameManager.gameParameters)            // override game settings with expert mode rules
@@ -80,6 +84,28 @@ class Referee : AbstractReferee() {
         } else {
             activePlayer.sendInputLine("0")
         }
+
+        val opponentLog = when(activePlayerId) {
+            0 -> gameLogPlayer1
+            else -> gameLogPlayer0
+        }
+
+        val activePlayerLog = when(activePlayerId) {
+            0 -> gameLogPlayer0
+            else -> gameLogPlayer1
+        }
+
+        if (activePlayerId != lastActivePlayerId) {
+            activePlayerLog.clear()
+        }
+
+        lastActivePlayerId = activePlayerId
+
+        activePlayer.sendInputLine("${opponentLog.size}")
+        for (log in opponentLog) {
+            activePlayer.sendInputLine(log)
+        }
+        opponentLog.clear()
 
         activePlayer.execute()
 
@@ -149,6 +175,15 @@ class Referee : AbstractReferee() {
                 }
                 is TurnResult.OK -> {}
             }
+
+            activePlayerLog.add(
+                when {
+                    move is Move.Play && league.rotationsAllowed -> "PLAY ${move.patchId} ${move.x} ${move.y} ${if (move.flip) "1" else "0"} ${move.rightRotations}"
+                    move is Move.Play -> "PLAY ${move.patchId} ${move.x} ${move.y}"
+                    move is Move.Skip -> "SKIP"
+                    else -> ""
+                }
+            )
 
             if (moveResult !is TurnResult.OK) {
                 boardManager.computeScore().forEachIndexed { index, score -> gameManager.players[index].score = score }
