@@ -1,40 +1,36 @@
-package com.codingame.game
+package com.codingame.game.gui
 
+import com.codingame.game.*
+import com.codingame.gameengine.core.MultiplayerGameManager
 import com.codingame.gameengine.module.entities.*
 import com.codingame.gameengine.module.toggle.ToggleModule
 import com.codingame.gameengine.module.tooltip.TooltipModule
-import com.google.inject.Inject
-import com.google.inject.Singleton
 import view.modules.InteractiveDisplayModule
 import kotlin.random.Random
 
 private const val TILE_SIZE = 60
 
-data class PatchEntity(
-    val patchId: Int,
-    val patch: Sprite,
-    val priceTag: Entity<*>?,
-    val trace: Rectangle?,
-    val toggleTrace: Entity<*>?,
-    val debugTrace: Entity<*>?
-)
+class Interface(
+    private val toggleModule: ToggleModule,
+    private val tooltips: TooltipModule,
+    private val g: GraphicEntityModule,
+    private val interactive: InteractiveDisplayModule,
+    private val boardManager: BoardManager,
+    private val gameManager: MultiplayerGameManager<Player>
+) {
 
-@Singleton
-class Interface {
+    internal data class PatchEntity(
+        val patchId: Int,
+        val patch: Sprite,
+        val priceTag: Entity<*>?,
+        val trace: Rectangle?,
+        val toggleTrace: Entity<*>?,
+        val debugTrace: Entity<*>?
+    )
 
-    @Inject
-    private lateinit var toggleModule: ToggleModule
 
-    @Inject
-    private lateinit var tooltips: TooltipModule
 
-    @Inject
-    private lateinit var g: GraphicEntityModule
-
-    @Inject
-    private lateinit var interactive: InteractiveDisplayModule
-
-    private val timeTokenOffset get() = if (league== League.L1) 771 else 430
+    private val timeTokenOffset get() = if (league == League.L1) 771 else 430
 
     data class EarningButton(val playerId: Int, val x: Int, val y: Int, val scale: Double, val targetX: Int, val targetY: Int, val targetScale: Double, val sprite: Sprite)
     private var buttons: MutableList<EarningButton> = mutableListOf()
@@ -134,14 +130,14 @@ class Interface {
         }
     }
 
-    fun initialize(
-        player1: Player,
-        player2: Player,
-        player1Data: BoardManager.PlayerData,
-        player2Data: BoardManager.PlayerData,
-        patches: MutableList<Patch>,
-        bonusPatches: MutableList<Patch>
-    ) {
+    fun init() {
+        val player1 = gameManager.players[0]
+        val player2 = gameManager.players[1]
+        val player1Data = boardManager.players[0]
+        val player2Data = boardManager.players[1]
+        val patches = boardManager.remainingPatches
+        val bonusPatches = boardManager.gameBonusPatches
+
         g.createSprite()
             .setZIndex(0)
             .setX(0)
@@ -516,11 +512,11 @@ class Interface {
             existing = visiblePatches.firstOrNull { it.patchId == patch.id }!!
 
             val offsetX = (g.world.width - 180) / 2
-            val offsetY = 300 + i * 180 + (TILE_SIZE * (3 - patch.shape.height)) / 2 + TILE_SIZE*patch.shape.height / 2
+            val offsetY = 300 + i * 180 + (TILE_SIZE * (3 - patch.shape.height)) / 2 + TILE_SIZE *patch.shape.height / 2
             existing.trace
                 ?.setVisible(false)
             existing.priceTag
-                ?.setY(offsetY + (patch.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE*patch.shape.height / 2)
+                ?.setY(offsetY + (patch.shape.height * TILE_SIZE - 60) / 2 - TILE_SIZE *patch.shape.height / 2)
                 ?.setX(offsetX + patch.shape.width * TILE_SIZE / 2 + 20)
                 ?.setScale(1.0)
             existing.patch.setScale(0.8)
@@ -739,5 +735,4 @@ class Interface {
         }?.also { g.commitEntityState(from, it) }
             ?.setScale(1.0, Curve.LINEAR)
     }
-
 }

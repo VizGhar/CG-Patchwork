@@ -1,6 +1,8 @@
 package com.codingame.game
 
-import kotlin.random.Random
+import com.codingame.gameengine.core.MultiplayerGameManager
+import java.security.SecureRandom
+import kotlin.random.asKotlinRandom
 
 private const val BOARD_WIDTH = 9
 private const val BOARD_HEIGHT = 9
@@ -13,7 +15,9 @@ sealed class TurnResult {
     data class OK(val bonusAchieved: Boolean, val earnReached: Boolean, val skippedTimepoints: Int): TurnResult()
 }
 
-class BoardManager(random: Random) {
+class BoardManager(private val gameManager: MultiplayerGameManager<Player>) {
+
+    private val random by lazy { SecureRandom(gameManager.seed.toString().toByteArray()).asKotlinRandom() }
 
     /**
      * Shuffled patches for this instance of game.
@@ -79,11 +83,11 @@ class BoardManager(random: Random) {
      * lastPlay var
      */
     val actualPlayerId get() = when {
-        players[0].availablePatches > 0 -> 0                    // apply patch 0
-        players[1].availablePatches > 0 -> 1                    // apply patch 1
-        players[0].position == players[1].position -> lastPlay  // stacked players
-        players[0].position < players[1].position -> 0          // standard 0
-        else -> 1                                               // standard 1
+        players[0].availablePatches > 0 -> 0                    // apply bonus patch player 0
+        players[1].availablePatches > 0 -> 1                    // apply bonus patch player 1
+        players[0].position == players[1].position -> lastPlay  // stacked players - last played moves
+        players[0].position < players[1].position -> 0          // standard player 0
+        else -> 1                                               // standard player 1
     }
 
     fun playPatch(patchId: Int, requiredOrientation: Int, isFlipRequired: Boolean, x: Int, y: Int) : TurnResult {
@@ -206,6 +210,7 @@ class BoardManager(random: Random) {
             }
         }
 
+    // TODO: rename and rework. Not a BoardManager role to adjust moves
     fun provideAutoPlaceBonusPatch() : Move {
         if (players[actualPlayerId].availablePatches == 0) {
             return Move.Skip
