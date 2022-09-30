@@ -1,5 +1,6 @@
 import java.util.*;
 
+@SuppressWarnings("InfiniteLoopStatement")
 class Boss5 {
 
     private static final int BOARD_WIDTH = 9;
@@ -200,7 +201,7 @@ class Boss5 {
         }
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
 
         Random r = new Random(0L);
         Scanner in = new Scanner(System.in);
@@ -241,11 +242,9 @@ class Boss5 {
 
             int bonusPatchId = in.nextInt(); // 0 if no bonus patch is available
             int gameLogCount = in.nextInt();
-            System.err.println("" + gameLogCount);
             in.nextLine();
             for (int i = 0; i < gameLogCount; i++) {
                 String log = in.nextLine();
-                System.err.println("" + log);
             }
             ArrayList<Patch> availablePatches = new ArrayList<>();
             if (bonusPatchId != 0) {

@@ -1,4 +1,6 @@
-package com.codingame.game
+package com.codingame.game.misc
+
+import com.codingame.game.Move
 
 class GameLog {
 

@@ -1,6 +1,7 @@
 package com.codingame.game.gui
 
 import com.codingame.game.*
+import com.codingame.game.config.patches
 import com.codingame.gameengine.core.MultiplayerGameManager
 import com.codingame.gameengine.module.entities.GraphicEntityModule
 

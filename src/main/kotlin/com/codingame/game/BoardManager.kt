@@ -1,5 +1,6 @@
 package com.codingame.game
 
+import com.codingame.game.config.*
 import com.codingame.gameengine.core.MultiplayerGameManager
 import java.security.SecureRandom
 import kotlin.random.asKotlinRandom
@@ -12,6 +13,7 @@ sealed class TurnResult {
     object InvalidPatchId: TurnResult()
     object InvalidPatchPlacement: TurnResult()
     object NoMoney: TurnResult()
+    object CantSkip: TurnResult()
     data class OK(val bonusAchieved: Boolean, val earnReached: Boolean, val skippedTimepoints: Int): TurnResult()
 }
 
@@ -61,7 +63,7 @@ class BoardManager(private val gameManager: MultiplayerGameManager<Player>) {
         val earning get() = playedPatches.sumOf { it.earn }
     }
 
-    private fun tryApplyPatchToBoard(board: Array<Array<Boolean>>, patchShape: PatchShape, x: Int, y: Int) : Boolean {
+    private fun tryApplyPatchToBoard(board: Array<Array<Boolean>>, patchShape: PatchShape, x: Int, y: Int, apply: Boolean = true) : Boolean {
         for (shapeY in patchShape.indices) {
             for (shapeX in patchShape[shapeY].indices) {
                 if (x + shapeX >= BOARD_WIDTH) return false
@@ -69,6 +71,7 @@ class BoardManager(private val gameManager: MultiplayerGameManager<Player>) {
                 if (board[y + shapeY][x + shapeX] && patchShape[shapeY][shapeX]) return false
             }
         }
+        if (!apply) return true
         for (shapeY in patchShape.indices) {
             for (shapeX in patchShape[shapeY].indices) {
                 board[y + shapeY][x + shapeX] = board[y + shapeY][x + shapeX] or patchShape[shapeY][shapeX]
@@ -90,7 +93,7 @@ class BoardManager(private val gameManager: MultiplayerGameManager<Player>) {
         else -> 1                                               // standard player 1
     }
 
-    fun playPatch(patchId: Int, requiredOrientation: Int, isFlipRequired: Boolean, x: Int, y: Int) : TurnResult {
+    fun playPatch(patchId: Int, requiredOrientation: Int, isFlipRequired: Boolean, x: Int, y: Int, apply: Boolean = true) : TurnResult {
         val orientation = if (league.rotationsAllowed) requiredOrientation else 0
         val flip = if (league.rotationsAllowed) isFlipRequired else false
         val playerId = actualPlayerId
@@ -110,9 +113,9 @@ class BoardManager(private val gameManager: MultiplayerGameManager<Player>) {
 
         // place patch on player's board
         val shape = patch.shape.all[(if (flip) 4 else 0) + orientation]
-        val patchPlaced = tryApplyPatchToBoard(player.board, shape, x, y)
+        val patchPlaced = tryApplyPatchToBoard(player.board, shape, x, y, apply)
         if (!patchPlaced) return TurnResult.InvalidPatchPlacement
-
+        if (!apply) return TurnResult.OK(bonusAchieved = false, earnReached = false, skippedTimepoints = 0)
         // !! patch placed on board Successfully !!
 
         // store played patch
@@ -160,6 +163,8 @@ class BoardManager(private val gameManager: MultiplayerGameManager<Player>) {
         val playerId = actualPlayerId
         val player = players[playerId]
         val opponent = players[(playerId + 1) % 2]
+
+        if (player.availablePatches > 0) return TurnResult.CantSkip
 
         val delta = minOf(
             opponent.position - player.position + 1,
@@ -210,19 +215,4 @@ class BoardManager(private val gameManager: MultiplayerGameManager<Player>) {
             }
         }
 
-    // TODO: rename and rework. Not a BoardManager role to adjust moves
-    fun provideAutoPlaceBonusPatch() : Move {
-        if (players[actualPlayerId].availablePatches == 0) {
-            return Move.Skip
-        } else {
-            for (y in 0 until 9) {
-                for (x in 0 until 9) {
-                    if (!players[actualPlayerId].board[y][x]) {
-                        return Move.Play(gameBonusPatches[0].id, x, y, false, 0)
-                    }
-                }
-            }
-            return Move.Skip
-        }
-    }
 }

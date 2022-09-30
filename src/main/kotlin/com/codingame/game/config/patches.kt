@@ -1,4 +1,4 @@
-package com.codingame.game
+package com.codingame.game.config
 
 typealias PatchShape = List<List<Boolean>>
 val PatchShape.width: Int get() = get(0).size

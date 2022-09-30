@@ -1,6 +1,6 @@
 package com.codingame.game.gui
 
-import com.codingame.game.Patch
+import com.codingame.game.config.Patch
 
 val Patch.image get() = when {
     id >= 0 -> "patch$id.png"

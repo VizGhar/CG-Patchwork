@@ -1,5 +1,6 @@
-package com.codingame.game
+package com.codingame.game.config
 
+import com.codingame.game.Player
 import com.codingame.gameengine.core.MultiplayerGameManager
 import java.util.*
 

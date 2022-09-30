@@ -1,5 +1,6 @@
 import java.util.*;
 
+@SuppressWarnings("InfiniteLoopStatement")
 class Boss4 {
 
     private static final int BOARD_WIDTH = 9;
@@ -121,7 +122,7 @@ class Boss4 {
         return new Patch(id, shape, 0, 0, 0);
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         Random r = new Random(0L);
         Scanner in = new Scanner(System.in);
         int incomeEvents = in.nextInt(); // the amount of "Button income" events that will happen
@@ -181,13 +182,6 @@ class Boss4 {
             if (availablePatches.isEmpty()) {
                 System.out.println("SKIP");
                 continue;
-            }
-
-            for (int y = 0; y < 9; y++) {
-                for (int x = 0; x < BOARD_WIDTH; x++) {
-                    System.err.print(board[y][x]? 'O' : '.');
-                }
-                System.err.println();
             }
 
             boolean s = false;

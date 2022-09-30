@@ -1,7 +1,12 @@
 package com.codingame.game
 
+import com.codingame.game.config.ExpertRules
+import com.codingame.game.config.League
+import com.codingame.game.config.league
 import com.codingame.game.gui.Animator
 import com.codingame.game.gui.Interface
+import com.codingame.game.misc.GameLog
+import com.codingame.game.misc.MoveModifier
 import com.codingame.gameengine.core.AbstractPlayer
 import com.codingame.gameengine.core.AbstractReferee
 import com.codingame.gameengine.core.MultiplayerGameManager
@@ -39,6 +44,7 @@ class Referee : AbstractReferee() {
     private val animator by lazy { Animator(graphicsModule, gameManager, gui, boardManager) }
     private val expertRules by lazy { ExpertRules(gameManager) }
     private val gui by lazy { Interface(toggleModule, tooltipModule, graphicsModule, interactiveDisplayModule, boardManager, gameManager) }
+    private val moveModifier by lazy { MoveModifier(boardManager) }
 
     override fun init() {
         League.leagueInit(gameManager.leagueLevel)  // init game
@@ -51,7 +57,7 @@ class Referee : AbstractReferee() {
         gameManager.frameDuration = 600
     }
 
-    override fun gameTurn(turn: Int) {
+    private fun input(turn: Int) {
         val activePlayerId = boardManager.actualPlayerId
         val activePlayer = gameManager.players[activePlayerId]
 
@@ -87,85 +93,91 @@ class Referee : AbstractReferee() {
         for (log in opponentLog) { activePlayer.sendInputLine(log.string()) }
 
         activePlayer.execute()
+    }
+
+    data class Output(val move: Move, val message: String)
+
+    private fun parseOutput(output: List<String>): Output {
+        val message: String
+        val move: Move
+        when {
+            output[0] == "SKIP" -> {
+                message = output.drop(1).joinToString(" ")
+                move = Move.Skip
+            }
+            output[0] == "PLAY" -> {
+                val patchId = output.getOrNull(1)?.toIntOrNull()
+                val x = output.getOrNull(2)?.toIntOrNull()
+                val y = output.getOrNull(3)?.toIntOrNull()
+                val flip = if (!league.rotationsAllowed) null else output.getOrNull(4)?.toIntOrNull()
+                val rightRotations = if (!league.rotationsAllowed) null else output.getOrNull(5)?.toIntOrNull()
+
+                if (patchId == null || x == null || y == null) {
+                    message = ""
+                    move = Move.Unknown
+                } else {
+                    message = if (flip == null) {
+                        output.drop(4).joinToString(" ")
+                    } else if (rightRotations == null) {
+                        output.drop(5).joinToString(" ")
+                    } else {
+                        output.drop(6).joinToString(" ")
+                    }
+
+                    move = Move.Play(
+                        patchId = patchId,
+                        x = x,
+                        y = y,
+                        flip = flip == 1,
+                        rightRotations = (rightRotations ?: 0) % 4
+                    )
+                }
+            }
+            else -> {
+                message = ""
+                move = Move.Unknown
+            }
+        }
+        return Output(move, message)
+    }
+
+    override fun gameTurn(turn: Int) {
+        val activePlayerId = boardManager.actualPlayerId
+        val activePlayer = gameManager.players[activePlayerId]
+
+        input(turn)
 
         try {
             val outputs = activePlayer.outputs
+
             if (outputs.size != 1) { activePlayer.deactivate(String.format("%d Single line of input expected", activePlayer.index)); return }
 
-            val output = outputs[0].split(" ")
-            val message: String
-            var move = when {
-                output[0] == "SKIP" -> {
-                    message = output.drop(1).joinToString(" ")
-                    boardManager.provideAutoPlaceBonusPatch()
-                }
-                output[0] == "PLAY" -> {
-                    val patchId = output.getOrNull(1)?.toIntOrNull()
-                    val x = output.getOrNull(2)?.toIntOrNull()
-                    val y = output.getOrNull(3)?.toIntOrNull()
-                    val flip = if (!league.rotationsAllowed) null else output.getOrNull(4)?.toIntOrNull()
-                    val rightRotations = if (!league.rotationsAllowed) null else output.getOrNull(5)?.toIntOrNull()
+            val (requiredMove, message) = parseOutput(outputs[0].split(" "))
 
-                    if (patchId == null || x == null || y == null) {
-                        message = ""
-                        Move.Unknown
-                    } else {
-                        message = if (flip == null) {
-                            output.drop(4).joinToString(" ")
-                        } else if (rightRotations == null) {
-                            output.drop(5).joinToString(" ")
-                        } else {
-                            output.drop(6).joinToString(" ")
-                        }
-
-                        Move.Play(
-                            patchId = patchId,
-                            x = x,
-                            y = y,
-                            flip = flip == 1,
-                            rightRotations = (rightRotations ?: 0) % 4
-                        )
-                    }
-                }
-                else -> {
-                    message = ""
-                    Move.Unknown
+            val adjustedMove = moveModifier.fixCommand(requiredMove) {
+                when(it){
+                    TurnResult.CantSkip -> gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} cannot skip while holding special patch - calling PLAY instead")
+                    TurnResult.InvalidPatchId -> gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} cannot pick this patch - calling SKIP instead")
+                    TurnResult.InvalidPatchPlacement -> gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} cannot place patch there - calling SKIP instead")
+                    TurnResult.NoMoney -> gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} cannot afford to buy required patch - calling SKIP instead")
+                    else -> {}
                 }
             }
 
-            var moveResult = getMoveResult(move)
-
-            when(moveResult){
-                TurnResult.UnknownCommand -> activePlayer.deactivate(String.format("$%d unknown command", activePlayer.index))
-                TurnResult.InvalidPatchId -> {
-                    gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} cannot pick this patch - calling SKIP instead")
-                    move = boardManager.provideAutoPlaceBonusPatch()
-                    moveResult = getMoveResult(move)
-                }
-                TurnResult.InvalidPatchPlacement -> {
-                    gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} cannot place patch there - calling SKIP instead")
-                    move = boardManager.provideAutoPlaceBonusPatch()
-                    moveResult = getMoveResult(move)
-                }
-                TurnResult.NoMoney -> {
-                    gameManager.addTooltip(activePlayer, "${activePlayer.nicknameToken} cannot afford to buy required patch - calling SKIP instead")
-                    move = boardManager.provideAutoPlaceBonusPatch()
-                    moveResult = getMoveResult(move)
-                }
-                is TurnResult.OK -> {}
-            }
-
-            gameLog.log(activePlayerId, move)
+            val moveResult = getMoveResult(adjustedMove)
 
             if (moveResult !is TurnResult.OK) {
+                activePlayer.deactivate(String.format("%s unknown command", activePlayer.nicknameToken))
                 boardManager.computeScore().forEachIndexed { index, score -> gameManager.players[index].score = score }
                 activePlayer.score = -1
                 gameManager.endGame()
                 return
             }
 
+            gameLog.log(activePlayerId, adjustedMove)
+
             // Run animations
-            animator.animateGameState(activePlayerId, move, moveResult, message)
+            animator.animateGameState(activePlayerId, adjustedMove, moveResult, message)
 
             // End game
             if (boardManager.players.any { it.position < league.gameDuration }) { return }
