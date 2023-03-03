@@ -1,6 +1,9 @@
 package com.codingame.game
 
-import kotlin.random.Random
+import com.codingame.game.config.*
+import com.codingame.gameengine.core.MultiplayerGameManager
+import java.security.SecureRandom
+import kotlin.random.asKotlinRandom
 
 private const val BOARD_WIDTH = 9
 private const val BOARD_HEIGHT = 9
@@ -10,10 +13,13 @@ sealed class TurnResult {
     object InvalidPatchId: TurnResult()
     object InvalidPatchPlacement: TurnResult()
     object NoMoney: TurnResult()
+    object CantSkip: TurnResult()
     data class OK(val bonusAchieved: Boolean, val earnReached: Boolean, val skippedTimepoints: Int): TurnResult()
 }
 
-class BoardManager(random: Random) {
+class BoardManager(private val gameManager: MultiplayerGameManager<Player>) {
+
+    private val random by lazy { SecureRandom(gameManager.seed.toString().toByteArray()).asKotlinRandom() }
 
     /**
      * Shuffled patches for this instance of game.
@@ -57,14 +63,15 @@ class BoardManager(random: Random) {
         val earning get() = playedPatches.sumOf { it.earn }
     }
 
-    private fun tryApplyPatchToBoard(board: Array<Array<Boolean>>, patchShape: PatchShape, x: Int, y: Int) : Boolean {
+    private fun tryApplyPatchToBoard(board: Array<Array<Boolean>>, patchShape: PatchShape, x: Int, y: Int, apply: Boolean = true) : Boolean {
         for (shapeY in patchShape.indices) {
             for (shapeX in patchShape[shapeY].indices) {
-                if (x + shapeX >= BOARD_WIDTH) return false
-                if (y + shapeY >= BOARD_HEIGHT) return false
+                if (x + shapeX >= BOARD_WIDTH || x + shapeX < 0) return false
+                if (y + shapeY >= BOARD_HEIGHT || x + shapeX < 0) return false
                 if (board[y + shapeY][x + shapeX] && patchShape[shapeY][shapeX]) return false
             }
         }
+        if (!apply) return true
         for (shapeY in patchShape.indices) {
             for (shapeX in patchShape[shapeY].indices) {
                 board[y + shapeY][x + shapeX] = board[y + shapeY][x + shapeX] or patchShape[shapeY][shapeX]
@@ -79,14 +86,14 @@ class BoardManager(random: Random) {
      * lastPlay var
      */
     val actualPlayerId get() = when {
-        players[0].availablePatches > 0 -> 0                    // apply patch 0
-        players[1].availablePatches > 0 -> 1                    // apply patch 1
-        players[0].position == players[1].position -> lastPlay  // stacked players
-        players[0].position < players[1].position -> 0          // standard 0
-        else -> 1                                               // standard 1
+        players[0].availablePatches > 0 -> 0                    // apply bonus patch player 0
+        players[1].availablePatches > 0 -> 1                    // apply bonus patch player 1
+        players[0].position == players[1].position -> lastPlay  // stacked players - last played moves
+        players[0].position < players[1].position -> 0          // standard player 0
+        else -> 1                                               // standard player 1
     }
 
-    fun playPatch(patchId: Int, requiredOrientation: Int, isFlipRequired: Boolean, x: Int, y: Int) : TurnResult {
+    fun playPatch(patchId: Int, requiredOrientation: Int, isFlipRequired: Boolean, x: Int, y: Int, apply: Boolean = true) : TurnResult {
         val orientation = if (league.rotationsAllowed) requiredOrientation else 0
         val flip = if (league.rotationsAllowed) isFlipRequired else false
         val playerId = actualPlayerId
@@ -106,9 +113,9 @@ class BoardManager(random: Random) {
 
         // place patch on player's board
         val shape = patch.shape.all[(if (flip) 4 else 0) + orientation]
-        val patchPlaced = tryApplyPatchToBoard(player.board, shape, x, y)
+        val patchPlaced = tryApplyPatchToBoard(player.board, shape, x, y, apply)
         if (!patchPlaced) return TurnResult.InvalidPatchPlacement
-
+        if (!apply) return TurnResult.OK(bonusAchieved = false, earnReached = false, skippedTimepoints = 0)
         // !! patch placed on board Successfully !!
 
         // store played patch
@@ -156,6 +163,8 @@ class BoardManager(random: Random) {
         val playerId = actualPlayerId
         val player = players[playerId]
         val opponent = players[(playerId + 1) % 2]
+
+        if (player.availablePatches > 0) return TurnResult.CantSkip
 
         val delta = minOf(
             opponent.position - player.position + 1,
@@ -206,18 +215,4 @@ class BoardManager(random: Random) {
             }
         }
 
-    fun provideAutoPlaceBonusPatch() : Move {
-        if (players[actualPlayerId].availablePatches == 0) {
-            return Move.Skip
-        } else {
-            for (y in 0 until 9) {
-                for (x in 0 until 9) {
-                    if (!players[actualPlayerId].board[y][x]) {
-                        return Move.Play(gameBonusPatches[0].id, x, y, false, 0)
-                    }
-                }
-            }
-            return Move.Skip
-        }
-    }
 }

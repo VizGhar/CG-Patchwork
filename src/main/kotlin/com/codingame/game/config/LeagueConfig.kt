@@ -1,4 +1,4 @@
-package com.codingame.game
+package com.codingame.game.config
 
 lateinit var league: League
 

@@ -15,16 +15,15 @@ text-align: center;">
         </div>
 
         <p style="font-weight: 700; margin-bottom: 6px;">
-            This is a <b>league based</b> game.
+            This is a <b>league-based</b> game.
         </p>
         <div class="statement-league-alert-content">
-            For this challenge, multiple leagues for the same game are available. Once you have proven yourself against
-            the first Boss, you will access a higher league and extra rules will be available
+            For this challenge, multiple leagues for the same game are available. Once you have proven yourself against the first Boss, you will access a higher league and extra rules will be available.
             <br><br>
             <p style="font-weight: 700; margin-bottom: 6px;">
                 <b>Initial rules</b>
             </p>
-            In this league you will be introduced to the game of Patchwork. Now let's learn how the game turn looks like and how you pay for tetris like patches using your time token.
+            In this league, you will be introduced to the game of Patchwork. Now let's learn what the game turn looks like and how you pay for tetris-like patches using your time token.
         </div>
     </div>
     <!-- END -->
@@ -44,7 +43,7 @@ text-align: center;">
             <p style="font-weight: 700; margin-bottom: 6px;">
                 <b>Patch Rotations</b>
             </p>
-            Now that you can place patches on your quilt board and you understand how "time flies", you will be allowed to rotate and flip your patches.
+            Now that you can place patches on your quilt board and you understand how "time flies," you will be allowed to rotate and flip your patches.
         </div>
     <!-- END -->
 
@@ -63,7 +62,7 @@ text-align: center;">
             <p style="font-weight: 700; margin-bottom: 6px;">
                 <b>Button Income</b>
             </p>
-            Congratulations! Now you understand how to place your patches on a quilt board. Your button budget now shrank to a few buttons. So you will have to understand how to earn those shiny little buttons now.
+            Congratulations! Now you understand how to place your patches on a quilt board. Your button budget has now shrunk to a few buttons. So you will have to understand how to earn those shiny little buttons now.
         </div>
     <!-- END -->
 
@@ -83,7 +82,7 @@ text-align: center;">
             <p style="font-weight: 700; margin-bottom: 6px;">
                 <b>Bonus button and Special Patches</b>
             </p>
-            Last step is to understand bonuses and how they affect the game. 2 new terms are introduced in this league. <strong>Bonus Button</strong> received for filling 7x7 square gives you 7 bonus points towards final score and you can earn <strong>Special Patch</strong> when crossing certain time points on a Timeline.
+            The last step is to understand bonuses and how they affect the game. 2 new terms are introduced in this league. A <strong>Bonus Button</strong> gives you 7 bonus points towards your final score. You will receive it for filling in a 7x7 square. You can also earn <strong>Special Patch</strong> when crossing certain time points on a Timeline.
         </div>
     <!-- END -->
 
@@ -94,12 +93,10 @@ text-align: center;">
             <span>The Goal</span>
         </h1>
         <div class="statement-goal-content">
-            Become the master of patchworking by filling your quilt canvas with patches. Be careful! Every patch costs
-            you a few <strong>Buttons</strong> and it also takes some <strong>Time</strong> to sew it on your canvas.
-            Those are your most valuable resources.<br><br>
-            This game is port of 2 player board game <a
+Become the master of patchworking by filling your quilt canvas with patches. Be careful! Every patch costs you a few <strong>Buttons</strong>, and it also takes some <strong>Time</strong> to sew it on your canvas. Those are your most valuable resources.<br><br>
+This game is a port of the 2 player board game <a
                 href="https://boardgamegeek.com/boardgame/163412/patchwork">Patchwork</a>.<br/><br/>
-                My thanks to <a href="https://www.codingame.com/profile/b3168ed8b0bc58c683ae18284d2087e21969904">Butanium</a> for his help with custom interaction module (zooming to patches on mouse hover)
+My thanks to <a href="https://www.codingame.com/profile/b3168ed8b0bc58c683ae18284d2087e21969904">Butanium</a> for his help with the custom interaction module (zooming to patches on mouse hover).
         </div>
     </div>
 
@@ -111,42 +108,32 @@ text-align: center;">
         </h1>
         <div>
             <div class="statement-rules-content">
-                This is turn based game but players do not necessarily alternate between turns. The player who is
-                furthest behind on the <strong>Timeline</strong> takes his turn. This may result in a player taking
-                multiple turns
-                in a row before his opponent can take one. If there are both <strong>Time tokens</strong> on same spot, player that
-                played last move takes his turn.
+                This is a turn-based game, but players do not necessarily alternate between turns. The player furthest behind on the <strong>Timeline</strong> takes his turn. This may result in a player taking multiple turns in a row before his opponent can take one. If there are both <strong>Time tokens</strong> on the same spot, the player that played last takes his turn.
                 <br><br>
                 <img src="https://cdn-games.codingame.com/community/3996809-1661712962734/040aa5fb711fa0bef0af0c3a43311ded84efe973f3622aac60f5c5c66b8d8469.png"/>
                 <br><br>
-
-                Game starts with pre-shuffled deck of <const>33</const> patches. All patches are placed on board and are visible to both players.
+The game starts with a pre-shuffled deck of <const>33</const> patches. All patches are placed on the table and are visible to both players.
 <br><br>
+Your goal is to collect more <strong>Buttons</strong> than your opponent and to cover as much of your quilt board with patches as possible. Uncovered squares on the quilt board will cost you <const>2</const> <strong>Buttons</strong> per piece at the end of the game.
+<br><br>
+On your turn, you carry out one of the following actions:
+<ul>
+    <li>
+Advance and Receive Buttons using <const>SKIP</const> command
+    </li>
+    <li>
+Take and Place a Patch using <const>PLAY</const> command
+    </li>
+</ul>
+If you use <const>PLAY</const> incorrectly, <const>SKIP</const> will be used instead.
 
-                Your goal is to collect more <strong>Buttons</strong> than your opponent and to cover as much of your
-                quilt board with patches as possible. Uncovered squares on quilt board will cost you
-                <const>2</const>
-                <strong>Buttons</strong> per piece
-                at the end of the game.
-                <br><br>
-                On your turn, you carry out one of the following actions:
-                <ul>
-                    <li>Advance and Receive Buttons using
-                        <const>SKIP</const>
-                        command
-                    </li>
-                    <li>Take and Place a Patch using
-                        <const>PLAY</const>
-                        command
-                    </li>
-                </ul>
-                If you use <const>PLAY</const> incorrectly <const>SKIP</const> will be used instead.
                     <!-- BEGIN level4 level5 -->
                     <br/>
                     <!-- BEGIN level4 -->
                                     <div class="statement-new-league-rule">
 <!-- END -->
-                    If you use <const>SKIP</const> while playing <strong>Special Patch</strong> the tile will be placed on first available position.
+
+If you use <const>SKIP</const> while playing <strong>Special Patch</strong>, the patch will be placed at the first available position.
                                         <!-- BEGIN level4 -->
                                     </div>
 <!-- END -->
@@ -178,17 +165,16 @@ text-align: center;">
             <span>Take and Place a Patch - the <const>PLAY</const> command</span>
         </h1>
         <div class="statement-rules-content">
-            This action consists of a few step:
+            This action consists of a few steps:
             <ul>
-                <li>Choose from the available <strong>Patches</strong> and place it on board</li>
+                <li>Choose from the available <strong>Patches</strong> and place it on your quilt board</li>
                 <li>Pay the depicted number of <strong>Buttons</strong> to the supply</li>
-                <li>Move your <strong>Time token</strong> on the time board by a number of spaces as depicted on the
-                    label
+                <li>Move your <strong>Time token</strong> on the time board by a number of spaces as depicted on the label.
                 </li>
             </ul>
             
             <!-- BEGIN level1 -->
-            Patch can be placed anywhere on board as far as it won't cover already placed patches.
+            A patch can be placed anywhere on the quilt board as long as it won't cover already placed patches.
             <!-- END -->
 
             <!-- BEGIN level2 level3 level4 level5 -->
@@ -203,11 +189,11 @@ text-align: center;">
             <const>1</const>
             ,
             <const>2</const>
-            or
+            , or
             <const>3</const>
             times.
             
-            Patch can be placed anywhere on board as far as it won't cover already placed patches.
+            A patch can be placed anywhere on the quilt board as long as it won't cover already placed patches.
             
             <br/><br/>
             Flipping Patch:
@@ -233,7 +219,7 @@ text-align: center;">
             <span>Timeline</span>
         </h1>
         <div class="statement-rules-content">
-            <strong>Timeline</strong> consists of starting point and
+            The <strong>Timeline</strong> consists of a starting point and
             <!-- BEGIN level1 -->
             <const>19</const>
             <!-- END -->
@@ -244,8 +230,7 @@ text-align: center;">
             <br/><br/>
             <!-- BEGIN level3 -->
                 <div class="statement-new-league-rule">
-            Some time points of the Timeline are marked with <strong>Button Income</strong> icon. Whenever you move onto or past
-            such point, you receive a number of buttons according to the patches on your quilt board.
+            Some points in the Timeline are marked with the <strong>Button Income</strong> icon. Whenever you move onto or past such point, you receive a number of buttons according to the patches on your quilt board.
                 </div>
             <br/>
 
@@ -258,18 +243,13 @@ text-align: center;">
             <!-- BEGIN level4 -->
                 <div class="statement-new-league-rule">
                     <!-- END -->
-            Some time points of the Timeline are marked with <strong>Button Income</strong> or <strong>Special Patch</strong> icon. Whenever you move onto or past
-            one of those spaces, resolve the corresponding event:
+            Some points in the Timeline are marked with the <strong>Button Income</strong> or <strong>Special Patch</strong> icon. Whenever you move onto or past one of those spaces, resolve the corresponding event:
             <ul>
                 <li><strong>Special Patch</strong>:
                     <const>PLAY</const>
-                    the special patch and place it on your quilt board. The special patches are the only way to "patch"
-                    single spaces of your quilt board. If you receive the <strong>Special Patch</strong>, you will have
-                    to resolve it in next turn. Playing special patch cannot be
-                    <const>SKIP</const>-ped. If you call <const>SKIP</const> while holding special patch. Patch will be applied to first free space on your quilt board.
+                    the special patch and place it on your quilt board. The special patches are the only way to "patch" single spaces on your quilt board. If you receive the <strong>Special Patch</strong>, you will have to resolve it in the next turn. A special patch cannot be <const>SKIP</const>-ped. If you call <const>SKIP</const> while holding a special patch. Patch will be applied to the first free space on your quilt board.
                 </li>
-                <li><strong>Button Income</strong>: You receive a number of buttons according to the patches on your
-                    quilt board.
+                <li><strong>Button Income</strong>: You receive a number of buttons according to the patches on your quilt board.
                 </li>
             </ul>
 
@@ -292,11 +272,8 @@ text-align: center;">
                 <div class="statement-new-league-rule">
                     <!-- END -->
         <div class="statement-rules-content">
-             First player
-            to
-            fully cover 7x7 square of quilt board will receive <strong>Bonus Button</strong>. The <strong>Bonus Button</strong> can't be spent and it adds
-            <const>7</const>
-            points towards final score.<br/><br/>
+            The first player to fully cover a 7x7 square of quilt board will receive <strong>Bonus Button</strong>. The <strong>Bonus Button</strong> can't be spent and it adds
+            <const>7</const> points towards the final score.<br/><br/>
 
             <img src="https://cdn-games.codingame.com/community/3996809-1661712962734/c585bc886e1fc5b7a1d9a9a1d9f45f27335876b6b694124bc0ba8affcbe2ffd2.png"/>
 
@@ -316,7 +293,7 @@ text-align: center;">
             were to move past the last space, it simply stops on the last space.
             
             <!-- BEGIN level3 level4 level5 -->
-            In case of
+            In case of a
             <const>SKIP</const>
             action, you only receive buttons for the actual number of spaces moved.
             <!-- END -->
@@ -328,7 +305,7 @@ text-align: center;">
             <ul>
                 <li>Subtract
                     <const>2</const>
-                    points for each empty space of your quilt board
+                    points for each empty space on your quilt board
                 </li>
                 <!-- BEGIN level4 level5 -->
                 <li>Add
@@ -338,8 +315,7 @@ text-align: center;">
                 <!-- END -->
                 <!-- BEGIN level5 -->
                 <li>Add
-                    <const>7</const>
-                    if you own <strong>Bonus Button</strong></li>
+                    <const>7</const> points if you own <strong>Bonus Button</strong></li>
                     <!-- END -->
             </ul>
                 <!-- BEGIN level3 -->
@@ -358,9 +334,7 @@ text-align: center;">
                 </div>
                 <br/>
                 <!-- END -->
-
-            The player with the higher score wins. In case of a tie, the player who got to the final time point of the time
-            board first wins.
+            The player with the higher score wins. In case of a tie, the player who gets to the final time point first wins.
         </div>
 
         <!-- Victory conditions -->
@@ -370,8 +344,8 @@ text-align: center;">
                 <div class="title">Victory Conditions</div>
                 <div class="text">
                     <ul style="padding-top:0; padding-bottom: 0;">
-                        <li>You have more points at the end of the game or</li>
-                        <li>You have same amount of points at the end of the game and you got to time point first</li>
+                        <li>You have more points at the end of the game <strong>or</strong></li>
+                        <li>You scored the same number of points, but you finished first</li>
                     </ul>
                 </div>
             </div>
@@ -389,9 +363,7 @@ text-align: center;">
                             <const>PLAY</const>
                             are allowed)
                         </li>
-
-                        <li>Your opponent have more points at the end of the game or he has same amount of points but
-                            finishes first
+                        <li>Your opponent has more points at the end of the game or he has the same number of points and finishes first
                         </li>
                     </ul>
                 </div>
@@ -409,9 +381,9 @@ text-align: center;">
 
         <ul>
             <li>
-                UI supports single line message bubbles. Anything after last valid entry is considered message.
+                The UI supports single-line message bubbles. Anything after the last valid entry is considered a message.
             </li>
-            <li>Patch with id <const>32</const> and <const>OO</const> shape is always last in deck after initial shuffling as per official rules.</li>
+            <li>The patch with id <const>32</const> and <const>OO</const> shape is always last in the deck after initial shuffling as per official rules.</li>
             <li>
             Source code on <a href="https://github.com/VizGhar/CG-Patchwork">GitHub</a> (Kotlin).
             </li>
@@ -440,25 +412,25 @@ text-align: center;">
         <div class="blk">
             <div class="title">Initialization Input</div>
             <div class="text">
-                <p><span class="statement-lineno">Line 1: </span> 1 integer <var>incomeEvents</var> how many
-                    "Button Income" events are there on Time Board
+                <p><span class="statement-lineno">Line 1: </span>integer <var>incomeEvents</var> how many
+                    <strong>Button Income</strong> events are there on the <strong>Timeline</strong>
                     <!-- BEGIN level1 level2 -->
                     <i>(always 0 for this league)</i>
                     <!-- END -->
                     </p>
                 <p><span class="statement-lineno">Line 2: </span> <var>incomeEvents</var> integers of
-                    <var>incomeTime</var>
-                    when the "Button income" event will occur
+                    <var>incomeTime</var> =
+                    when the <strong>Button Income</strong> event will occur
                     </p>
-                <p><span class="statement-lineno">Line 3: </span> 1 integer <var>patchEvents</var> how many
-                    "Special Patch" events are there on Time Board
+                <p><span class="statement-lineno">Line 3: </span>integer <var>patchEvents</var> how many
+                    <strong>Special Patch</strong> events are there on the <strong>Timeline</strong>
                     <!-- BEGIN level1 level2 level3 -->
                     <i>(always 0 for this league)</i>
                     <!-- END -->
                     </p>
                 <p><span class="statement-lineno">Line 4: </span> <var>patchEvents</var> integers of
-                    <var>patchTime</var>
-                    when the "Special Patch" event will occur</p>
+                    <var>patchTime</var> =
+                    when the <strong>Special Patch</strong> event will occur</p>
             </div>
         </div>
         <!-- Protocol block -->
@@ -466,7 +438,7 @@ text-align: center;">
             <div class="title">Game turn Input</div>
             <div class="text">
                 <p><span class="statement-lineno">Line 1: </span> 3 integers <var>myButtons</var> = amount of
-                    buttons you currently own; <var>myTime</var> = how far is your token on Timeline; <var>myEarning</var> = how much you will earn during Button Income event
+                    <strong>Buttons</strong> you currently own; <var>myTime</var> = how far is your token on the <strong>Timeline</strong>; <var>myEarning</var> = how much you will earn during <strong> Button Income</strong> event
                     <!-- BEGIN level1 level2 level3 -->
                     <i>(always 0 for this league)</i>
                     <!-- END -->
@@ -477,8 +449,8 @@ text-align: center;">
                     <const>.</const>
                     is empty</p>
                 <p><span class="statement-lineno">Line 11: </span> 3 integers <var>opponentButtons</var> = amount of
-                    buttons your opponent currently owns; <var>opponentTime</var> = how far is your opponent's
-                    token on Timeline; <var>opponentEarning</var> = how much your opponent will earn during Button Income event
+                    <strong>Buttons</strong> your opponent currently owns; <var>opponentTime</var> = how far is your opponent's
+                    token on the <strong>Timeline</strong>; <var>opponentEarning</var> = how much your opponent will earn during <strong> Button Income</strong> event
                     <!-- BEGIN level1 level2 level3 -->
                     <i>(always 0 for this league)</i>
                     <!-- END -->
@@ -492,33 +464,33 @@ text-align: center;">
 
                 <p><span class="statement-lineno">Line 21: </span><var>patches</var> - count of patches not yet used
                 <!-- BEGIN level1 level2 level3 -->
-                 (you can play only first 3 of these)
+                 (you can play only the first 3 of these)
                  <!-- END -->
                 <!-- BEGIN level4 level5 -->
-                 (you can play only first 3 of these if <var>bonusPatchId</var> is <const>0</const>, bonus patch otherwise)
+                 (you can play only the first 3 of these if <var>specialPatchId</var> is <const>0</const>)
                  <!-- END -->
                 </p>
                 <p><span class="statement-lineno">Next <var>patches</var> lines:</span> <var>patchId</var>
                     <var>patchEarning</var> <var>patchButtonPrice</var> <var>patchTimePrice</var>
                     <var>patchShape</var></p>
 
-                <p><span class="statement-lineno">Next line: </span> 1 integer <var>bonusPatchId</var>:
+                <p><span class="statement-lineno">Next line: </span>integer <var>specialPatchId</var>:
                 <!-- BEGIN level1 level2 level3 -->
                 ignore <i>(always 0 for this league)</i>
                 <!-- END --> 
                 <!-- BEGIN level4 level5 -->
-                Id of bonus patch if available (<const>0</const> otherwise)
+                Id of special patch if available (<const>0</const> otherwise)
                 <!-- END -->
                 </p>
-                                <p><span class="statement-lineno">Next line: </span> 1 integer <var>opponentMoves</var>: how many moves your opponet played since your last move
+                                <p><span class="statement-lineno">Next line: </span> integer <var>opponentMoves</var>: how many moves your opponet played since your last move
                 </p>
 
-<p><span class="statement-lineno">Next <var>opponentMoves</var> lines:</span> <var>opponentMove</var> - move description (<const>SKIP</const> or <const>PLAY</const> with all its attributes)</p>
+<p><span class="statement-lineno">Next <var>opponentMoves</var> lines:</span> <var>opponentMove</var> - move description (<const>SKIP</const> or <const>PLAY</const> with all its attributes except message)</p>
                 To describe all fields of patch:
                 <ul>
                     <li><var>patchId</var> - patch identifier in range <const>0 - 32</const>
                     </li>
-                    <li><var>patchEarning</var> - how much will this patch earn during each "Button income" event
+                    <li><var>patchEarning</var> - how much will this patch earn during each <strong>Button Income</strong> event
                     <!-- BEGIN level1 level2 -->
                     <i>(ignore for this league)</i>
                     <!-- END -->
@@ -533,9 +505,9 @@ text-align: center;">
                         <const>O</const>
                         characters.
                         <const>O</const>
-                        means current square is taken by this patch.<br/>
-                        So
-                        <const>O.O|OOO|O.O</const>
+                        means current square is taken by this patch.<br/><br/>
+                        For example:
+                        <var>patchShape</var> <const>O.O|OOO|O.O</const>
                         represents
                         <const>H</const>
                         shaped patch
@@ -580,13 +552,12 @@ text-align: center;">
                 
                     <!-- BEGIN level2 level3 level4 level5 -->
                     <var>x</var> and <var>y</var> - coordinates of
-                top/left corner of your patch after applying transformations
+                top/left corner of your patch after applying transformations (flip and/or rotations)
                     <br>
                     <var>horizontalFlip</var>
                 -
                 <const>1</const>
                 if pach should be flipped horizontally first<br><var>rotations</var> - how many times to rotate patch clockwise
-
                 <br><br>
                 <const>PLAY 3 6 5 1 2</const>
                 - places patch with id
