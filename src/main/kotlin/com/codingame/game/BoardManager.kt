@@ -66,8 +66,8 @@ class BoardManager(private val gameManager: MultiplayerGameManager<Player>) {
     private fun tryApplyPatchToBoard(board: Array<Array<Boolean>>, patchShape: PatchShape, x: Int, y: Int, apply: Boolean = true) : Boolean {
         for (shapeY in patchShape.indices) {
             for (shapeX in patchShape[shapeY].indices) {
-                if (x + shapeX >= BOARD_WIDTH) return false
-                if (y + shapeY >= BOARD_HEIGHT) return false
+                if (x + shapeX >= BOARD_WIDTH || x + shapeX < 0) return false
+                if (y + shapeY >= BOARD_HEIGHT || x + shapeX < 0) return false
                 if (board[y + shapeY][x + shapeX] && patchShape[shapeY][shapeX]) return false
             }
         }
