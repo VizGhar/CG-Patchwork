@@ -3,10 +3,10 @@ import java.util.*;
 @SuppressWarnings("InfiniteLoopStatement")
 class Boss5 {
 
-    private static final int BOARD_WIDTH = 9;
-    private static final int BOARD_HEIGHT = 9;
+    static final int BOARD_WIDTH = 9;
+    static final int BOARD_HEIGHT = 9;
 
-    private static class Patch {
+    static class Patch {
         public int id;
         public List<List<Boolean>> shape;
         public int earn;
@@ -21,7 +21,7 @@ class Boss5 {
             this.time = time;
         }
 
-        private int score(int remainingEarningTurns) {
+        int score(int remainingEarningTurns) {
             int spaceValue = 0;
             for (int y = 0; y < shape.size(); y++) {
                 for (int x = 0; x < shape.size(); x++) {
@@ -32,7 +32,7 @@ class Boss5 {
         }
     }
 
-    private static class Rotation {
+    static class Rotation {
         public boolean flip;
         public int rightRotations;
         public List<List<Boolean>> shape;
@@ -44,11 +44,11 @@ class Boss5 {
         }
     }
 
-    private static int getWidth(List<List<Boolean>> shape) {
+    static int getWidth(List<List<Boolean>> shape) {
         return shape.get(0).size();
     }
 
-    private static List<List<Boolean>> nextShape(Scanner scanner) {
+    static List<List<Boolean>> nextShape(Scanner scanner) {
         List<List<Boolean>> result = new ArrayList<>();
         String shape = scanner.next();
         String[] lines = shape.split("\\|");
@@ -62,7 +62,7 @@ class Boss5 {
         return result;
     }
 
-    private static List<List<Boolean>> flip(List<List<Boolean>> shape) {
+    static List<List<Boolean>> flip(List<List<Boolean>> shape) {
         List<List<Boolean>> result = new ArrayList<>();
         for (List<Boolean> line : shape) {
             ArrayList<Boolean> lineShape = new ArrayList<>();
@@ -74,7 +74,7 @@ class Boss5 {
         return result;
     }
 
-    private static List<List<Boolean>> rotateRight(List<List<Boolean>> shape) {
+    static List<List<Boolean>> rotateRight(List<List<Boolean>> shape) {
         List<List<Boolean>> result = new ArrayList<>();
         for (int row = 0; row < getWidth(shape); row++) {
             List<Boolean> rowc = new ArrayList<>();
@@ -86,7 +86,7 @@ class Boss5 {
         return result;
     }
 
-    private static List<Rotation> allOrientations(List<List<Boolean>> shape) {
+    static List<Rotation> allOrientations(List<List<Boolean>> shape) {
         List<Rotation> result = new ArrayList<>();
         result.add(new Rotation(false, 0, shape));
         result.add(new Rotation(false, 1, rotateRight(shape)));
@@ -99,7 +99,7 @@ class Boss5 {
         return result;
     }
 
-    private static Patch getPatch(Scanner scanner) {
+    static Patch getPatch(Scanner scanner) {
         int id = scanner.nextInt();
         int earn = scanner.nextInt();
         int price = scanner.nextInt();
@@ -108,7 +108,7 @@ class Boss5 {
         return new Patch(id, shape, earn, price, time);
     }
 
-    private static boolean tryApplyPatchToBoard(boolean[][] board, List<List<Boolean>> patchShape, int x, int y) {
+    static boolean tryApplyPatchToBoard(boolean[][] board, List<List<Boolean>> patchShape, int x, int y) {
         for (int shapeY = 0; shapeY < patchShape.size(); shapeY++) {
             for (int shapeX = 0; shapeX < patchShape.get(shapeY).size(); shapeX++) {
                 if (x + shapeX >= BOARD_WIDTH) return false;
@@ -124,7 +124,7 @@ class Boss5 {
         return true;
     }
 
-    private static Patch bonusPatch(int id) {
+    static Patch bonusPatch(int id) {
         List<List<Boolean>> shape = new ArrayList<>();
         List<Boolean> a = new ArrayList<>();
         a.add(true);

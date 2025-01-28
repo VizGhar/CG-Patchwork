@@ -2,10 +2,10 @@ import java.util.*;
 
 class Boss1 {
 
-    private static final int BOARD_WIDTH = 9;
-    private static final int BOARD_HEIGHT = 9;
+    static final int BOARD_WIDTH = 9;
+    static final int BOARD_HEIGHT = 9;
 
-    private static class Patch {
+    static class Patch {
         public int id;
         public List<List<Boolean>> shape;
         public int earn;
@@ -21,7 +21,7 @@ class Boss1 {
         }
     }
 
-    private static List<List<Boolean>> nextShape(Scanner scanner) {
+    static List<List<Boolean>> nextShape(Scanner scanner) {
         List<List<Boolean>> result = new ArrayList<>();
         String shape = scanner.next();
         String[] lines = shape.split("\\|");
@@ -35,7 +35,7 @@ class Boss1 {
         return result;
     }
 
-    private static Patch getPatch(Scanner scanner) {
+    static Patch getPatch(Scanner scanner) {
         int id = scanner.nextInt();
         int earn = scanner.nextInt();
         int price = scanner.nextInt();
@@ -44,7 +44,7 @@ class Boss1 {
         return new Patch(id, shape, earn, price, time);
     }
 
-    private static boolean tryApplyPatchToBoard(boolean[][] board, List<List<Boolean>> patchShape, int x, int y) {
+    static boolean tryApplyPatchToBoard(boolean[][] board, List<List<Boolean>> patchShape, int x, int y) {
         for (int shapeY = 0; shapeY < patchShape.size(); shapeY++) {
             for (int shapeX = 0; shapeX < patchShape.get(shapeY).size(); shapeX++) {
                 if (x + shapeX >= BOARD_WIDTH) return false;

@@ -342,9 +342,7 @@ function getMouseMoveFunc(module) {
 export class InteractiveDisplayModule {
     constructor(_assets) {
         this.interactive = {}
-        this.previousFrame = {
-            registered: {}
-        }
+        this.previousFrame = { registered: {} }
         this.inside = {}
         this.hovered_entities = new Set()
         this.clicked_entities = []
@@ -361,7 +359,6 @@ export class InteractiveDisplayModule {
         this.hovered_entities.delete(id)
     }
 
-
     static get name() {
         return 'h'
     }
@@ -374,13 +371,7 @@ export class InteractiveDisplayModule {
     handleFrameData(frameInfo, data = []) {
         const newRegistration = data[0] || []
         const registered = {...this.previousFrame.registered, ...newRegistration}
-
-        Object.keys(newRegistration).forEach(
-            k => {
-                this.interactive[k] = true
-            }
-        )
-
+        Object.keys(newRegistration).forEach(k => { this.interactive[k] = true })
         const frame = {registered, number: frameInfo.number}
         this.previousFrame = frame
         return frame
@@ -397,6 +388,7 @@ export class InteractiveDisplayModule {
             }
         })
         this.container = container
+        container.sortableChildren = true
         container.interactive = true
         container.mousemove = getMouseMoveFunc(this)
         if (InteractiveDisplayModule.enable_display_on_click) {
@@ -406,6 +398,8 @@ export class InteractiveDisplayModule {
             entityContainer.interactive = true
             // getResetOnClick will be triggered everytime the user click on the player
             entityContainer.click = getResetOnClickFunc(this)
+
+            entityContainer.sortableChildren = true
         }
     }
 
